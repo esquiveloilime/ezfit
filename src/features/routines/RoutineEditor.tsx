@@ -1,10 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
+import { useQuery } from '@/db/useQuery';
 import { exercises } from '@/db/schema';
 import { loadRoutineForEdit, saveRoutine } from '@/db/repositories/routines';
 import { newId } from '@/domain/id';
@@ -29,10 +29,10 @@ export function RoutineEditor({ id }: { id: string | undefined }) {
   const [saveError, setSaveError] = useState(false);
 
   // Nombres de todos los ejercicios (incluidos los archivados que ya estaban en la rutina).
-  const { data: allExercises } = useLiveQuery(
+  const { data: allExercises } = useQuery(
     db.select({ id: exercises.id, name: exercises.name }).from(exercises),
   );
-  const names = useMemo(() => new Map((allExercises ?? []).map((e) => [e.id, e.name])), [allExercises]);
+  const names = useMemo(() => new Map(allExercises.map((e) => [e.id, e.name])), [allExercises]);
 
   // Al entrar, carga la rutina en el borrador; al salir de la pantalla, lo descarta.
   useEffect(() => {

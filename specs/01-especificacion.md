@@ -204,6 +204,7 @@ El usuario crea una cuenta con correo y contraseña.
 **CUE-05 · P1 · Incorporación**
 - Pregunta si el usuario es principiante.
 - Si lo es: pregunta sus días de entrenamiento (días concretos de la semana, o una cantidad entre 2 y 6) y propone un plan semanal acorde (RUT-02). El usuario puede aceptarlo, elegir otro o saltarse el paso.
+- Si eligió días concretos y acepta un plan con otra cantidad de días (por ejemplo, el de 3 días en lugar del de 6), la app le pide ajustar sus días a la cantidad del plan, para que cada día de entrenamiento tenga su rutina.
 - Si no lo es: no asigna plan; lleva a **Hoy** con las opciones de F2.
 - En ambos casos pregunta la unidad de peso por defecto (kg o lb, con lb preseleccionada).
 - La incorporación se muestra una sola vez por cuenta, o una sola vez en el teléfono en modo sin cuenta. Todo lo elegido se puede cambiar después en **Perfil**.

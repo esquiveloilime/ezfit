@@ -55,6 +55,7 @@ export default function RootLayout() {
           {/* Pantallas principales: con o sin cuenta. */}
           <Stack.Protected guard={mode !== 'welcome'}>
             <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
             <Stack.Screen
               name="exercises/index"
               options={{ headerShown: true, title: t.exercises.catalogTitle }}

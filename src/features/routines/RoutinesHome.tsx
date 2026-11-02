@@ -1,9 +1,9 @@
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
+import { useQuery } from '@/db/useQuery';
 import {
   ownRoutinesQuery,
   type RoutineRow,
@@ -42,32 +42,32 @@ function RoutineCard({ routine, exerciseCount }: { routine: RoutineRow; exercise
 /** Pestaña Rutinas: propias, predeterminadas, planes y catálogo (RUT-01, RUT-03). */
 export function RoutinesHome() {
   const { db, owner } = useDatabase();
-  const { data: own } = useLiveQuery(ownRoutinesQuery(db, owner), [owner]);
-  const { data: templates } = useLiveQuery(templateRoutinesQuery(db));
-  const { data: plans } = useLiveQuery(templatePlansQuery(db));
-  const { data: counts } = useLiveQuery(routineExerciseCountsQuery(db));
+  const { data: own, loaded: ownLoaded } = useQuery(ownRoutinesQuery(db, owner), [owner]);
+  const { data: templates } = useQuery(templateRoutinesQuery(db));
+  const { data: plans } = useQuery(templatePlansQuery(db));
+  const { data: counts } = useQuery(routineExerciseCountsQuery(db));
 
   const countOf = useMemo(() => {
-    const map = new Map((counts ?? []).map((c) => [c.routineId, c.n]));
+    const map = new Map(counts.map((c) => [c.routineId, c.n]));
     return (id: string) => map.get(id) ?? 0;
   }, [counts]);
 
-  const byTime = (templates ?? []).filter((r) => r.category === 'time');
-  const byMuscle = (templates ?? []).filter((r) => r.category === 'muscle');
+  const byTime = templates.filter((r) => r.category === 'time');
+  const byMuscle = templates.filter((r) => r.category === 'muscle');
 
   return (
     <Screen title={t.tabs.routines}>
       <Button label={t.routines.createButton} onPress={() => router.push('/routines/edit')} />
 
       <Section title={t.routines.mine}>
-        {own && own.length === 0 ? <Text style={styles.cardBody}>{t.routines.mineEmpty}</Text> : null}
-        {(own ?? []).map((r) => (
+        {ownLoaded && own.length === 0 ? <Text style={styles.cardBody}>{t.routines.mineEmpty}</Text> : null}
+        {own.map((r) => (
           <RoutineCard key={r.id} routine={r} exerciseCount={countOf(r.id)} />
         ))}
       </Section>
 
       <Section title={t.routines.plans}>
-        {(plans ?? []).map((p) => (
+        {plans.map((p) => (
           <Card
             key={p.id}
             accessibilityLabel={p.name}

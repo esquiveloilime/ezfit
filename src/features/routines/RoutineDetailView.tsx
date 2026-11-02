@@ -1,8 +1,8 @@
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router } from 'expo-router';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
+import { useQuery } from '@/db/useQuery';
 import {
   deleteRoutine,
   duplicateRoutine,
@@ -16,11 +16,11 @@ import { Button, Card, EmptyState, Screen, colors, font, spacing } from '@/ui';
 /** Detalle de una rutina propia o predeterminada (RUT-01, RUT-04). */
 export function RoutineDetailView({ id }: { id: string }) {
   const { db, owner } = useDatabase();
-  const { data: routineRows } = useLiveQuery(routineByIdQuery(db, id), [id]);
-  const { data: items } = useLiveQuery(routineItemsQuery(db, id), [id]);
-  const routine = routineRows?.[0];
+  const { data: routineRows, loaded } = useQuery(routineByIdQuery(db, id), [id]);
+  const { data: items } = useQuery(routineItemsQuery(db, id), [id]);
+  const routine = routineRows[0];
 
-  if (routineRows && (!routine || routine.deletedAt !== null)) {
+  if (loaded && (!routine || routine.deletedAt !== null)) {
     return (
       <Screen>
         <EmptyState title={t.routines.notFoundTitle} body={t.routines.notFoundBody} />
@@ -59,7 +59,7 @@ export function RoutineDetailView({ id }: { id: string }) {
       {isTemplate ? <Text style={styles.note}>{t.routines.template}</Text> : null}
 
       <View style={styles.list}>
-        {(items ?? []).map((item, index) => {
+        {items.map((item, index) => {
           const target = formatTarget(item.targetSets, item.repsMin, item.repsMax);
           const rest = item.restSeconds !== null ? format(t.routines.rest, { time: formatRest(item.restSeconds) }) : null;
           return (

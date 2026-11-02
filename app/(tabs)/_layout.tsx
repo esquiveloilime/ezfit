@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
 import type { ColorValue } from 'react-native';
 
+import { useProfile } from '@/features/onboarding/useProfile';
 import { t } from '@/i18n';
 import { colors, font } from '@/ui';
 
@@ -16,6 +17,11 @@ function tabIcon(name: IconName) {
 }
 
 export default function TabsLayout() {
+  const { loading, profile } = useProfile();
+  if (loading) return null;
+  // La incorporación se muestra una sola vez por cuenta o por teléfono sin cuenta (CUE-05).
+  if (!profile?.onboardingCompleted) return <Redirect href="/onboarding" />;
+
   return (
     <Tabs
       screenOptions={{

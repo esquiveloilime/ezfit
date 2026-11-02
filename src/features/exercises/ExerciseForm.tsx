@@ -1,9 +1,9 @@
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
+import { useQuery } from '@/db/useQuery';
 import {
   createExercise,
   type ExerciseDetail,
@@ -55,12 +55,12 @@ type Props =
 /** Crear o editar un ejercicio propio (EJE-03, EJE-04). */
 export function ExerciseForm(props: Props) {
   const { db } = useDatabase();
-  const { data } = useLiveQuery(exerciseByIdQuery(db, props.mode === 'edit' ? props.id : ''), [
+  const { data, loaded } = useQuery(exerciseByIdQuery(db, props.mode === 'edit' ? props.id : ''), [
     props.mode === 'edit' ? props.id : '',
   ]);
   if (props.mode === 'edit') {
-    const row = data?.[0];
-    if (!data) return <Screen>{null}</Screen>;
+    const row = data[0];
+    if (!loaded) return <Screen>{null}</Screen>;
     if (!row || row.userId === null) {
       return (
         <Screen>

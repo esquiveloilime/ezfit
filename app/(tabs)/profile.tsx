@@ -2,13 +2,16 @@ import { router } from 'expo-router';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useAccount } from '@/features/account/accountStore';
+import { useProfile } from '@/features/onboarding/useProfile';
+import { WeightUnitSetting } from '@/features/settings/WeightUnitSetting';
 import { t } from '@/i18n';
-import { Button, Card, EmptyState, Screen, colors, font, spacing } from '@/ui';
+import { Button, Card, Screen, colors, font, spacing } from '@/ui';
 
 export default function ProfileScreen() {
   const mode = useAccount((s) => s.mode);
   const user = useAccount((s) => s.user);
   const signOut = useAccount((s) => s.signOut);
+  const { profile } = useProfile();
 
   function confirmSignOut() {
     Alert.alert(t.profile.signOutConfirmTitle, t.profile.signOutConfirmBody, [
@@ -41,7 +44,8 @@ export default function ProfileScreen() {
           </View>
         </Card>
       )}
-      <EmptyState title={t.placeholders.profile.title} body={t.placeholders.profile.body} />
+      <Text style={styles.section}>{t.settings.title}</Text>
+      {profile ? <WeightUnitSetting profile={profile} /> : null}
     </Screen>
   );
 }
@@ -51,4 +55,5 @@ const styles = StyleSheet.create({
   warning: { fontSize: font.body, color: colors.warning },
   body: { fontSize: font.body, color: colors.text },
   buttons: { gap: spacing.sm, marginTop: spacing.sm },
+  section: { fontSize: font.title, fontWeight: '700', color: colors.text, marginTop: spacing.sm },
 });

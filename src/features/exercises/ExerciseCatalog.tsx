@@ -1,9 +1,9 @@
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
+import { useQuery } from '@/db/useQuery';
 import { activeExercisesQuery, toExerciseDetail } from '@/db/repositories/exercises';
 import {
   EQUIPMENT,
@@ -27,12 +27,12 @@ type Props = {
 export function ExerciseCatalog({ mode = 'browse' }: Props) {
   const { db } = useDatabase();
   const pick = useExercisePicker((s) => s.pick);
-  const { data } = useLiveQuery(activeExercisesQuery(db));
+  const { data, loaded } = useQuery(activeExercisesQuery(db));
   const [query, setQuery] = useState('');
   const [muscleGroup, setMuscleGroup] = useState<MuscleGroup | null>(null);
   const [equipment, setEquipment] = useState<Equipment | null>(null);
 
-  const all = useMemo(() => (data ?? []).map(toExerciseDetail), [data]);
+  const all = useMemo(() => data.map(toExerciseDetail), [data]);
   const results = useMemo(
     () => filterExercises(all, { query, muscleGroup, equipment }, t.exercises.muscleGroups),
     [all, query, muscleGroup, equipment],
@@ -102,7 +102,7 @@ export function ExerciseCatalog({ mode = 'browse' }: Props) {
       keyExtractor={(e) => e.id}
       ListHeaderComponent={header}
       ListEmptyComponent={
-        data ? <EmptyState title={t.exercises.emptyTitle} body={t.exercises.emptyBody} /> : null
+        loaded ? <EmptyState title={t.exercises.emptyTitle} body={t.exercises.emptyBody} /> : null
       }
       contentContainerStyle={styles.list}
       keyboardShouldPersistTaps="handled"

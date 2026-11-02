@@ -1,8 +1,8 @@
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router } from 'expo-router';
 import { Alert, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
+import { useQuery } from '@/db/useQuery';
 import { archiveExercise, exerciseByIdQuery, toExerciseDetail } from '@/db/repositories/exercises';
 import { tutorialUrl } from '@/domain/exercise';
 import { t } from '@/i18n';
@@ -36,10 +36,10 @@ function Field({ label, value }: { label: string; value: string }) {
 /** Ficha del ejercicio: datos, foto (o ícono) y botón de tutorial. */
 export function ExerciseDetailView({ id }: { id: string }) {
   const { db, owner } = useDatabase();
-  const { data } = useLiveQuery(exerciseByIdQuery(db, id), [id]);
-  const row = data?.[0];
+  const { data, loaded } = useQuery(exerciseByIdQuery(db, id), [id]);
+  const row = data[0];
 
-  if (data && !row) {
+  if (loaded && !row) {
     return (
       <Screen>
         <EmptyState title={t.exercises.notFoundTitle} body={t.exercises.notFoundBody} />

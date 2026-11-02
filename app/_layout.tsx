@@ -7,9 +7,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { DatabaseProvider } from '@/db/DatabaseProvider';
 import { ownerFor, useAccount } from '@/features/account/accountStore';
 import { t } from '@/i18n';
+import { configureNotifications } from '@/services/notifications';
 import { colors } from '@/ui';
 
 void SplashScreen.preventAutoHideAsync();
+configureNotifications();
 
 /** Abre la base de datos del dueño actual; en la bienvenida no hace falta ninguna. */
 function WithDatabase({ owner, children }: { owner: string | null; children: ReactNode }) {

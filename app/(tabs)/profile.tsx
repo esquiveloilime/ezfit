@@ -3,6 +3,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useAccount } from '@/features/account/accountStore';
 import { useProfile } from '@/features/onboarding/useProfile';
+import { RestSettings } from '@/features/settings/RestSettings';
 import { WeightUnitSetting } from '@/features/settings/WeightUnitSetting';
 import { t } from '@/i18n';
 import { Button, Card, Screen, colors, font, spacing } from '@/ui';
@@ -46,6 +47,7 @@ export default function ProfileScreen() {
       )}
       <Text style={styles.section}>{t.settings.title}</Text>
       {profile ? <WeightUnitSetting profile={profile} /> : null}
+      {profile ? <RestSettings profile={profile} /> : null}
     </Screen>
   );
 }

@@ -18,6 +18,8 @@ import { useProfile } from '@/features/onboarding/useProfile';
 import { format, t } from '@/i18n';
 import { Button, Card, Chip, EmptyState, Screen, TextField, colors, font, spacing } from '@/ui';
 
+import { stopRest } from './restTimer';
+
 /** Cierre de la sesión: resumen, estado de ánimo y nota (SES-07, SES-11). */
 export function FinishView() {
   const { db, owner } = useDatabase();
@@ -62,6 +64,7 @@ function Finish({ workout, profile }: { workout: WorkoutRow; profile: ProfileRow
 
   function save() {
     try {
+      stopRest(db);
       finishWorkout(db, workout.id, { mood, notes: notes.trim() || null });
       done();
     } catch (error) {
@@ -77,6 +80,7 @@ function Finish({ workout, profile }: { workout: WorkoutRow; profile: ProfileRow
         text: t.workout.discardConfirm,
         style: 'destructive',
         onPress: () => {
+          stopRest(db);
           discardWorkout(db, workout.id);
           done();
         },

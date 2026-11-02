@@ -57,10 +57,22 @@ type Props = {
   defaultUnit: WeightUnit;
   increments: Record<WeightUnit, number>;
   onMove: (from: number, to: number) => void;
+  onSetLogged: () => void;
 };
 
 /** Un ejercicio dentro de la sesión: última vez, series registradas y la siguiente serie (SES-02, SES-03, SES-09). */
-export function ExerciseBlock({ item, index, total, sets, last, target, defaultUnit, increments, onMove }: Props) {
+export function ExerciseBlock({
+  item,
+  index,
+  total,
+  sets,
+  last,
+  target,
+  defaultUnit,
+  increments,
+  onMove,
+  onSetLogged,
+}: Props) {
   const { db } = useDatabase();
   const [editingId, setEditingId] = useState<string | null>(null);
   const name = item.name ?? t.routines.unknownExercise;
@@ -167,6 +179,7 @@ export function ExerciseBlock({ item, index, total, sets, last, target, defaultU
             defaultUnit,
           })}
           increments={increments}
+          onLogged={onSetLogged}
           {...options}
         />
       ) : null}
@@ -184,11 +197,13 @@ function NextSet({
   increments,
   showRir,
   showTechnique,
+  onLogged,
 }: {
   workoutExerciseId: string;
   tracking: TrackingType;
   initial: SetInput;
   increments: Record<WeightUnit, number>;
+  onLogged: () => void;
 } & Options) {
   const { db, owner } = useDatabase();
   const [value, setValue] = useState(initial);
@@ -206,6 +221,7 @@ function NextSet({
     try {
       addSet(db, owner, workoutExerciseId, result.values);
       setSubmitted(true);
+      onLogged();
     } catch (error) {
       console.error('No se pudo registrar la serie', error);
       Alert.alert(t.workout.saveFailed);

@@ -55,6 +55,21 @@ export function setWeightUnit(db: Db, owner: string, unit: WeightUnit): void {
     .run();
 }
 
+export type RestSettings = {
+  restSeconds: number;
+  restAutoStart: boolean;
+  restSound: boolean;
+  restVibration: boolean;
+};
+
+/** Cambia los ajustes de descanso (AJU-02). */
+export function setRestSettings(db: Db, owner: string, values: Partial<RestSettings>): void {
+  db.update(profiles)
+    .set({ ...values, ...touched() })
+    .where(and(eq(profiles.userId, owner), isNull(profiles.deletedAt)))
+    .run();
+}
+
 /** Última sesión terminada, para saber qué rutina del plan sigue (RUT-02). */
 export function lastFinishedWorkoutQuery(db: Db, owner: string) {
   return db

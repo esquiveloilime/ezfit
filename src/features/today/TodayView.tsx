@@ -9,11 +9,14 @@ import { parseWeekdays, todaysPlanDay, type Weekday } from '@/domain/plan';
 import { formatTarget } from '@/domain/routine';
 import { format, t } from '@/i18n';
 import { Button, Card, Screen, colors, font, spacing } from '@/ui';
+import { ActiveWorkoutCard } from '@/features/workout/ActiveWorkoutCard';
+import { useStartWorkout } from '@/features/workout/useStartWorkout';
 
 /** Pantalla Hoy: la rutina del día según el plan, descanso, u opciones si no hay plan (RUT-02, F1, F2). */
 export function TodayView({ profile }: { profile: ProfileRow }) {
   return (
     <Screen title={t.tabs.today}>
+      <ActiveWorkoutCard />
       {profile.activePlanId ? <PlanToday profile={profile} planId={profile.activePlanId} /> : <NoPlan />}
     </Screen>
   );
@@ -24,6 +27,7 @@ function PlanToday({ profile, planId }: { profile: ProfileRow; planId: string })
   const planQuery = useQuery(planByIdQuery(db, planId), [planId]);
   const daysQuery = useQuery(planDaysQuery(db, planId), [planId]);
   const lastQuery = useQuery(lastFinishedWorkoutQuery(db, owner), [owner]);
+  const start = useStartWorkout();
   const plan = planQuery.data[0];
   const days = daysQuery.data;
 
@@ -51,6 +55,7 @@ function PlanToday({ profile, planId }: { profile: ProfileRow; planId: string })
           <Text style={styles.title}>{t.today.restTitle}</Text>
           <Text style={styles.body}>{t.today.restBody}</Text>
         </Card>
+        <Button variant="secondary" label={t.today.startEmpty} onPress={() => start(null)} />
         {seePlan}
       </>
     );
@@ -65,7 +70,8 @@ function PlanToday({ profile, planId }: { profile: ProfileRow; planId: string })
         name={dayName}
         subtitle={format(t.today.fromPlan, { plan: plan.name, n: today.day.position + 1 })}
       />
-      <Text style={styles.hint}>{t.today.startComingSoon}</Text>
+      <Button label={t.today.start} onPress={() => start(today.day.routineId)} />
+      <Button variant="secondary" label={t.today.startEmpty} onPress={() => start(null)} />
       {seePlan}
     </>
   );
@@ -92,13 +98,15 @@ function RoutineSummary({ routineId, name, subtitle }: { routineId: string; name
 }
 
 function NoPlan() {
+  const start = useStartWorkout();
   return (
     <>
       <Card>
         <Text style={styles.title}>{t.today.noPlanTitle}</Text>
         <Text style={styles.body}>{t.today.noPlanBody}</Text>
       </Card>
-      <Button label={t.today.createRoutine} onPress={() => router.push('/routines/edit')} />
+      <Button label={t.today.startEmpty} onPress={() => start(null)} />
+      <Button variant="secondary" label={t.today.createRoutine} onPress={() => router.push('/routines/edit')} />
       <Button variant="secondary" label={t.today.exploreTemplates} onPress={() => router.navigate('/routines')} />
     </>
   );

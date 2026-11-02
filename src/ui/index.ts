@@ -4,6 +4,7 @@ export { Chip } from './Chip';
 export { ChipGroup } from './ChipGroup';
 export { ToggleRow } from './ToggleRow';
 export { EmptyState } from './EmptyState';
+export { IconButton } from './IconButton';
 export { Screen } from './Screen';
 export { TextField } from './TextField';
 export * from './tokens';

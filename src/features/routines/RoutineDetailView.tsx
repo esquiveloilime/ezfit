@@ -12,6 +12,7 @@ import {
 import { copyName, formatRest, formatTarget } from '@/domain/routine';
 import { format, t } from '@/i18n';
 import { Button, Card, EmptyState, Screen, colors, font, spacing } from '@/ui';
+import { useStartWorkout } from '@/features/workout/useStartWorkout';
 
 /** Detalle de una rutina propia o predeterminada (RUT-01, RUT-04). */
 export function RoutineDetailView({ id }: { id: string }) {
@@ -19,6 +20,7 @@ export function RoutineDetailView({ id }: { id: string }) {
   const { data: routineRows, loaded } = useQuery(routineByIdQuery(db, id), [id]);
   const { data: items } = useQuery(routineItemsQuery(db, id), [id]);
   const routine = routineRows[0];
+  const start = useStartWorkout();
 
   if (loaded && (!routine || routine.deletedAt !== null)) {
     return (
@@ -77,11 +79,13 @@ export function RoutineDetailView({ id }: { id: string }) {
       </View>
 
       <View style={styles.actions}>
+        <Button label={t.routines.startWorkout} onPress={() => start(routine.id)} />
         {isTemplate ? (
-          <Button label={t.routines.duplicateTemplate} onPress={duplicate} />
+          <Button variant="secondary" label={t.routines.duplicateTemplate} onPress={duplicate} />
         ) : (
           <>
             <Button
+              variant="secondary"
               label={t.routines.edit}
               onPress={() => router.push({ pathname: '/routines/edit', params: { id: routine.id } })}
             />

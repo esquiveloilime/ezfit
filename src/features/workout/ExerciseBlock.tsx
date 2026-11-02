@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
@@ -7,7 +7,9 @@ import {
   addSet,
   deleteSet,
   type LastSession,
+  machineHistory,
   removeWorkoutExercise,
+  setMachine,
   toLoggedSet,
   updateSet,
   type WorkoutSet,
@@ -15,8 +17,11 @@ import {
 import type { TrackingType } from '@/domain/exercise';
 import { formatTarget } from '@/domain/routine';
 import {
+  cleanMachine,
+  fieldsFor,
   formatSet,
   inputFromSet,
+  machineSuggestions,
   prefillSet,
   type SetError,
   type SetInput,
@@ -26,7 +31,7 @@ import {
   type WeightUnit,
 } from '@/domain/workout';
 import { format, t } from '@/i18n';
-import { Button, Card, IconButton, colors, font, minTouch, radius, spacing } from '@/ui';
+import { Button, Card, Chip, IconButton, TextField, colors, font, minTouch, radius, spacing } from '@/ui';
 
 import { SetEditor } from './SetEditor';
 
@@ -35,6 +40,9 @@ export type WorkoutItem = {
   exerciseId: string;
   name: string | null;
   trackingType: TrackingType | null;
+  usesRir: boolean | null;
+  usesTechnique: boolean | null;
+  machine: string | null;
 };
 
 export type Target = { targetSets: number | null; repsMin: number | null; repsMax: number | null } | undefined;
@@ -59,6 +67,11 @@ export function ExerciseBlock({ item, index, total, sets, last, target, defaultU
   const tracking: TrackingType = item.trackingType ?? 'weight_reps';
   const numbers = setNumbers(sets);
   const targetText = target ? formatTarget(target.targetSets, target.repsMin, target.repsMax) : '';
+  // El RIR solo tiene sentido cuando se cuentan repeticiones (EJE-03).
+  const options = {
+    showRir: !!item.usesRir && fieldsFor(tracking).reps,
+    showTechnique: !!item.usesTechnique,
+  };
 
   function confirmRemove() {
     if (sets.length === 0) {
@@ -101,9 +114,18 @@ export function ExerciseBlock({ item, index, total, sets, last, target, defaultU
         {last ? format(t.workout.lastTime, { summary: summarizeSets(last.sets) }) : t.workout.noLastTime}
       </Text>
 
+      <MachineField workoutExerciseId={item.id} exerciseId={item.exerciseId} saved={item.machine} />
+
       {sets.map((s, i) => {
         const label = numbers[i] ?? null;
-        const number = label === null ? '–' : String(label);
+        const warmup = s.kind === 'warmup';
+        const number = label === null ? t.workout.warmupShort : String(label);
+        const meta = [
+          s.rir !== null ? format(t.workout.setMeta.rir, { n: s.rir === 5 ? t.workout.rirMax : s.rir }) : null,
+          s.technique !== null ? format(t.workout.setMeta.technique, { n: s.technique }) : null,
+        ]
+          .filter(Boolean)
+          .join(' · ');
         if (editingId === s.id) {
           return (
             <EditSet
@@ -112,6 +134,7 @@ export function ExerciseBlock({ item, index, total, sets, last, target, defaultU
               tracking={tracking}
               defaultUnit={defaultUnit}
               increments={increments}
+              {...options}
               onDone={() => setEditingId(null)}
             />
           );
@@ -121,11 +144,12 @@ export function ExerciseBlock({ item, index, total, sets, last, target, defaultU
           <Pressable
             key={s.id}
             accessibilityRole="button"
-            accessibilityLabel={format(t.workout.editSet, { n: number, set: text })}
+            accessibilityLabel={format(t.workout.editSet, { n: warmup ? t.workout.warmup : number, set: text })}
             onPress={() => setEditingId(s.id)}
-            style={({ pressed }) => [styles.setRow, pressed && styles.pressed]}>
-            <Text style={styles.setNumber}>{number}</Text>
-            <Text style={styles.setText}>{text}</Text>
+            style={({ pressed }) => [styles.setRow, warmup && styles.warmupRow, pressed && styles.pressed]}>
+            <Text style={[styles.setNumber, warmup && styles.warmupNumber]}>{number}</Text>
+            <Text style={[styles.setText, warmup && styles.warmupText]}>{text}</Text>
+            {meta ? <Text style={styles.setMeta}>{meta}</Text> : null}
           </Pressable>
         );
       })}
@@ -143,6 +167,7 @@ export function ExerciseBlock({ item, index, total, sets, last, target, defaultU
             defaultUnit,
           })}
           increments={increments}
+          {...options}
         />
       ) : null}
     </Card>
@@ -150,17 +175,21 @@ export function ExerciseBlock({ item, index, total, sets, last, target, defaultU
 }
 
 /** Campos de la siguiente serie, ya llenos (SES-03). */
+type Options = { showRir: boolean; showTechnique: boolean };
+
 function NextSet({
   workoutExerciseId,
   tracking,
   initial,
   increments,
+  showRir,
+  showTechnique,
 }: {
   workoutExerciseId: string;
   tracking: TrackingType;
   initial: SetInput;
   increments: Record<WeightUnit, number>;
-}) {
+} & Options) {
   const { db, owner } = useDatabase();
   const [value, setValue] = useState(initial);
   const [errors, setErrors] = useState<SetError[]>([]);
@@ -194,6 +223,8 @@ function NextSet({
         }}
         increments={increments}
         errors={errors}
+        showRir={showRir}
+        showTechnique={showTechnique}
         submitLabel={t.workout.logSet}
         onSubmit={submit}
       />
@@ -207,6 +238,8 @@ function EditSet({
   tracking,
   defaultUnit,
   increments,
+  showRir,
+  showTechnique,
   onDone,
 }: {
   set: WorkoutSet;
@@ -214,7 +247,7 @@ function EditSet({
   defaultUnit: WeightUnit;
   increments: Record<WeightUnit, number>;
   onDone: () => void;
-}) {
+} & Options) {
   const { db } = useDatabase();
   const [value, setValue] = useState(() => inputFromSet(toLoggedSet(set), defaultUnit));
   const [errors, setErrors] = useState<SetError[]>([]);
@@ -259,6 +292,8 @@ function EditSet({
         }}
         increments={increments}
         errors={errors}
+        showRir={showRir}
+        showTechnique={showTechnique}
         submitLabel={t.workout.saveSet}
         onSubmit={save}
         footer={
@@ -276,7 +311,72 @@ function EditSet({
   );
 }
 
+/**
+ * Máquina o marca usada en el ejercicio (SES-06). Viene con la última que se usó y, al
+ * escribir, sugiere las que ya se anotaron antes. Se guarda al salir del campo o al
+ * tocar una sugerencia.
+ */
+function MachineField({
+  workoutExerciseId,
+  exerciseId,
+  saved,
+}: {
+  workoutExerciseId: string;
+  exerciseId: string;
+  saved: string | null;
+}) {
+  const { db, owner } = useDatabase();
+  const [value, setValue] = useState(saved ?? '');
+  const [focused, setFocused] = useState(false);
+  const history = useMemo(() => machineHistory(db, owner, exerciseId), [db, owner, exerciseId]);
+  const suggestions = focused ? machineSuggestions(history, value, 4) : [];
+
+  function save(text: string) {
+    const machine = cleanMachine(text);
+    if (machine !== saved) setMachine(db, workoutExerciseId, machine);
+  }
+
+  return (
+    <View style={styles.machine}>
+      <TextField
+        label={t.workout.machine}
+        placeholder={t.workout.machinePlaceholder}
+        value={value}
+        onChangeText={setValue}
+        onFocus={() => setFocused(true)}
+        onBlur={() => {
+          setFocused(false);
+          save(value);
+        }}
+        maxLength={60}
+        returnKeyType="done"
+      />
+      {suggestions.length ? (
+        <View style={styles.suggestions}>
+          {suggestions.map((m) => (
+            <Chip
+              key={m}
+              label={m}
+              selected={false}
+              onPress={() => {
+                setValue(m);
+                save(m);
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  machine: { gap: spacing.xs },
+  suggestions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  warmupRow: { backgroundColor: colors.warningSoft },
+  warmupNumber: { color: colors.warning },
+  warmupText: { color: colors.textMuted },
+  setMeta: { fontSize: font.small, color: colors.textMuted },
   header: { flexDirection: 'row', alignItems: 'center' },
   titleBox: { flex: 1, minHeight: minTouch, justifyContent: 'center' },
   name: { fontSize: font.body, fontWeight: '700', color: colors.primary },

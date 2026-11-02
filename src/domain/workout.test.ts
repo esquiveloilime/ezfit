@@ -1,8 +1,16 @@
 import {
+  canSaveWorkout,
+  cleanMachine,
+  convertWeight,
   fieldsFor,
+  formatDuration,
+  formatThousands,
+  machineSuggestions,
+  workoutSummary,
   formatClock,
   formatSet,
   formatTimeOfDay,
+  inputFromSet,
   type LoggedSet,
   parseDecimal,
   prefillSet,
@@ -20,6 +28,8 @@ const set = (weight: number | null, unit: 'kg' | 'lb' | null, reps: number | nul
   reps,
   durationSeconds: null,
   distanceMeters: null,
+  rir: null,
+  technique: null,
   ...extra,
 });
 
@@ -30,6 +40,8 @@ const input = (values: Partial<SetInput>): SetInput => ({
   reps: '',
   duration: '',
   distance: '',
+  rir: null,
+  technique: null,
   ...values,
 });
 
@@ -82,7 +94,7 @@ describe('validateSet', () => {
   it('guarda el peso tal como se escribió, con su unidad y sin convertir', () => {
     expect(validateSet('weight_reps', input({ weight: '22,5', unit: 'kg', reps: '10' }))).toEqual({
       ok: true,
-      values: { kind: 'working', weight: 22.5, unit: 'kg', reps: 10, durationSeconds: null, distanceMeters: null },
+      values: { kind: 'working', weight: 22.5, unit: 'kg', reps: 10, durationSeconds: null, distanceMeters: null, rir: null, technique: null },
     });
   });
 
@@ -100,7 +112,7 @@ describe('validateSet', () => {
   it('ignora los campos que el ejercicio no pide', () => {
     expect(validateSet('time', input({ weight: '100', reps: '5', duration: '45' }))).toEqual({
       ok: true,
-      values: { kind: 'working', weight: null, unit: null, reps: null, durationSeconds: 45, distanceMeters: null },
+      values: { kind: 'working', weight: null, unit: null, reps: null, durationSeconds: 45, distanceMeters: null, rir: null, technique: null },
     });
   });
 });
@@ -159,5 +171,100 @@ describe('summarizeSets (resumen de la última vez)', () => {
 describe('setNumbers', () => {
   it('numera solo las series efectivas', () => {
     expect(setNumbers([{ kind: 'warmup' }, { kind: 'working' }, { kind: 'working' }])).toEqual([null, 1, 2]);
+  });
+});
+
+describe('RIR y técnica (SES-04, SES-05)', () => {
+  it('no se precargan aunque la serie de referencia los tenga', () => {
+    const last = [set(100, 'lb', 8, { rir: 2, technique: 4 })];
+    expect(prefillSet({ index: 0, lastSession: last, today: [], defaultUnit: 'lb' })).toMatchObject({ rir: null, technique: null });
+    expect(prefillSet({ index: 1, lastSession: [], today: last, defaultUnit: 'lb' })).toMatchObject({ rir: null, technique: null });
+  });
+
+  it('se guardan si están en rango y se ignoran si no', () => {
+    const ok = validateSet('weight_reps', input({ weight: '100', reps: '8', rir: 5, technique: 1 }));
+    expect(ok).toMatchObject({ ok: true, values: { rir: 5, technique: 1 } });
+    const bad = validateSet('weight_reps', input({ weight: '100', reps: '8', rir: 9, technique: 0 }));
+    expect(bad).toMatchObject({ ok: true, values: { rir: null, technique: null } });
+  });
+
+  it('se conservan al corregir una serie', () => {
+    expect(inputFromSet(set(null, null, 10, { rir: 1, technique: 3 }), 'lb')).toMatchObject({ rir: 1, technique: 3, reps: '10' });
+  });
+});
+
+describe('resumen al terminar (SES-11, AJU-01)', () => {
+  it('convierte cada serie a la unidad por defecto antes de sumar el volumen', () => {
+    const sets = [
+      { ...set(100, 'lb', 10), workoutExerciseId: 'a' },
+      { ...set(50, 'kg', 10), workoutExerciseId: 'b' },
+    ];
+    // 100 × 10 = 1000 lb; 50 kg × 10 = 500 kg = 1102.31 lb → 2102 lb.
+    expect(workoutSummary({ sets, defaultUnit: 'lb', startedAt: 0, endedAt: 3600_000 })).toEqual({
+      durationSeconds: 3600,
+      exercises: 2,
+      workingSets: 2,
+      warmupSets: 0,
+      volume: 2102,
+      unit: 'lb',
+    });
+    // En kg: 1000 lb = 453.59 kg + 500 kg → 954 kg.
+    expect(workoutSummary({ sets, defaultUnit: 'kg', startedAt: 0, endedAt: 0 }).volume).toBe(954);
+  });
+
+  it('cuenta calentamientos aparte y no suma series sin peso', () => {
+    const sets = [
+      { ...set(45, 'lb', 10, { kind: 'warmup' }), workoutExerciseId: 'a' },
+      { ...set(null, null, 15), workoutExerciseId: 'a' },
+      { ...set(null, null, null, { durationSeconds: 60 }), workoutExerciseId: 'b' },
+    ];
+    expect(workoutSummary({ sets, defaultUnit: 'lb', startedAt: 0, endedAt: 0 })).toMatchObject({
+      exercises: 2,
+      workingSets: 2,
+      warmupSets: 1,
+      volume: 450,
+    });
+  });
+
+  it('convertWeight usa 1 kg = 2.20462 lb', () => {
+    expect(convertWeight(10, 'kg', 'lb')).toBeCloseTo(22.0462);
+    expect(convertWeight(22.0462, 'lb', 'kg')).toBeCloseTo(10);
+    expect(convertWeight(10, 'lb', 'lb')).toBe(10);
+  });
+
+  it('una sesión sin series ni cardio no se guarda', () => {
+    expect(canSaveWorkout(0, 0)).toBe(false);
+    expect(canSaveWorkout(1, 0)).toBe(true);
+    expect(canSaveWorkout(0, 1)).toBe(true);
+  });
+
+  it('formatos del resumen', () => {
+    expect(formatThousands(12345)).toBe('12,345');
+    expect(formatThousands(999)).toBe('999');
+    expect(formatThousands(1234567.6)).toBe('1,234,568');
+    expect(formatDuration(20)).toBe('1 min');
+    expect(formatDuration(45 * 60)).toBe('45 min');
+    expect(formatDuration(65 * 60)).toBe('1 h 05 min');
+  });
+});
+
+describe('máquina (SES-06)', () => {
+  const history = ['Hammer Strength', 'hammer strength', 'Life Fitness', 'Matrix', ''];
+
+  it('sugiere las anotadas antes, sin repetir y en orden de uso', () => {
+    expect(machineSuggestions(history, '')).toEqual(['Hammer Strength', 'Life Fitness', 'Matrix']);
+  });
+
+  it('filtra por lo escrito sin importar mayúsculas ni acentos', () => {
+    expect(machineSuggestions(history, 'fít')).toEqual(['Life Fitness']);
+  });
+
+  it('no sugiere lo que ya está escrito completo', () => {
+    expect(machineSuggestions(history, 'matrix')).toEqual([]);
+  });
+
+  it('cleanMachine', () => {
+    expect(cleanMachine('  Hammer   Strength ')).toBe('Hammer Strength');
+    expect(cleanMachine('   ')).toBeNull();
   });
 });

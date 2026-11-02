@@ -1,7 +1,7 @@
 // Reglas de la sesión de entrenamiento (SES-01 a SES-03, SES-09).
 // Sin dependencias de React Native ni de la base de datos.
 
-import type { TrackingType } from './exercise';
+import { normalizeText, type TrackingType } from './exercise';
 
 export type WeightUnit = 'kg' | 'lb';
 export type SetKind = 'warmup' | 'working';
@@ -14,6 +14,8 @@ export type LoggedSet = {
   reps: number | null;
   durationSeconds: number | null;
   distanceMeters: number | null;
+  rir: number | null;
+  technique: number | null;
 };
 
 /** Qué campos pide cada serie según el tipo de registro del ejercicio (SES-03). */
@@ -42,6 +44,9 @@ export type SetInput = {
   reps: string;
   duration: string;
   distance: string;
+  /** RIR y técnica se marcan con un toque (SES-04, SES-05); no se precargan. */
+  rir: number | null;
+  technique: number | null;
 };
 
 const text = (n: number | null) => (n === null ? '' : String(n));
@@ -54,6 +59,8 @@ export function inputFromSet(set: LoggedSet, defaultUnit: WeightUnit): SetInput 
     reps: text(set.reps),
     duration: text(set.durationSeconds),
     distance: text(set.distanceMeters),
+    rir: set.rir,
+    technique: set.technique,
   };
 }
 
@@ -72,11 +79,20 @@ export function prefillSet(input: {
   defaultUnit: WeightUnit;
 }): SetInput {
   const equivalent = input.lastSession[input.index];
-  if (equivalent) return inputFromSet(equivalent, input.defaultUnit);
+  const fresh = { rir: null, technique: null };
+  if (equivalent) return { ...inputFromSet(equivalent, input.defaultUnit), ...fresh };
   const previous = input.today[input.today.length - 1];
-  if (previous) return { ...inputFromSet(previous, input.defaultUnit), kind: 'working' };
-  return { kind: 'working', weight: '', unit: input.defaultUnit, reps: '', duration: '', distance: '' };
+  if (previous) return { ...inputFromSet(previous, input.defaultUnit), ...fresh, kind: 'working' };
+  return { kind: 'working', weight: '', unit: input.defaultUnit, reps: '', duration: '', distance: '', ...fresh };
 }
+
+/** RIR de 0 a 5; el 5 significa "5 o más" (SES-04). */
+export const RIR_OPTIONS = [0, 1, 2, 3, 4, 5] as const;
+/** Técnica de 1 a 5 (SES-05). */
+export const TECHNIQUE_OPTIONS = [1, 2, 3, 4, 5] as const;
+
+const isRir = (n: number | null): n is number => n !== null && Number.isInteger(n) && n >= 0 && n <= 5;
+const isTechnique = (n: number | null): n is number => n !== null && Number.isInteger(n) && n >= 1 && n <= 5;
 
 export const SET_LIMITS = {
   weight: 2000,
@@ -94,6 +110,8 @@ export type SetValues = {
   reps: number | null;
   durationSeconds: number | null;
   distanceMeters: number | null;
+  rir: number | null;
+  technique: number | null;
 };
 
 export type SetResult = { ok: true; values: SetValues } | { ok: false; errors: SetError[] };
@@ -124,6 +142,8 @@ export function validateSet(tracking: TrackingType, input: SetInput): SetResult 
     reps: null,
     durationSeconds: null,
     distanceMeters: null,
+    rir: isRir(input.rir) ? input.rir : null,
+    technique: isTechnique(input.technique) ? input.technique : null,
   };
   if (fields.weight) {
     const weight = parseDecimal(input.weight);
@@ -227,4 +247,93 @@ export function summarizeSets(sets: readonly LoggedSet[]): string {
 export function setNumbers(sets: readonly { kind: SetKind }[]): (number | null)[] {
   let n = 0;
   return sets.map((s) => (s.kind === 'working' ? ++n : null));
+}
+
+// --- Cierre de la sesión (SES-11) y máquina (SES-06) ---
+
+/** Factor de conversión entre unidades (AJU-01). Solo se usa para totales, nunca al guardar. */
+export const LB_PER_KG = 2.20462;
+
+export function convertWeight(weight: number, from: WeightUnit, to: WeightUnit): number {
+  if (from === to) return weight;
+  return from === 'kg' ? weight * LB_PER_KG : weight / LB_PER_KG;
+}
+
+export type WorkoutSummary = {
+  durationSeconds: number;
+  exercises: number;
+  workingSets: number;
+  warmupSets: number;
+  /** Suma de peso × repeticiones de todas las series, convertida a la unidad por defecto. */
+  volume: number;
+  unit: WeightUnit;
+};
+
+/**
+ * Resumen al terminar (SES-11): duración, ejercicios con al menos una serie, series y
+ * volumen total. Cada serie se convierte a la unidad por defecto antes de sumar (AJU-01).
+ */
+export function workoutSummary(input: {
+  sets: readonly (LoggedSet & { workoutExerciseId: string })[];
+  defaultUnit: WeightUnit;
+  startedAt: number;
+  endedAt: number;
+}): WorkoutSummary {
+  let volume = 0;
+  for (const s of input.sets) {
+    if (s.weight !== null && s.unit && s.reps !== null) {
+      volume += convertWeight(s.weight, s.unit, input.defaultUnit) * s.reps;
+    }
+  }
+  return {
+    durationSeconds: Math.max(0, Math.round((input.endedAt - input.startedAt) / 1000)),
+    exercises: new Set(input.sets.map((s) => s.workoutExerciseId)).size,
+    workingSets: input.sets.filter((s) => s.kind === 'working').length,
+    warmupSets: input.sets.filter((s) => s.kind === 'warmup').length,
+    volume: Math.round(volume),
+    unit: input.defaultUnit,
+  };
+}
+
+/** Una sesión sin series ni cardio no se guarda (SES-11). */
+export function canSaveWorkout(setCount: number, cardioCount: number): boolean {
+  return setCount + cardioCount > 0;
+}
+
+/** Entero con separador de miles: 12345 → "12,345". */
+export function formatThousands(n: number): string {
+  return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/** Duración legible: 45 min, 1 h 05 min. Menos de un minuto cuenta como 1 min. */
+export function formatDuration(seconds: number): string {
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  if (minutes < 60) return `${minutes} min`;
+  return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')} min`;
+}
+
+/**
+ * Sugerencias de máquina mientras se escribe (SES-06): las que el usuario ya anotó en
+ * ese ejercicio, de la más reciente a la más antigua, sin repetir (sin importar
+ * mayúsculas ni acentos), que contengan lo escrito y no sean exactamente lo escrito.
+ */
+export function machineSuggestions(history: readonly string[], typed: string, limit = 5): string[] {
+  const query = normalizeText(typed);
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const machine of history) {
+    const key = normalizeText(machine);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    if (key === query || !key.includes(query)) continue;
+    result.push(machine.trim());
+    if (result.length === limit) break;
+  }
+  return result;
+}
+
+/** Texto de la máquina listo para guardar: sin espacios de sobra; vacío → null. */
+export function cleanMachine(value: string): string | null {
+  const clean = value.trim().replace(/\s+/g, ' ');
+  return clean ? clean.slice(0, 60) : null;
 }

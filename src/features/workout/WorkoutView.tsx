@@ -1,6 +1,6 @@
 import { router, Stack } from 'expo-router';
 import { useMemo } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Alert, StyleSheet, Text } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
 import type { ProfileRow } from '@/db/repositories/profile';
@@ -8,6 +8,7 @@ import { routineByIdQuery } from '@/db/repositories/routines';
 import {
   activeWorkoutQuery,
   addWorkoutExercise,
+  discardWorkout,
   lastSessions,
   moveWorkoutExercise,
   routineTargets,
@@ -72,6 +73,20 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
   const title = routineRows[0]?.name ?? t.workout.emptyWorkoutName;
   const increments = { kg: profile.weightIncrementKg, lb: profile.weightIncrementLb };
 
+  function confirmDiscard() {
+    Alert.alert(t.workout.discardConfirmTitle, t.workout.discardConfirmBody, [
+      { text: t.common.cancel, style: 'cancel' },
+      {
+        text: t.workout.discardConfirm,
+        style: 'destructive',
+        onPress: () => {
+          discardWorkout(db, workout.id);
+          router.dismissAll();
+        },
+      },
+    ]);
+  }
+
   function onAddExercise() {
     openPicker((exerciseId) => addWorkoutExercise(db, owner, workout.id, exerciseId));
     router.push('/exercises/pick');
@@ -104,6 +119,8 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
       ))}
 
       <Button variant="secondary" label={t.workout.addExercise} onPress={onAddExercise} />
+      <Button label={t.workout.finish} onPress={() => router.push('/workout/finish')} />
+      <Button variant="ghost" label={t.workout.discard} onPress={confirmDiscard} />
     </Screen>
   );
 }

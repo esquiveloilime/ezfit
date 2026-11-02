@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 
 import { moveItem } from '@/domain/routine';
 import type { LoggedSet, SetValues } from '@/domain/workout';
@@ -99,7 +99,13 @@ export function startWorkout(db: Db, owner: string, routineId: string | null): {
         .all();
       items.forEach((item, position) => {
         tx.insert(workoutExercises)
-          .values({ ...newRecord(owner, now), workoutId: record.id, exerciseId: item.exerciseId, position })
+          .values({
+            ...newRecord(owner, now),
+            workoutId: record.id,
+            exerciseId: item.exerciseId,
+            position,
+            machine: machineHistory(tx, owner, item.exerciseId)[0] ?? null,
+          })
           .run();
       });
     }
@@ -121,7 +127,8 @@ export function addWorkoutExercise(db: Db, owner: string, workoutId: string, exe
   const items = activeItems(db, workoutId);
   const position = items.length ? Math.max(...items.map((i) => i.position)) + 1 : 0;
   const record = newRecord(owner);
-  db.insert(workoutExercises).values({ ...record, workoutId, exerciseId, position }).run();
+  const machine = machineHistory(db, owner, exerciseId)[0] ?? null;
+  db.insert(workoutExercises).values({ ...record, workoutId, exerciseId, position, machine }).run();
   return record.id;
 }
 
@@ -244,7 +251,9 @@ export function lastSessions(
   return result;
 }
 
-export function toLoggedSet(row: Pick<SetRow, 'kind' | 'weight' | 'unit' | 'reps' | 'durationSeconds' | 'distanceMeters'>): LoggedSet {
+export function toLoggedSet(
+  row: Pick<SetRow, 'kind' | 'weight' | 'unit' | 'reps' | 'durationSeconds' | 'distanceMeters' | 'rir' | 'technique'>,
+): LoggedSet {
   return {
     kind: row.kind,
     weight: row.weight,
@@ -252,6 +261,8 @@ export function toLoggedSet(row: Pick<SetRow, 'kind' | 'weight' | 'unit' | 'reps
     reps: row.reps,
     durationSeconds: row.durationSeconds,
     distanceMeters: row.distanceMeters,
+    rir: row.rir,
+    technique: row.technique,
   };
 }
 
@@ -271,4 +282,71 @@ export function routineTargets(db: Db, routineId: string | null) {
     }
   }
   return map;
+}
+
+type Reader = Pick<Db, 'select'>;
+
+/**
+ * Máquinas anotadas antes en un ejercicio, de la más reciente a la más antigua (SES-06).
+ * La primera es la que viene por defecto al agregar el ejercicio a una sesión.
+ */
+export function machineHistory(db: Reader, owner: string, exerciseId: string): string[] {
+  return db
+    .select({ machine: workoutExercises.machine })
+    .from(workoutExercises)
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .where(
+      and(
+        eq(workoutExercises.exerciseId, exerciseId),
+        isNotNull(workoutExercises.machine),
+        isNull(workoutExercises.deletedAt),
+        eq(workouts.userId, owner),
+        isNull(workouts.deletedAt),
+      ),
+    )
+    .orderBy(desc(workouts.startedAt))
+    .all()
+    .map((r) => r.machine)
+    .filter((m): m is string => !!m);
+}
+
+/** Anota la máquina usada en un ejercicio de la sesión (SES-06). */
+export function setMachine(db: Db, workoutExerciseId: string, machine: string | null): void {
+  db.update(workoutExercises)
+    .set({ machine, ...touched() })
+    .where(eq(workoutExercises.id, workoutExerciseId))
+    .run();
+}
+
+/** Termina la sesión con su ánimo y nota (SES-07, SES-11). */
+export function finishWorkout(db: Db, workoutId: string, values: { mood: number | null; notes: string | null }): void {
+  const now = Date.now();
+  db.update(workouts)
+    .set({ status: 'finished', endedAt: now, mood: values.mood, notes: values.notes, ...touched(now) })
+    .where(eq(workouts.id, workoutId))
+    .run();
+}
+
+/** Descarta la sesión con sus ejercicios y series (SES-11, borrado lógico). */
+export function discardWorkout(db: Db, workoutId: string): void {
+  const now = Date.now();
+  db.transaction((tx) => {
+    const items = tx
+      .select({ id: workoutExercises.id })
+      .from(workoutExercises)
+      .where(eq(workoutExercises.workoutId, workoutId))
+      .all()
+      .map((i) => i.id);
+    if (items.length) {
+      tx.update(sets)
+        .set(softDeleted(now))
+        .where(and(inArray(sets.workoutExerciseId, items), isNull(sets.deletedAt)))
+        .run();
+      tx.update(workoutExercises)
+        .set(softDeleted(now))
+        .where(and(inArray(workoutExercises.id, items), isNull(workoutExercises.deletedAt)))
+        .run();
+    }
+    tx.update(workouts).set(softDeleted(now)).where(eq(workouts.id, workoutId)).run();
+  });
 }

@@ -80,6 +80,7 @@ export default function RootLayout() {
               options={{ headerShown: true, title: t.routines.planTitle }}
             />
             <Stack.Screen name="workout/index" options={{ headerShown: true, title: t.workout.title }} />
+            <Stack.Screen name="workout/finish" options={{ headerShown: true, title: '' }} />
           </Stack.Protected>
 
           {/* Registro e inicio de sesión: desde la bienvenida o desde el modo sin cuenta. */}

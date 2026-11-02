@@ -62,48 +62,48 @@ Tareas del autor, sin código:
 
 ## Bloque 1 · Fundamentos, modo sin cuenta y cuenta
 
-### I-01 · Proyecto base y navegación
+### I-01 · Proyecto base y navegación ✅
 
 Crear el proyecto con Expo y TypeScript estricto, la estructura de carpetas del plan técnico, lint, pruebas, tokens de diseño, componentes base (botón, campo de texto, tarjeta, pantalla), archivo de textos y la barra inferior con las cinco secciones vacías. Completar la sección de comandos de `CLAUDE.md`.
 
 Cubre: RNF-06, base de RNF-01.
 
 Cómo probarlo:
-- [ ] La app abre en Expo Go en el S22.
-- [ ] Se ven las cinco secciones (Hoy, Rutinas, Correr, Historial, Perfil) y se puede navegar entre ellas.
-- [ ] Todos los textos están en español.
+- [x] La app abre en Expo Go en el S22.
+- [x] Se ven las cinco secciones (Hoy, Rutinas, Correr, Historial, Perfil) y se puede navegar entre ellas.
+- [x] Todos los textos están en español.
 
-### I-02 · Base de datos local y catálogo de ejercicios
+### I-02 · Base de datos local y catálogo de ejercicios ✅
 
 Esquema completo de SQLite con todas las tablas del plan técnico (incluidos la clave de foto y el enlace de video de los ejercicios), migraciones, datos iniciales del catálogo (80 ejercicios o más), pantalla de catálogo con búsqueda y filtros, y ficha del ejercicio con el botón **Ver tutorial**. Las fotos llegan en I-26; mientras tanto se muestra el ícono del grupo muscular.
 
 Cubre: EJE-01, EJE-02, EJE-06.
 
 Cómo probarlo:
-- [ ] El catálogo muestra los ejercicios en español, con modo avión activado.
-- [ ] Buscar "press" y "PRESS" da los mismos resultados; buscar "biceps" encuentra "bíceps".
-- [ ] Los filtros por músculo y equipo funcionan combinados con la búsqueda.
-- [ ] Revisar la lista de ejercicios y avisar si falta alguno importante o hay nombres raros.
-- [ ] Abrir un ejercicio y tocar **Ver tutorial**: se abre YouTube buscando cómo hacer ese ejercicio.
-- [ ] En modo avión, **Ver tutorial** avisa que necesita internet y no se traba.
+- [x] El catálogo muestra los ejercicios en español, con modo avión activado.
+- [x] Buscar "press" y "PRESS" da los mismos resultados; buscar "biceps" encuentra "bíceps".
+- [x] Los filtros por músculo y equipo funcionan combinados con la búsqueda.
+- [x] Revisar la lista de ejercicios y avisar si falta alguno importante o hay nombres raros.
+- [x] Abrir un ejercicio y tocar **Ver tutorial**: se abre YouTube buscando cómo hacer ese ejercicio.
+- [x] En modo avión, **Ver tutorial** avisa que necesita internet y no se traba.
 
-### I-03 · Bienvenida, modo sin cuenta y cuenta de usuario
+### I-03 · Bienvenida, modo sin cuenta y cuenta de usuario ✅
 
 Pantalla de bienvenida y modo sin cuenta con su propia base de datos local. Proyecto de Supabase con las tablas, las reglas de seguridad por fila y el catálogo cargado. Pantallas de registro e inicio de sesión, sesión persistente, cierre de sesión y base de datos local por usuario. Aviso en Perfil para quien no tiene cuenta y paso de los datos del modo sin cuenta a la cuenta, solo en el teléfono (la subida a la nube se prueba en I-13 y la unión con una cuenta con datos en I-14).
 
 Cubre: CUE-00, CUE-01, CUE-02, CUE-03 (sin el aviso de pendientes, que llega en I-15), CUE-07 (en el teléfono).
 
 Cómo probarlo:
-- [ ] Con internet apagado, abrir la app por primera vez y tocar **Empezar sin cuenta**: entra sin pedir nada.
-- [ ] Cerrar y abrir la app: sigue en modo sin cuenta, sin volver a la bienvenida.
-- [ ] Perfil muestra el aviso "Tus datos solo están en este teléfono" y el botón para crear cuenta.
-- [ ] Desde ese botón, crear una cuenta con correo y contraseña: no se repite la incorporación y la app sigue igual.
-- [ ] Cerrar sesión: vuelve a la bienvenida. Crear una cuenta desde ahí.
-- [ ] Cerrar la app por completo y abrirla: sigue dentro.
-- [ ] Abrirla en modo avión: entra sin pedir datos.
-- [ ] Cerrar sesión y probar con correo o contraseña incorrectos: el error se entiende.
-- [ ] Crear una segunda cuenta en el mismo teléfono: no ve nada de la primera.
-- [ ] Cerrar sesión y tocar **Empezar sin cuenta**: la app está vacía.
+- [x] Con internet apagado, abrir la app por primera vez y tocar **Empezar sin cuenta**: entra sin pedir nada.
+- [x] Cerrar y abrir la app: sigue en modo sin cuenta, sin volver a la bienvenida.
+- [x] Perfil muestra el aviso "Tus datos solo están en este teléfono" y el botón para crear cuenta.
+- [x] Desde ese botón, crear una cuenta con correo y contraseña: no se repite la incorporación y la app sigue igual.
+- [x] Cerrar sesión: vuelve a la bienvenida. Crear una cuenta desde ahí.
+- [x] Cerrar la app por completo y abrirla: sigue dentro.
+- [x] Abrirla en modo avión: entra sin pedir datos.
+- [x] Cerrar sesión y probar con correo o contraseña incorrectos: el error se entiende.
+- [x] Crear una segunda cuenta en el mismo teléfono: no ve nada de la primera.
+- [x] Cerrar sesión y tocar **Empezar sin cuenta**: la app está vacía.
 
 ---
 

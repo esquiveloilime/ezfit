@@ -65,4 +65,4 @@ La prioridad es avanzar rápido. El autor pide bloques completos ("Implementa el
 
 ## Estado
 
-Bloque actual: 0, preparación.
+Bloque actual: 2, ejercicios, rutinas e incorporación. El bloque 1 (I-01 a I-03) quedó probado y cerrado el 2 de noviembre de 2026.

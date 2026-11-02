@@ -38,6 +38,29 @@ describe('filterExercises', () => {
     expect(filterExercises(list, { ...noFilter, query: 'biceps' }).map((e) => e.id)).toEqual(['2']);
   });
 
+  it('también busca por el grupo muscular principal', () => {
+    const labels = {
+      chest: 'Pecho',
+      back: 'Espalda',
+      shoulders: 'Hombro',
+      biceps: 'Bíceps',
+      triceps: 'Tríceps',
+      quads: 'Cuádriceps',
+      hamstrings: 'Femoral',
+      glutes: 'Glúteo',
+      calves: 'Pantorrilla',
+      abs: 'Abdomen',
+    } as const;
+    const withHammer = [
+      ...list,
+      { id: '5', name: 'Curl martillo', muscleGroup: 'biceps' as const, equipment: 'dumbbell' as const, isCustom: false },
+    ];
+    expect(filterExercises(withHammer, { ...noFilter, query: 'bice' }, labels).map((e) => e.id)).toEqual(['2', '5']);
+    expect(filterExercises(withHammer, { ...noFilter, query: 'PECHO maquina' }, labels).map((e) => e.id)).toEqual(['4']);
+    // Sin los nombres de los grupos, solo se busca en el nombre.
+    expect(filterExercises(withHammer, { ...noFilter, query: 'pecho' })).toEqual([]);
+  });
+
   it('todas las palabras deben aparecer, en cualquier orden', () => {
     expect(filterExercises(list, { ...noFilter, query: 'maquina press' }).map((e) => e.id)).toEqual(['3']);
   });

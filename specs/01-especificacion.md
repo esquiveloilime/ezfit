@@ -224,7 +224,7 @@ El usuario crea una cuenta con correo y contraseña.
 - Todos los grupos musculares (pecho, espalda, hombro, bíceps, tríceps, cuádriceps, femoral, glúteo, pantorrilla, abdomen) tienen al menos 5 ejercicios.
 
 **EJE-02 · P1 · Buscar y filtrar**
-- Búsqueda por nombre que ignora mayúsculas y acentos.
+- Búsqueda por nombre o por grupo muscular principal, que ignora mayúsculas y acentos. Por ejemplo, "bice" muestra los ejercicios de bíceps aunque su nombre no diga "bíceps" (como "Curl martillo").
 - Filtros por grupo muscular y por tipo de equipo, combinables con la búsqueda.
 
 **EJE-03 · P1 · Ejercicio personalizado**

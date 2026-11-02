@@ -28,7 +28,7 @@ export function ExerciseCatalog() {
 
   const all = useMemo(() => (data ?? []).map(toExerciseDetail), [data]);
   const results = useMemo(
-    () => filterExercises(all, { query, muscleGroup, equipment }),
+    () => filterExercises(all, { query, muscleGroup, equipment }, t.exercises.muscleGroups),
     [all, query, muscleGroup, equipment],
   );
 

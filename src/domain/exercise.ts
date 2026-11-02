@@ -61,19 +61,24 @@ export function normalizeText(text: string): string {
 }
 
 /**
- * Filtra ejercicios por nombre (sin importar mayúsculas ni acentos), grupo muscular
- * principal y tipo de equipo. Todas las palabras buscadas deben aparecer en el nombre.
- * El resultado queda ordenado alfabéticamente.
+ * Filtra ejercicios por texto, grupo muscular principal y tipo de equipo (EJE-02).
+ * El texto se busca, sin importar mayúsculas ni acentos, en el nombre y en el nombre
+ * del grupo muscular principal (`muscleLabels`, por ejemplo "Bíceps"): cada palabra
+ * buscada debe aparecer en alguno de los dos. El resultado queda en orden alfabético.
  */
-export function filterExercises<T extends ExerciseSummary>(exercises: T[], filter: ExerciseFilter): T[] {
+export function filterExercises<T extends ExerciseSummary>(
+  exercises: T[],
+  filter: ExerciseFilter,
+  muscleLabels?: Record<MuscleGroup, string>,
+): T[] {
   const words = normalizeText(filter.query).split(' ').filter(Boolean);
   return exercises
     .filter((e) => {
       if (filter.muscleGroup && e.muscleGroup !== filter.muscleGroup) return false;
       if (filter.equipment && e.equipment !== filter.equipment) return false;
       if (words.length === 0) return true;
-      const name = normalizeText(e.name);
-      return words.every((w) => name.includes(w));
+      const text = normalizeText(`${e.name} ${muscleLabels?.[e.muscleGroup] ?? ''}`);
+      return words.every((w) => text.includes(w));
     })
     .sort((a, b) => normalizeText(a.name).localeCompare(normalizeText(b.name)));
 }

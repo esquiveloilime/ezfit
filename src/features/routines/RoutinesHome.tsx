@@ -12,7 +12,7 @@ import {
   templateRoutinesQuery,
 } from '@/db/repositories/routines';
 import { format, t } from '@/i18n';
-import { Button, Card, Screen, colors, font, spacing } from '@/ui';
+import { Button, Card, Chip, Screen, colors, font, spacing } from '@/ui';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -53,7 +53,14 @@ export function RoutinesHome() {
   }, [counts]);
 
   const byTime = templates.filter((r) => r.category === 'time');
-  const byMuscle = templates.filter((r) => r.category === 'muscle');
+  const split = templates.filter((r) => r.category === 'muscle');
+  // Pierna, Push y Pull: una tarjeta por tipo, con sus duraciones de menor a mayor (anexo A).
+  const splitGroups = t.routines.splitGroups.map((g) => ({
+    ...g,
+    routines: split
+      .filter((r) => r.name.startsWith(`${g.prefix} `))
+      .sort((a, b) => (a.estimatedMinutes ?? 0) - (b.estimatedMinutes ?? 0)),
+  }));
 
   return (
     <Screen title={t.tabs.routines}>
@@ -84,9 +91,22 @@ export function RoutinesHome() {
         ))}
       </Section>
 
-      <Section title={t.routines.byMuscle}>
-        {byMuscle.map((r) => (
-          <RoutineCard key={r.id} routine={r} exerciseCount={countOf(r.id)} />
+      <Section title={t.routines.split}>
+        {splitGroups.map((g) => (
+          <Card key={g.prefix}>
+            <Text style={styles.cardTitle}>{g.title}</Text>
+            <Text style={styles.cardBody}>{g.body}</Text>
+            <View style={styles.durations}>
+              {g.routines.map((r) => (
+                <Chip
+                  key={r.id}
+                  label={format(t.routines.durationButton, { n: r.estimatedMinutes ?? 0 })}
+                  selected={false}
+                  onPress={() => router.push({ pathname: '/routines/[id]', params: { id: r.id } })}
+                />
+              ))}
+            </View>
+          </Card>
         ))}
       </Section>
 
@@ -105,4 +125,5 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: font.body, fontWeight: '600', color: colors.text },
   cardBody: { fontSize: font.body, color: colors.textMuted },
   meta: { fontSize: font.small, color: colors.textMuted },
+  durations: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.xs },
 });

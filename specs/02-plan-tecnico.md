@@ -120,7 +120,7 @@ Toda tabla sincronizada tiene:
 |---|---|---|
 | `profiles` | Ajustes del usuario | nivel, unidad de peso, días de entrenamiento, plan activo, descanso por defecto, inicio automático, sonido, vibración, incremento de peso, incorporación completada |
 | `exercises` | Catálogo y ejercicios propios | nombre, grupo muscular, grupos secundarios, equipo, tipo de registro, usa RIR, usa técnica, notas, archivado, clave de foto (solo catálogo), enlace de video |
-| `routines` | Rutinas propias y plantillas | nombre, descripción, categoría (propia, tiempo, músculo, plan), duración estimada |
+| `routines` | Rutinas propias y plantillas | nombre, descripción, categoría (propia, tiempo, músculo, plan), duración estimada. La categoría `músculo` (`muscle`) agrupa las rutinas de Pierna, Push y Pull |
 | `routine_exercises` | Ejercicios de una rutina | rutina, ejercicio, orden, series objetivo, repeticiones mínimas y máximas, descanso |
 | `plans` | Planes semanales | nombre, días por semana |
 | `plan_days` | Rutina de cada día de un plan | plan, orden, rutina, día de la semana (opcional) |

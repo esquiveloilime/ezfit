@@ -57,7 +57,7 @@ Una misma persona puede ser los tres.
 - Uso sin cuenta desde el primer momento, con la opción de crear cuenta después sin perder datos.
 - Cuenta de usuario con correo y contraseña, o con Google.
 - Catálogo de ejercicios con fotografía y enlace a un video tutorial, y ejercicios personalizados.
-- Rutinas predeterminadas (por tiempo, por músculo, plan semanal) y rutinas propias.
+- Rutinas predeterminadas (por tiempo; Pierna, Push y Pull; plan semanal) y rutinas propias.
 - Registro de sesión de pesas y cardio con todos los datos descritos en la sección 6.
 - Temporizador de descanso manual y automático.
 - Historial por sesión y por ejercicio; copiar sesiones y ejercicios de días anteriores.
@@ -258,7 +258,7 @@ Si un ejercicio no está en el catálogo, el usuario lo crea.
 **RUT-01 · P1 · Rutinas predeterminadas**
 La app incluye plantillas en tres categorías:
 - **Por tiempo:** 30, 45 y 60 minutos.
-- **Por músculo objetivo:** pecho, espalda, pierna, hombro, brazos, abdomen.
+- **Pierna, Push y Pull:** una rutina de pierna, una de empuje (pecho, hombro y tríceps) y una de jalón (espalda y bíceps), cada una en versiones de 30, 45 y 60 minutos.
 - **Plan semanal:** de 2, 3, 4, 5 y 6 días (ver anexo A).
 
 Cada plantilla muestra sus ejercicios con series y rango de repeticiones, y se puede empezar una sesión directamente desde ella.
@@ -584,8 +584,16 @@ Al aplicar las respuestas anteriores surgieron estos detalles. Se tomó la opci�
 | 45 min | Cuerpo completo, 5 a 6 ejercicios |
 | 60 min | Cuerpo completo, 7 a 8 ejercicios |
 
-### Por músculo objetivo
+### Pierna, Push y Pull
 
-Una rutina de 5 a 6 ejercicios para cada uno: pecho, espalda, pierna, hombro, brazos y abdomen.
+| Tipo | Músculos |
+|---|---|
+| Pierna | Cuádriceps, femoral, glúteo y pantorrilla |
+| Push (empuje) | Pecho, hombro y tríceps |
+| Pull (jalón) | Espalda, hombro posterior y bíceps |
+
+Cada tipo tiene tres versiones, con la misma cantidad de ejercicios que las rutinas por tiempo: 30 minutos con 4 ejercicios y descansos cortos, 45 minutos con 5 a 6 ejercicios y 60 minutos con 7 a 8 ejercicios. En la pestaña Rutinas se muestran agrupadas por tipo.
+
+Hasta la versión 0.3 había una rutina por músculo objetivo (pecho, espalda, pierna, hombro, brazos y abdomen); el autor las reemplazó por estas el 2 de noviembre de 2026.
 
 El contenido exacto (qué ejercicios lleva cada plantilla) se redacta en la tarea correspondiente y el autor lo revisa antes de aprobarla.

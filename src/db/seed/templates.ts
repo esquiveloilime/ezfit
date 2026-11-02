@@ -5,7 +5,7 @@
 
 import { catalogExerciseId } from './exercises';
 
-export const TEMPLATES_VERSION = 1;
+export const TEMPLATES_VERSION = 2;
 
 type Category = 'time' | 'muscle' | 'plan';
 
@@ -138,54 +138,79 @@ export const TEMPLATE_ROUTINES: TemplateRoutine[] = [
     items: [main(53, 90), main(3, 90), main(12, 90), main(24, 90), main(59, 90), acc(27, 60), acc(42, 60), acc(35, 60)],
   },
 
-  // Por músculo objetivo.
+  // Pierna, Push y Pull (categoría `muscle`), de 30, 45 y 60 minutos (anexo A).
+  // Hasta la versión 1 aquí había rutinas por músculo (números 14 a 19); se quitaron.
   {
-    n: 14,
-    name: 'Pecho',
-    description: 'Press con barra, mancuernas y máquina, más aperturas.',
+    n: 20,
+    name: 'Pierna de 30 minutos',
+    description: 'Cuádriceps, femoral y glúteo con 4 ejercicios y descansos cortos.',
+    category: 'muscle',
+    minutes: 30,
+    items: [main(51, 60), main(53, 60), main(59, 60), main(65, 60)],
+  },
+  {
+    n: 21,
+    name: 'Pierna de 45 minutos',
+    description: 'Pierna completa con 6 ejercicios.',
     category: 'muscle',
     minutes: 45,
-    items: [main(1), main(4), main(6), acc(7), acc(8), acc(9)],
+    items: [main(51, 90), main(59, 90), main(60, 90), acc(52, 60), acc(65, 60), acc(70, 60)],
   },
   {
-    n: 15,
-    name: 'Espalda',
-    description: 'Jalones y remos para el ancho y el grosor de la espalda.',
+    n: 22,
+    name: 'Pierna de 60 minutos',
+    description: 'Pierna completa con sentadilla, prensa y peso muerto rumano.',
+    category: 'muscle',
+    minutes: 60,
+    items: [main(49, 150), main(51, 120), main(58, 120), main(60, 90), acc(52, 60), acc(65, 60), acc(54, 60), acc(70, 60)],
+  },
+  {
+    n: 23,
+    name: 'Push de 30 minutos',
+    description: 'Pecho, hombro y tríceps con 4 ejercicios y descansos cortos.',
+    category: 'muscle',
+    minutes: 30,
+    items: [main(6, 60), main(25, 60), main(4, 60), acc(42, 60)],
+  },
+  {
+    n: 24,
+    name: 'Push de 45 minutos',
+    description: 'Pecho, hombro y tríceps con 6 ejercicios.',
     category: 'muscle',
     minutes: 45,
-    items: [main(12), main(14), main(16), acc(15), acc(19), acc(20)],
+    items: [main(6, 90), main(4, 90), main(25, 90), acc(7, 60), acc(27, 60), acc(42, 60)],
   },
   {
-    n: 16,
-    name: 'Pierna',
-    description: 'Sentadilla, prensa y peso muerto rumano.',
+    n: 25,
+    name: 'Push de 60 minutos',
+    description: 'Pecho, hombro y tríceps con press de banca y trabajo extra de hombro.',
     category: 'muscle',
-    minutes: 50,
-    items: [main(49, 150), main(51), main(58), acc(52), acc(60), acc(70)],
+    minutes: 60,
+    items: [main(1, 120), main(4, 90), main(25, 90), acc(7, 60), acc(27, 60), acc(28, 60), acc(42, 60), acc(44, 60)],
   },
   {
-    n: 17,
-    name: 'Hombro',
-    description: 'Press y elevaciones para las tres partes del hombro.',
+    n: 26,
+    name: 'Pull de 30 minutos',
+    description: 'Espalda y bíceps con 4 ejercicios y descansos cortos.',
     category: 'muscle',
-    minutes: 40,
-    items: [main(24), main(25), acc(27), acc(28), acc(31), acc(32)],
+    minutes: 30,
+    items: [main(12, 60), main(16, 60), main(17, 60), acc(35, 60)],
   },
   {
-    n: 18,
-    name: 'Brazos',
-    description: 'Bíceps y tríceps alternados.',
+    n: 27,
+    name: 'Pull de 45 minutos',
+    description: 'Espalda, hombro posterior y bíceps con 6 ejercicios.',
     category: 'muscle',
-    minutes: 40,
-    items: [main(34), main(41), acc(36), acc(42), acc(37), acc(44)],
+    minutes: 45,
+    items: [main(12, 90), main(16, 90), main(15, 90), acc(32, 60), acc(35, 60), acc(36, 60)],
   },
   {
-    n: 19,
-    name: 'Abdomen',
-    description: 'Crunch, elevaciones y planchas.',
+    n: 28,
+    name: 'Pull de 60 minutos',
+    description: 'Espalda completa con jalones y remos, más bíceps.',
     category: 'muscle',
-    minutes: 25,
-    items: [acc(79, 60), acc(80, 60), acc(78, 60), acc(82, 60), timed(75), timed(76)],
+    minutes: 60,
+    items: [main(12, 90), main(14, 120), main(16, 90), main(13, 90), acc(31, 60), acc(32, 60), acc(34, 60), acc(36, 60)],
   },
 ];
 

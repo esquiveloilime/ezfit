@@ -25,13 +25,51 @@ describe('plantillas (RUT-01, anexo A)', () => {
     }
   });
 
-  it('hay una rutina de 5 a 6 ejercicios para cada músculo objetivo', () => {
-    const muscle = TEMPLATE_ROUTINES.filter((r) => r.category === 'muscle');
-    expect(muscle.map((r) => r.name).sort()).toEqual(['Abdomen', 'Brazos', 'Espalda', 'Hombro', 'Pecho', 'Pierna']);
-    for (const r of muscle) {
-      expect(r.items.length).toBeGreaterThanOrEqual(5);
-      expect(r.items.length).toBeLessThanOrEqual(6);
+  it('hay rutinas de Pierna, Push y Pull de 30, 45 y 60 minutos con la cantidad del anexo A', () => {
+    const ppl = TEMPLATE_ROUTINES.filter((r) => r.category === 'muscle');
+    expect(ppl.map((r) => r.name)).toEqual([
+      'Pierna de 30 minutos',
+      'Pierna de 45 minutos',
+      'Pierna de 60 minutos',
+      'Push de 30 minutos',
+      'Push de 45 minutos',
+      'Push de 60 minutos',
+      'Pull de 30 minutos',
+      'Pull de 45 minutos',
+      'Pull de 60 minutos',
+    ]);
+    for (const r of ppl) {
+      const n = r.items.length;
+      if (r.minutes === 30) {
+        expect(n).toBe(4);
+        for (const [, , , , rest] of r.items) expect(rest).toBeLessThanOrEqual(60);
+      } else if (r.minutes === 45) {
+        expect(n).toBeGreaterThanOrEqual(5);
+        expect(n).toBeLessThanOrEqual(6);
+      } else {
+        expect(r.minutes).toBe(60);
+        expect(n).toBeGreaterThanOrEqual(7);
+        expect(n).toBeLessThanOrEqual(8);
+      }
     }
+  });
+
+  it('cada tipo trabaja sus músculos', () => {
+    const muscles = (prefix: string) =>
+      new Set(
+        TEMPLATE_ROUTINES.filter((r) => r.name.startsWith(prefix)).flatMap((r) =>
+          r.items.map(([ex]) => byNumber.get(ex)!.muscle),
+        ),
+      );
+    for (const m of muscles('Pierna de')) expect(['quads', 'hamstrings', 'glutes', 'calves']).toContain(m);
+    for (const m of muscles('Push de')) expect(['chest', 'shoulders', 'triceps']).toContain(m);
+    for (const m of muscles('Pull de')) expect(['back', 'shoulders', 'biceps']).toContain(m);
+  });
+
+  it('ya no hay rutinas por un solo músculo ni se reutilizan sus números', () => {
+    const numbers = TEMPLATE_ROUTINES.map((r) => r.n);
+    for (const old of [14, 15, 16, 17, 18, 19]) expect(numbers).not.toContain(old);
+    expect(new Set(numbers).size).toBe(numbers.length);
   });
 
   it('las rutinas de los planes tienen de 5 a 7 ejercicios, 3 series y rangos del anexo A', () => {

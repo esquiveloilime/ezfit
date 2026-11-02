@@ -130,7 +130,7 @@ Datos iniciales de las plantillas del anexo A, pantalla de rutinas, detalle de r
 Cubre: RUT-01, RUT-03, RUT-04.
 
 Cómo probarlo:
-- [ ] Se ven las plantillas por tiempo, por músculo y los planes semanales.
+- [ ] Se ven las plantillas por tiempo; las de Pierna, Push y Pull de 30, 45 y 60 minutos; y los planes semanales.
 - [ ] Revisar el contenido de las plantillas y avisar qué cambiarías.
 - [ ] Crear una rutina propia con cuatro ejercicios, cambiar el orden y editar las series objetivo.
 - [ ] Duplicar una plantilla y modificar la copia; la plantilla original no cambia.

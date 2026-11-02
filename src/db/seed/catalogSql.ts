@@ -86,6 +86,9 @@ ${insert(
   rows.plans.map((p) => [...head(p.id), p.name, p.daysPerWeek]),
   ['updated_at', 'name', 'days_per_week'],
 )}
+delete from public.routines where user_id is null and id not in (
+${rows.routines.map((r) => `  ${quote(r.id)}`).join(',\n')}
+);
 delete from public.routine_exercises where user_id is null;
 ${insert(
   'routine_exercises',

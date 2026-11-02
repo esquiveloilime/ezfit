@@ -1,4 +1,4 @@
-import { eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, notInArray } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 import { appMeta, planDays, plans, routineExercises, routines } from '../schema';
@@ -36,6 +36,9 @@ export function seedTemplates(db: SyncDb, now: number = Date.now()): void {
         .onConflictDoUpdate({ target: plans.id, set: { ...values, updatedAt: now } })
         .run();
     }
+    // Plantillas que ya no existen (por ejemplo, las rutinas por músculo de la versión 1).
+    const current = rows.routines.map((r) => r.id);
+    tx.delete(routines).where(and(isNull(routines.userId), notInArray(routines.id, current))).run();
     tx.delete(routineExercises).where(isNull(routineExercises.userId)).run();
     for (const re of rows.routineExercises) tx.insert(routineExercises).values({ ...base, ...re }).run();
     tx.delete(planDays).where(isNull(planDays.userId)).run();

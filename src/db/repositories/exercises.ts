@@ -1,13 +1,16 @@
 import { and, eq, isNull } from 'drizzle-orm';
 
 import type { Equipment, ExerciseSummary, MuscleGroup, TrackingType } from '@/domain/exercise';
+import type { ExerciseFormValues } from '@/domain/exerciseForm';
 
 import type { Db } from '../client';
+import { newRecord, touched } from '../records';
 import { exercises } from '../schema';
 
 export type ExerciseRow = typeof exercises.$inferSelect;
 
 export type ExerciseDetail = ExerciseSummary & {
+  archived: boolean;
   secondaryMuscles: MuscleGroup[];
   trackingType: TrackingType;
   usesRir: boolean;
@@ -33,6 +36,7 @@ export function toExerciseDetail(row: ExerciseRow): ExerciseDetail {
     muscleGroup: row.muscleGroup,
     equipment: row.equipment as Equipment,
     isCustom: row.userId !== null,
+    archived: row.archived,
     secondaryMuscles: parseMuscles(row.secondaryMuscles),
     trackingType: row.trackingType,
     usesRir: row.usesRir,
@@ -53,4 +57,42 @@ export function activeExercisesQuery(db: Db) {
 
 export function exerciseByIdQuery(db: Db, id: string) {
   return db.select().from(exercises).where(eq(exercises.id, id)).limit(1);
+}
+
+function toColumns(values: ExerciseFormValues) {
+  return {
+    name: values.name,
+    muscleGroup: values.muscleGroup,
+    equipment: values.equipment,
+    trackingType: values.trackingType,
+    usesRir: values.usesRir,
+    usesTechnique: values.usesTechnique,
+    notes: values.notes,
+    videoUrl: values.videoUrl,
+  };
+}
+
+/** Crea un ejercicio propio (EJE-03) y devuelve su identificador. */
+export function createExercise(db: Db, owner: string, values: ExerciseFormValues): string {
+  const record = newRecord(owner);
+  db.insert(exercises)
+    .values({ ...record, ...toColumns(values), secondaryMuscles: '[]', archived: false })
+    .run();
+  return record.id;
+}
+
+/** Edita un ejercicio propio. Los del catálogo no se pueden editar (EJE-04). */
+export function updateExercise(db: Db, owner: string, id: string, values: ExerciseFormValues): void {
+  db.update(exercises)
+    .set({ ...toColumns(values), ...touched() })
+    .where(and(eq(exercises.id, id), eq(exercises.userId, owner)))
+    .run();
+}
+
+/** Archiva un ejercicio propio: deja de aparecer al elegir ejercicios, pero conserva su historial. */
+export function archiveExercise(db: Db, owner: string, id: string): void {
+  db.update(exercises)
+    .set({ archived: true, ...touched() })
+    .where(and(eq(exercises.id, id), eq(exercises.userId, owner)))
+    .run();
 }

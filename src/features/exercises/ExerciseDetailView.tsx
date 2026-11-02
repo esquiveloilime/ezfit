@@ -1,8 +1,9 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { router } from 'expo-router';
 import { Alert, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
-import { exerciseByIdQuery, toExerciseDetail } from '@/db/repositories/exercises';
+import { archiveExercise, exerciseByIdQuery, toExerciseDetail } from '@/db/repositories/exercises';
 import { tutorialUrl } from '@/domain/exercise';
 import { t } from '@/i18n';
 import { isOnline } from '@/services/network';
@@ -34,7 +35,7 @@ function Field({ label, value }: { label: string; value: string }) {
 
 /** Ficha del ejercicio: datos, foto (o ícono) y botón de tutorial. */
 export function ExerciseDetailView({ id }: { id: string }) {
-  const { db } = useDatabase();
+  const { db, owner } = useDatabase();
   const { data } = useLiveQuery(exerciseByIdQuery(db, id), [id]);
   const row = data?.[0];
 
@@ -49,6 +50,20 @@ export function ExerciseDetailView({ id }: { id: string }) {
 
   const e = toExerciseDetail(row);
   const secondary = e.secondaryMuscles.map((m) => t.exercises.muscleGroups[m]).join(', ');
+
+  function confirmArchive() {
+    Alert.alert(t.exercises.archiveConfirmTitle, t.exercises.archiveConfirmBody, [
+      { text: t.common.cancel, style: 'cancel' },
+      {
+        text: t.exercises.archiveButton,
+        style: 'destructive',
+        onPress: () => {
+          archiveExercise(db, owner, e.id);
+          router.back();
+        },
+      },
+    ]);
+  }
 
   return (
     <Screen title={e.name}>
@@ -67,6 +82,17 @@ export function ExerciseDetailView({ id }: { id: string }) {
         <Field label={t.exercises.trackingLabel} value={t.exercises.trackingTypes[e.trackingType]} />
         {e.notes ? <Field label={t.exercises.notesLabel} value={e.notes} /> : null}
       </Card>
+      {e.isCustom && e.archived ? <Text style={styles.archived}>{t.exercises.archived}</Text> : null}
+      {e.isCustom && !e.archived ? (
+        <View style={styles.actions}>
+          <Button
+            variant="secondary"
+            label={t.exercises.editButton}
+            onPress={() => router.push({ pathname: '/exercises/edit/[id]', params: { id: e.id } })}
+          />
+          <Button variant="ghost" label={t.exercises.archiveButton} onPress={confirmArchive} />
+        </View>
+      ) : null}
     </Screen>
   );
 }
@@ -76,4 +102,6 @@ const styles = StyleSheet.create({
   field: { gap: 2, paddingVertical: spacing.xs },
   fieldLabel: { fontSize: font.small, color: colors.textMuted },
   fieldValue: { fontSize: font.body, color: colors.text },
+  actions: { gap: spacing.sm },
+  archived: { fontSize: font.body, color: colors.textMuted, textAlign: 'center' },
 });

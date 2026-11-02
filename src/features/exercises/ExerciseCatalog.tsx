@@ -13,14 +13,20 @@ import {
   type MuscleGroup,
 } from '@/domain/exercise';
 import { format, t } from '@/i18n';
-import { Card, EmptyState, TextField, colors, font, spacing } from '@/ui';
-import { Chip } from '@/ui/Chip';
+import { Button, Card, Chip, EmptyState, TextField, colors, font, spacing } from '@/ui';
 
 import { ExerciseThumb } from './ExerciseThumb';
+import { useExercisePicker } from './pickerStore';
+
+type Props = {
+  /** `pick`: selector de ejercicios; al tocar uno se elige y se vuelve atrás. */
+  mode?: 'browse' | 'pick';
+};
 
 /** Catálogo con búsqueda y filtros por músculo y equipo (EJE-01, EJE-02). */
-export function ExerciseCatalog() {
+export function ExerciseCatalog({ mode = 'browse' }: Props) {
   const { db } = useDatabase();
+  const pick = useExercisePicker((s) => s.pick);
   const { data } = useLiveQuery(activeExercisesQuery(db));
   const [query, setQuery] = useState('');
   const [muscleGroup, setMuscleGroup] = useState<MuscleGroup | null>(null);
@@ -32,8 +38,26 @@ export function ExerciseCatalog() {
     [all, query, muscleGroup, equipment],
   );
 
+  function onPressExercise(id: string) {
+    if (mode === 'pick') {
+      pick(id);
+      router.back();
+    } else {
+      router.push({ pathname: '/exercises/[id]', params: { id } });
+    }
+  }
+
   const header = (
     <View style={styles.header}>
+      <Button
+        variant="secondary"
+        label={t.exercises.createButton}
+        onPress={() =>
+          router.push(
+            mode === 'pick' ? { pathname: '/exercises/new', params: { pick: '1' } } : '/exercises/new',
+          )
+        }
+      />
       <TextField
         label={t.exercises.searchLabel}
         placeholder={t.exercises.searchPlaceholder}
@@ -85,7 +109,7 @@ export function ExerciseCatalog() {
       renderItem={({ item }) => (
         <Card
           accessibilityLabel={item.name}
-          onPress={() => router.push({ pathname: '/exercises/[id]', params: { id: item.id } })}>
+          onPress={() => onPressExercise(item.id)}>
           <View style={styles.row}>
             <ExerciseThumb imageKey={item.imageKey} size={48} />
             <View style={styles.rowText}>

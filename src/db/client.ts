@@ -5,6 +5,7 @@ import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 import migrations from '../../drizzle/migrations';
 import * as schema from './schema';
 import { seedCatalog } from './seed/seedCatalog';
+import { seedTemplates } from './seed/seedTemplates';
 
 export type Db = ExpoSQLiteDatabase<typeof schema>;
 
@@ -35,5 +36,6 @@ export async function openAppDatabase(
   const db = drizzle(sqlite, { schema });
   await migrate(db, migrations);
   seedCatalog(db);
+  seedTemplates(db);
   return { db, sqlite, owner };
 }

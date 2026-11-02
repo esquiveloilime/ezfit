@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { catalogSql } from './catalogSql';
+import { catalogSql, templatesSql } from './catalogSql';
 import { CATALOG_EXERCISES, catalogExerciseId } from './exercises';
 
 describe('catálogo en Supabase', () => {
@@ -16,5 +16,13 @@ describe('catálogo en Supabase', () => {
       'utf8',
     );
     expect(file.replace(/\r\n/g, '\n')).toBe(catalogSql());
+  });
+
+  it('el archivo de plantillas está al día (si falla: npm run supabase:catalog)', () => {
+    const file = readFileSync(
+      join(__dirname, '..', '..', '..', 'supabase', 'migrations', '0003_plantillas.sql'),
+      'utf8',
+    );
+    expect(file.replace(/\r\n/g, '\n')).toBe(templatesSql());
   });
 });

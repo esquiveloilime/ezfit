@@ -69,6 +69,15 @@ export default function RootLayout() {
               name="exercises/pick"
               options={{ headerShown: true, title: t.exercises.pickTitle }}
             />
+            <Stack.Screen
+              name="routines/[id]"
+              options={{ headerShown: true, title: t.routines.detailTitle }}
+            />
+            <Stack.Screen name="routines/edit" options={{ headerShown: true, title: '' }} />
+            <Stack.Screen
+              name="plans/[id]"
+              options={{ headerShown: true, title: t.routines.planTitle }}
+            />
           </Stack.Protected>
 
           {/* Registro e inicio de sesión: desde la bienvenida o desde el modo sin cuenta. */}

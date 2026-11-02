@@ -12,7 +12,8 @@
     },
     "noUncheckedIndexedAccess": true,
     "types": [
-      "jest"
+      "jest",
+      "node"
     ]
   },
   "include": [

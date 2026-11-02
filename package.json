@@ -47,7 +47,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "check": "npm run typecheck && npm run lint && npm test",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "supabase:catalog": "npx --yes tsx scripts/generate-catalog-sql.ts"
   },
   "private": true,
   "jest": {

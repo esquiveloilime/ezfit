@@ -18,9 +18,19 @@ export function databaseName(owner: string): string {
 
 export type OpenDatabase = { db: Db; sqlite: SQLiteDatabase; owner: string };
 
-/** Abre la base de datos del dueño indicado, aplica las migraciones y carga el catálogo. */
-export async function openAppDatabase(owner: string): Promise<OpenDatabase> {
-  const sqlite = openDatabaseSync(databaseName(owner), { enableChangeListener: true });
+/**
+ * Abre la base de datos del dueño indicado, aplica las migraciones y carga el catálogo.
+ * `separate` abre una conexión aparte, que se puede cerrar sin afectar a la que usan
+ * las pantallas (por ejemplo, al pasar los datos del modo sin cuenta a una cuenta).
+ */
+export async function openAppDatabase(
+  owner: string,
+  { separate = false }: { separate?: boolean } = {},
+): Promise<OpenDatabase> {
+  const sqlite = openDatabaseSync(databaseName(owner), {
+    enableChangeListener: !separate,
+    useNewConnection: separate,
+  });
   sqlite.execSync('PRAGMA journal_mode = WAL;');
   const db = drizzle(sqlite, { schema });
   await migrate(db, migrations);

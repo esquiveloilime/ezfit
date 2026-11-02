@@ -109,45 +109,45 @@ Cómo probarlo:
 
 ## Bloque 2 · Ejercicios, rutinas e incorporación
 
-### I-04 · Ejercicios personalizados
+### I-04 · Ejercicios personalizados ✅
 
 Crear, editar y archivar ejercicios propios, con tipo de registro, opciones de RIR y técnica, y enlace opcional a un video. Creación rápida desde el selector de ejercicios.
 
 Cubre: EJE-03, EJE-04, EJE-06 (enlace propio).
 
 Cómo probarlo:
-- [ ] Crear un ejercicio de "solo tiempo" (por ejemplo, plancha) y otro de "peso y repeticiones" sin RIR.
-- [ ] Ambos aparecen en el catálogo marcados como propios.
-- [ ] Archivar uno: desaparece del selector.
-- [ ] Un ejercicio del catálogo no se puede editar.
-- [ ] Crear un ejercicio con el enlace de un video de YouTube: **Ver tutorial** abre ese video.
-- [ ] Escribir algo que no es un enlace: la app lo rechaza con un mensaje claro.
+- [x] Crear un ejercicio de "solo tiempo" (por ejemplo, plancha) y otro de "peso y repeticiones" sin RIR.
+- [x] Ambos aparecen en el catálogo marcados como propios.
+- [x] Archivar uno: desaparece del selector.
+- [x] Un ejercicio del catálogo no se puede editar.
+- [x] Crear un ejercicio con el enlace de un video de YouTube: **Ver tutorial** abre ese video.
+- [x] Escribir algo que no es un enlace: la app lo rechaza con un mensaje claro.
 
-### I-05 · Rutinas predeterminadas y propias
+### I-05 · Rutinas predeterminadas y propias ✅
 
 Datos iniciales de las plantillas del anexo A, pantalla de rutinas, detalle de rutina, y creación, edición, duplicado y eliminación de rutinas propias.
 
 Cubre: RUT-01, RUT-03, RUT-04.
 
 Cómo probarlo:
-- [ ] Se ven las plantillas por tiempo; las de Pierna, Push y Pull de 30, 45 y 60 minutos; y los planes semanales.
-- [ ] Revisar el contenido de las plantillas y avisar qué cambiarías.
-- [ ] Crear una rutina propia con cuatro ejercicios, cambiar el orden y editar las series objetivo.
-- [ ] Duplicar una plantilla y modificar la copia; la plantilla original no cambia.
-- [ ] Eliminar una rutina propia pide confirmación.
+- [x] Se ven las plantillas por tiempo; las de Pierna, Push y Pull de 30, 45 y 60 minutos; y los planes semanales.
+- [x] Revisar el contenido de las plantillas y avisar qué cambiarías.
+- [x] Crear una rutina propia con cuatro ejercicios, cambiar el orden y editar las series objetivo.
+- [x] Duplicar una plantilla y modificar la copia; la plantilla original no cambia.
+- [x] Eliminar una rutina propia pide confirmación.
 
-### I-06 · Incorporación, plan semanal y pantalla Hoy
+### I-06 · Incorporación, plan semanal y pantalla Hoy ✅
 
 Flujo de incorporación (principiante o no, días, unidad), asignación de plan semanal y pantalla Hoy con la rutina del día. Ajuste de unidad de peso en Perfil.
 
 Cubre: CUE-05, RUT-02, AJU-01.
 
 Cómo probarlo:
-- [ ] Empezando sin cuenta, responder que eres principiante y elegir lunes, miércoles y viernes: propone el plan de 3 días.
-- [ ] Hoy muestra la rutina que toca; en un día sin entrenamiento muestra descanso.
-- [ ] Cerrar sesión (o borrar los datos de Expo Go), crear una cuenta nueva desde la bienvenida y responder que no eres principiante: llegas a Hoy con las tres opciones del flujo F2.
-- [ ] La incorporación no vuelve a aparecer al reabrir la app.
-- [ ] La unidad por defecto es lb; cambiarla a kg en Perfil.
+- [x] Empezando sin cuenta, responder que eres principiante y elegir lunes, miércoles y viernes: propone el plan de 3 días.
+- [x] Hoy muestra la rutina que toca; en un día sin entrenamiento muestra descanso.
+- [x] Cerrar sesión (o borrar los datos de Expo Go), crear una cuenta nueva desde la bienvenida y responder que no eres principiante: llegas a Hoy con las tres opciones del flujo F2.
+- [x] La incorporación no vuelve a aparecer al reabrir la app.
+- [x] La unidad por defecto es lb; cambiarla a kg en Perfil.
 
 ---
 

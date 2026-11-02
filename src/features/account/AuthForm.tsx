@@ -82,7 +82,7 @@ export function AuthForm({ kind }: { kind: Kind }) {
           value={password}
           onChangeText={setPassword}
           error={passwordError}
-          secureTextEntry
+          password={{ showLabel: t.auth.showPassword, hideLabel: t.auth.hidePassword }}
           autoCapitalize="none"
           autoComplete={isSignUp ? 'new-password' : 'current-password'}
           textContentType={isSignUp ? 'newPassword' : 'password'}

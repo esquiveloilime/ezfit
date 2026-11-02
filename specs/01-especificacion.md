@@ -183,6 +183,7 @@ Cinco secciones principales, siempre visibles en una barra inferior:
 **CUE-01 · P1 · Registro**
 El usuario crea una cuenta con correo y contraseña.
 - Se valida el formato del correo y que la contraseña tenga al menos 8 caracteres.
+- El campo de contraseña tiene un botón con ícono de ojo para mostrar u ocultar lo escrito; empieza oculto.
 - Los errores (correo ya registrado, sin conexión, contraseña débil) se muestran en español y dicen qué hacer.
 - Al registrarse con éxito pasa a la incorporación (CUE-05), salvo que venga del modo sin cuenta y ya la haya hecho (CUE-07).
 - Registrarse necesita internet.

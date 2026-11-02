@@ -88,6 +88,8 @@ export const es = {
     emailPlaceholder: 'tu@correo.com',
     passwordLabel: 'Contraseña',
     passwordPlaceholder: 'Al menos 8 caracteres',
+    showPassword: 'Mostrar contraseña',
+    hidePassword: 'Ocultar contraseña',
     signUpButton: 'Crear cuenta',
     signInButton: 'Entrar',
     noAccount: '¿No tienes cuenta? Crear una',

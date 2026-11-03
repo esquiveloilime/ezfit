@@ -48,12 +48,6 @@ export const es = {
     history: 'Historial',
     profile: 'Perfil',
   },
-  placeholders: {
-    history: {
-      title: 'Historial',
-      body: 'Aquí verás tus sesiones, tus actividades y tu progreso por ejercicio.',
-    },
-  },
   welcome: {
     tagline: 'Registra tus entrenamientos y tus carreras, aunque no haya señal en el gimnasio.',
     startGuest: 'Empezar sin cuenta',
@@ -108,6 +102,8 @@ export const es = {
   },
   weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
   weekdaysLong: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+  monthsShort: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+  dateTime: '{weekday} {day} {month} {year} · {time}',
   units: { kg: 'kg', lb: 'lb' },
   onboarding: {
     levelTitle: '¿Estás empezando en el gimnasio?',
@@ -451,6 +447,31 @@ export const es = {
     discard: 'Descartar actividad',
     discardConfirmTitle: '¿Descartar la actividad?',
     discardConfirmBody: 'Se borrará el recorrido y no se podrá recuperar.',
+    save: 'Guardar actividad',
+    saveFailed: 'No se pudo guardar. Inténtalo de nuevo.',
+    saveAndReview: 'Ver resumen y guardar',
+    summaryTitle: 'Resumen',
+    detailTitle: 'Actividad',
+    avgSpeed: 'Velocidad promedio',
+    speedUnit: 'km/h',
+    noSpeed: '--',
+    name: 'Nombre',
+    notes: 'Notas (opcional)',
+    notesPlaceholder: '¿Cómo te sentiste? ¿Por dónde fuiste?',
+    defaultName: {
+      run: { morning: 'Carrera de la mañana', afternoon: 'Carrera de la tarde', night: 'Carrera de la noche' },
+      walk: { morning: 'Caminata de la mañana', afternoon: 'Caminata de la tarde', night: 'Caminata de la noche' },
+    },
+    noRoute: 'No se registraron puntos de la ruta.',
+    delete: 'Eliminar actividad',
+    deleteConfirmTitle: '¿Eliminar esta actividad?',
+    deleteConfirmBody: 'Se borrará de tu historial y no se podrá recuperar.',
+    notFoundTitle: 'No se encontró la actividad',
+    notFoundBody: 'Puede que ya se haya eliminado.',
+    listTitle: 'Actividades',
+    listItem: '{km} km · {time} · {pace} /km',
+    emptyListTitle: 'Todavía no tienes actividades',
+    emptyListBody: 'Graba tu primera carrera o caminata desde la sección Correr.',
   },
 } as const;
 

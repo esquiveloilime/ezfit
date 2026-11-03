@@ -1,5 +1,10 @@
 import {
+  avgSpeedKmh,
   canStartRun,
+  dayPart,
+  decodeRoute,
+  encodeRoute,
+  simplifyLine,
   currentPace,
   distanceMeters,
   filterPoint,
@@ -179,5 +184,47 @@ describe('formato', () => {
     expect(formatPace(null)).toBe('--:--');
     expect(formatElapsed(245)).toBe('4:05');
     expect(formatElapsed(3845)).toBe('1:04:05');
+  });
+});
+
+describe('resumen y ruta guardada (RUN-05)', () => {
+  it('avgSpeedKmh: 5 km en 25 minutos son 12 km/h', () => {
+    expect(avgSpeedKmh(5000, 1500)).toBeCloseTo(12, 5);
+    expect(avgSpeedKmh(0, 100)).toBeNull();
+  });
+
+  it('dayPart: mañana, tarde y noche', () => {
+    expect(dayPart(new Date(2026, 10, 3, 7))).toBe('morning');
+    expect(dayPart(new Date(2026, 10, 3, 13))).toBe('afternoon');
+    expect(dayPart(new Date(2026, 10, 3, 21))).toBe('night');
+    expect(dayPart(new Date(2026, 10, 3, 2))).toBe('night');
+  });
+
+  it('simplifyLine quita los puntos de una recta y conserva las esquinas', () => {
+    const line = [at(0), at(10), at(20), at(30), at(30, 10), at(30, 20)];
+    const simple = simplifyLine(line);
+    expect(simple).toHaveLength(3);
+    expect(simple[1]).toEqual(line[3]);
+  });
+
+  it('encodeRoute y decodeRoute conservan la ruta por tramos, con error menor a 2 m', () => {
+    const points = [at(0, 0, 0, 0), at(50, 20, 10_000, 0), at(120, 0, 20_000, 0), at(300, 0, 60_000, 1), at(400, 30, 70_000, 1)];
+    const decoded = decodeRoute(encodeRoute(points));
+    expect(decoded).toHaveLength(2);
+    expect(decoded[0]).toHaveLength(3);
+    const original = splitSegments(points).flat();
+    decoded.flat().forEach((p, i) => expect(distanceMeters(p, original[i]!)).toBeLessThan(2));
+  });
+
+  it('decodeRoute tolera una ruta vacía o dañada', () => {
+    expect(decodeRoute(null)).toEqual([]);
+    expect(decodeRoute('')).toEqual([]);
+    expect(() => decodeRoute('@@@')).not.toThrow();
+  });
+
+  it('una ruta de 10 km ocupa pocos kilobytes', () => {
+    const points: RoutePoint[] = [];
+    for (let s = 0; s < 3600; s++) points.push(at(s * 2.8 * Math.cos(s / 300), 300 * Math.sin(s / 200), s * 1000));
+    expect(encodeRoute(points).length).toBeLessThan(10_000);
   });
 });

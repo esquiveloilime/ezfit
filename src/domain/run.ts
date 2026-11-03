@@ -203,3 +203,137 @@ export function formatElapsed(seconds: number): string {
   const sec = String(s % 60).padStart(2, '0');
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
 }
+
+// --- Resumen y ruta guardada (RUN-05, RUN-06; plan técnico, sección 4) ---
+
+/** Velocidad promedio en km/h, o `null` sin distancia o sin tiempo. */
+export function avgSpeedKmh(meters: number, seconds: number): number | null {
+  if (meters < MIN_PACE_METERS || seconds <= 0) return null;
+  return meters / 1000 / (seconds / 3600);
+}
+
+export type DayPart = 'morning' | 'afternoon' | 'night';
+
+/** Momento del día para el nombre por defecto: mañana de 5 a 12, tarde de 12 a 19, noche el resto. */
+export function dayPart(date: Date): DayPart {
+  const h = date.getHours();
+  if (h >= 5 && h < 12) return 'morning';
+  if (h >= 12 && h < 19) return 'afternoon';
+  return 'night';
+}
+
+/** Tolerancia (m) al simplificar la ruta: menos que el error del GPS, así que no cambia su forma. */
+export const SIMPLIFY_TOLERANCE_METERS = 3;
+
+/** Distancia (m) de `p` al segmento a–b, en un plano local (suficiente para tramos cortos). */
+function offsetFromLine(p: LatLng, a: LatLng, b: LatLng): number {
+  const mPerLat = 111_195;
+  const mPerLng = mPerLat * Math.cos(rad(a.latitude));
+  const ax = 0;
+  const ay = 0;
+  const bx = (b.longitude - a.longitude) * mPerLng;
+  const by = (b.latitude - a.latitude) * mPerLat;
+  const px = (p.longitude - a.longitude) * mPerLng;
+  const py = (p.latitude - a.latitude) * mPerLat;
+  const len2 = bx * bx + by * by;
+  const k = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * bx + (py - ay) * by) / len2));
+  return Math.hypot(px - k * bx, py - k * by);
+}
+
+/** Simplifica un tramo con el algoritmo de Douglas-Peucker: quita puntos que no cambian la forma. */
+export function simplifyLine(line: readonly LatLng[], tolerance = SIMPLIFY_TOLERANCE_METERS): LatLng[] {
+  if (line.length <= 2) return [...line];
+  const keep = new Array<boolean>(line.length).fill(false);
+  keep[0] = true;
+  keep[line.length - 1] = true;
+  const stack: [number, number][] = [[0, line.length - 1]];
+  while (stack.length) {
+    const [start, end] = stack.pop()!;
+    let maxDist = 0;
+    let index = -1;
+    for (let i = start + 1; i < end; i++) {
+      const d = offsetFromLine(line[i]!, line[start]!, line[end]!);
+      if (d > maxDist) {
+        maxDist = d;
+        index = i;
+      }
+    }
+    if (index !== -1 && maxDist > tolerance) {
+      keep[index] = true;
+      stack.push([start, index], [index, end]);
+    }
+  }
+  return line.filter((_, i) => keep[i]);
+}
+
+// Codificación de polilíneas de Google (precisión de 5 decimales, unos 1.1 m): cada tramo es
+// una cadena de caracteres imprimibles; los tramos se separan con un espacio.
+
+function encodeNumber(value: number): string {
+  let v = value < 0 ? ~(value << 1) : value << 1;
+  let out = '';
+  while (v >= 0x20) {
+    out += String.fromCharCode((0x20 | (v & 0x1f)) + 63);
+    v >>= 5;
+  }
+  return out + String.fromCharCode(v + 63);
+}
+
+function encodeLine(line: readonly LatLng[]): string {
+  let lat = 0;
+  let lng = 0;
+  let out = '';
+  for (const p of line) {
+    const la = Math.round(p.latitude * 1e5);
+    const ln = Math.round(p.longitude * 1e5);
+    out += encodeNumber(la - lat) + encodeNumber(ln - lng);
+    lat = la;
+    lng = ln;
+  }
+  return out;
+}
+
+function decodeLine(text: string): LatLng[] {
+  const out: LatLng[] = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+  const next = (): number | null => {
+    let result = 0;
+    let shift = 0;
+    let byte: number;
+    do {
+      if (index >= text.length) return null;
+      byte = text.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    return result & 1 ? ~(result >> 1) : result >> 1;
+  };
+  while (index < text.length) {
+    const dLat = next();
+    const dLng = next();
+    if (dLat === null || dLng === null) break;
+    lat += dLat;
+    lng += dLng;
+    out.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
+  }
+  return out;
+}
+
+/** Ruta simplificada y comprimida que se guarda en `runs.route` y se sincroniza. */
+export function encodeRoute(points: readonly RoutePoint[]): string {
+  return splitSegments(points)
+    .map((segment) => encodeLine(simplifyLine(segment)))
+    .filter((s) => s.length > 0)
+    .join(' ');
+}
+
+export function decodeRoute(route: string | null): LatLng[][] {
+  if (!route) return [];
+  return route
+    .split(' ')
+    .filter(Boolean)
+    .map(decodeLine)
+    .filter((line) => line.length > 0);
+}

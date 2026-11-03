@@ -51,7 +51,7 @@ export function RunLiveView() {
         text: t.run.finish,
         onPress: () => {
           const runId = finishRun(db);
-          if (runId) router.back();
+          if (runId) router.replace({ pathname: '/run/summary', params: { id: runId } });
         },
       },
     ]);

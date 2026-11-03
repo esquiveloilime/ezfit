@@ -72,6 +72,12 @@ function PendingRun({ run }: { run: RunRow }) {
           })}
         </Text>
       </Card>
+      {!interrupted ? (
+        <Button
+          label={t.run.saveAndReview}
+          onPress={() => router.push({ pathname: '/run/summary', params: { id: run.id } })}
+        />
+      ) : null}
       <Button variant="ghost" label={t.run.discard} onPress={confirmDiscard} />
     </Screen>
   );

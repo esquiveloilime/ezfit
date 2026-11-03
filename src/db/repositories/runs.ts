@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, isNull, ne } from 'drizzle-orm';
 
 import { newId } from '@/domain/id';
-import { paceSecondsPerKm, type RoutePoint, type RunKind, routeDistance } from '@/domain/run';
+import { encodeRoute, paceSecondsPerKm, type RoutePoint, type RunKind, routeDistance } from '@/domain/run';
 
 import type { Db } from '../client';
 import { newRecord, softDeleted, touched } from '../records';
@@ -72,7 +72,8 @@ export function setRunStatus(db: Db, runId: string, status: 'recording' | 'pause
  * lista para el resumen (RUN-05).
  */
 export function endRun(db: Db, runId: string, movingSeconds: number, now: number = Date.now()): void {
-  const distance = routeDistance(getRunPoints(db, runId));
+  const points = getRunPoints(db, runId);
+  const distance = routeDistance(points);
   const seconds = Math.round(movingSeconds);
   db.update(runs)
     .set({
@@ -81,10 +82,36 @@ export function endRun(db: Db, runId: string, movingSeconds: number, now: number
       movingSeconds: seconds,
       distanceMeters: distance,
       avgPaceSecondsPerKm: paceSecondsPerKm(distance, seconds),
+      route: encodeRoute(points),
       ...touched(now),
     })
     .where(eq(runs.id, runId))
     .run();
+}
+
+/** Guarda la actividad terminada con su nombre y notas; desde aquí aparece en el historial (RUN-05). */
+export function saveRun(db: Db, runId: string, values: { name: string; notes: string | null }): void {
+  db.update(runs)
+    .set({ status: 'finished', name: values.name, notes: values.notes, ...touched() })
+    .where(eq(runs.id, runId))
+    .run();
+}
+
+/** Actividades guardadas, de la más reciente a la más antigua (RUN-06). */
+export function finishedRunsQuery(db: Db, owner: string) {
+  return db
+    .select()
+    .from(runs)
+    .where(and(eq(runs.userId, owner), eq(runs.status, 'finished'), isNull(runs.deletedAt)))
+    .orderBy(desc(runs.startedAt));
+}
+
+export function runByIdQuery(db: Db, runId: string) {
+  return db
+    .select()
+    .from(runs)
+    .where(and(eq(runs.id, runId), isNull(runs.deletedAt)))
+    .limit(1);
 }
 
 /** Descarta una actividad: se marca como borrada y sus puntos se eliminan del teléfono. */

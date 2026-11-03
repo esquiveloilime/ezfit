@@ -64,16 +64,24 @@ export function configureNotifications(): void {
   }
 }
 
+/**
+ * Crea el canal de Android del aviso. Expo Go no permite crear canales propios: si falla,
+ * se usa el canal por defecto de la app y el aviso llega igual.
+ */
 async function ensureChannel(alert: RestAlert, name: string): Promise<string | undefined> {
   if (Platform.OS !== 'android') return undefined;
   const id = channelId(alert);
-  await setNotificationChannelAsync(id, {
-    name,
-    importance: AndroidImportance.HIGH,
-    sound: alert.sound ? 'default' : null,
-    enableVibrate: alert.vibration,
-    vibrationPattern: alert.vibration ? VIBRATION_PATTERN : null,
-  });
+  try {
+    await setNotificationChannelAsync(id, {
+      name,
+      importance: AndroidImportance.HIGH,
+      sound: alert.sound ? 'default' : null,
+      enableVibrate: alert.vibration,
+      vibrationPattern: alert.vibration ? VIBRATION_PATTERN : null,
+    });
+  } catch {
+    return undefined;
+  }
   return id;
 }
 

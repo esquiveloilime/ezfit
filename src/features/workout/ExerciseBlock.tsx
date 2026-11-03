@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -18,6 +19,7 @@ import type { TrackingType } from '@/domain/exercise';
 import { formatTarget } from '@/domain/routine';
 import {
   cleanMachine,
+  type ExerciseProgress,
   fieldsFor,
   formatSet,
   inputFromSet,
@@ -58,6 +60,10 @@ type Props = {
   increments: Record<WeightUnit, number>;
   onMove: (from: number, to: number) => void;
   onSetLogged: () => void;
+  /** Plegado: solo se ve el nombre y el avance; al tocarlo se abre (SES-02). */
+  open: boolean;
+  progress: ExerciseProgress;
+  onToggle: () => void;
 };
 
 /** Un ejercicio dentro de la sesión: última vez, series registradas y la siguiente serie (SES-02, SES-03, SES-09). */
@@ -72,6 +78,9 @@ export function ExerciseBlock({
   increments,
   onMove,
   onSetLogged,
+  open,
+  progress,
+  onToggle,
 }: Props) {
   const { db } = useDatabase();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -96,17 +105,55 @@ export function ExerciseBlock({
     ]);
   }
 
+  const progressText =
+    progress.target !== null
+      ? format(t.workout.progressOf, { done: progress.done, target: progress.target })
+      : progress.done === 1
+        ? t.workout.progressOne
+        : format(t.workout.progressCount, { n: progress.done });
+
+  if (!open) {
+    return (
+      <Card>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: false }}
+          accessibilityLabel={format(t.workout.expand, { name, progress: progressText })}
+          onPress={onToggle}
+          style={({ pressed }) => [styles.collapsed, pressed && styles.pressed]}>
+          <View style={styles.titleBox}>
+            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.meta}>{progressText}</Text>
+          </View>
+          {progress.complete ? (
+            <Ionicons name="checkmark-circle" size={24} color={colors.success} accessibilityLabel={t.workout.complete} />
+          ) : null}
+          <Ionicons name="chevron-down" size={22} color={colors.textMuted} />
+        </Pressable>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={format(t.workout.openExercise, { name })}
-          onPress={() => router.push({ pathname: '/exercises/[id]', params: { id: item.exerciseId } })}
-          style={({ pressed }) => [styles.titleBox, pressed && styles.pressed]}>
-          <Text style={styles.name}>{name}</Text>
-          {targetText ? <Text style={styles.meta}>{format(t.workout.target, { target: targetText })}</Text> : null}
+          accessibilityState={{ expanded: true }}
+          accessibilityLabel={format(t.workout.collapse, { name })}
+          onPress={onToggle}
+          style={({ pressed }) => [styles.titleBox, styles.titleRow, pressed && styles.pressed]}>
+          <View style={styles.flex}>
+            <Text style={styles.name}>{name}</Text>
+            {targetText ? <Text style={styles.meta}>{format(t.workout.target, { target: targetText })}</Text> : null}
+          </View>
+          <Ionicons name="chevron-up" size={22} color={colors.textMuted} />
         </Pressable>
+        <IconButton
+          icon="information-circle-outline"
+          label={format(t.workout.openExercise, { name })}
+          onPress={() => router.push({ pathname: '/exercises/[id]', params: { id: item.exerciseId } })}
+        />
         <IconButton
           icon="arrow-up"
           label={format(t.workout.moveUp, { name })}
@@ -395,6 +442,8 @@ const styles = StyleSheet.create({
   setMeta: { fontSize: font.small, color: colors.textMuted },
   header: { flexDirection: 'row', alignItems: 'center' },
   titleBox: { flex: 1, minHeight: minTouch, justifyContent: 'center' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  collapsed: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   name: { fontSize: font.body, fontWeight: '700', color: colors.primary },
   meta: { fontSize: font.small, color: colors.textMuted },
   pressed: { opacity: 0.6 },

@@ -289,6 +289,7 @@ Cada plantilla muestra sus ejercicios con series y rango de repeticiones, y se p
 **SES-02 · P1 · Gestionar ejercicios durante la sesión**
 - Agregar, quitar y reordenar ejercicios en cualquier momento.
 - Quitar un ejercicio con series registradas pide confirmación.
+- Los ejercicios se muestran plegados: solo el nombre y el avance (por ejemplo, "2 de 4 series", con una marca cuando se completan las series objetivo). Al tocar uno se abre con sus series y los campos para registrar; solo hay uno abierto a la vez. Al entrar a la sesión se abre el primer ejercicio sin completar, y al agregar un ejercicio se abre ese.
 
 **SES-03 · P1 · Registrar una serie**
 - Los campos dependen del tipo de registro del ejercicio (peso y repeticiones, solo tiempo, etc.).

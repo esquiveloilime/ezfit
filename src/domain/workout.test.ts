@@ -2,6 +2,8 @@ import {
   canSaveWorkout,
   cleanMachine,
   convertWeight,
+  exerciseProgress,
+  firstPendingExercise,
   fieldsFor,
   formatDuration,
   formatThousands,
@@ -266,5 +268,38 @@ describe('máquina (SES-06)', () => {
   it('cleanMachine', () => {
     expect(cleanMachine('  Hammer   Strength ')).toBe('Hammer Strength');
     expect(cleanMachine('   ')).toBeNull();
+  });
+});
+
+describe('ejercicios plegados (SES-02)', () => {
+  const w = { kind: 'working' as const };
+  const c = { kind: 'warmup' as const };
+
+  it('exerciseProgress cuenta solo las series efectivas contra el objetivo', () => {
+    expect(exerciseProgress([c, w, w], 3)).toEqual({ done: 2, target: 3, complete: false });
+    expect(exerciseProgress([w, w, w, w], 3)).toEqual({ done: 4, target: 3, complete: true });
+    expect(exerciseProgress([w], null)).toEqual({ done: 1, target: null, complete: false });
+    expect(exerciseProgress([], 0)).toEqual({ done: 0, target: null, complete: false });
+  });
+
+  it('firstPendingExercise abre el primero sin completar', () => {
+    expect(
+      firstPendingExercise([
+        { id: 'a', done: 3, target: 3, complete: true },
+        { id: 'b', done: 1, target: 3, complete: false },
+        { id: 'c', done: 0, target: 3, complete: false },
+      ]),
+    ).toBe('b');
+  });
+
+  it('firstPendingExercise: sin objetivo, pendiente mientras no tenga series', () => {
+    expect(
+      firstPendingExercise([
+        { id: 'a', done: 2, target: null, complete: false },
+        { id: 'b', done: 0, target: null, complete: false },
+      ]),
+    ).toBe('b');
+    expect(firstPendingExercise([{ id: 'a', done: 3, target: 3, complete: true }])).toBeNull();
+    expect(firstPendingExercise([])).toBeNull();
   });
 });

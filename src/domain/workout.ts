@@ -249,6 +249,29 @@ export function setNumbers(sets: readonly { kind: SetKind }[]): (number | null)[
   return sets.map((s) => (s.kind === 'working' ? ++n : null));
 }
 
+// --- Ejercicios plegados durante la sesión (SES-02) ---
+
+/** Avance de un ejercicio: series efectivas registradas contra las series objetivo de la rutina. */
+export type ExerciseProgress = { done: number; target: number | null; complete: boolean };
+
+export function exerciseProgress(
+  sets: readonly { kind: SetKind }[],
+  targetSets: number | null | undefined,
+): ExerciseProgress {
+  const done = sets.filter((s) => s.kind === 'working').length;
+  const target = targetSets && targetSets > 0 ? targetSets : null;
+  return { done, target, complete: target !== null && done >= target };
+}
+
+/**
+ * Ejercicio que se abre al entrar a la sesión: el primero que no está completo. Sin series
+ * objetivo, un ejercicio está pendiente mientras no tenga ninguna serie efectiva.
+ */
+export function firstPendingExercise(items: readonly ({ id: string } & ExerciseProgress)[]): string | null {
+  const pending = items.find((i) => (i.target === null ? i.done === 0 : !i.complete));
+  return pending?.id ?? null;
+}
+
 // --- Cierre de la sesión (SES-11) y máquina (SES-06) ---
 
 /** Factor de conversión entre unidades (AJU-01). Solo se usa para totales, nunca al guardar. */

@@ -166,6 +166,7 @@ Cómo probarlo:
 - [ ] Contar los toques para registrar una serie con valores llenos: dos o menos.
 - [ ] Cerrar la app a la fuerza a media sesión y abrirla: todo sigue ahí.
 - [ ] Agregar un ejercicio que no estaba en la rutina, quitar otro y cambiar el orden.
+- [ ] Los ejercicios aparecen plegados con su avance; al tocar uno se abre y el que estaba abierto se cierra. Al entrar se abre el primero sin completar.
 - [ ] Corregir el peso de una serie ya registrada.
 - [ ] Registrar una serie en lb y la siguiente en kg con un toque en el selector: cada una se guarda y se muestra con su unidad, sin convertir.
 - [ ] Probar un ejercicio de "solo tiempo": pide tiempo, no peso.

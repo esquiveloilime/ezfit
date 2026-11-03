@@ -83,6 +83,7 @@ export default function RootLayout() {
             />
             <Stack.Screen name="workout/index" options={{ headerShown: true, title: t.workout.title }} />
             <Stack.Screen name="workout/finish" options={{ headerShown: true, title: '' }} />
+            <Stack.Screen name="run/live" options={{ headerShown: true, title: t.tabs.run }} />
           </Stack.Protected>
 
           {/* Registro e inicio de sesión: desde la bienvenida o desde el modo sin cuenta. */}

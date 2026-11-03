@@ -165,7 +165,8 @@ Cómo probarlo:
 - [ ] Empezar la rutina de hoy y registrar tres series de un ejercicio: desde la segunda, los campos ya vienen llenos.
 - [ ] Contar los toques para registrar una serie con valores llenos: dos o menos.
 - [ ] Cerrar la app a la fuerza a media sesión y abrirla: todo sigue ahí.
-- [ ] Con una sesión en curso, Hoy muestra "Entrenando" en lugar de "Hoy toca"; al terminarla muestra "Hoy entrenaste" con su resumen.
+- [ ] Con una sesión en curso, Hoy muestra "Entrenando" en lugar de "Hoy toca"; al terminarla muestra "Hoy entrenaste" con su resumen. Al empezar y terminar una segunda sesión el mismo día, las dos aparecen bajo "Hoy entrenaste".
+- [ ] Quitar un ejercicio de la sesión siempre pide confirmación, aunque no tenga series.
 - [ ] Agregar un ejercicio que no estaba en la rutina, quitar otro y cambiar el orden.
 - [ ] Los ejercicios aparecen plegados con su avance; al tocar uno se abre y el que estaba abierto se cierra. Al entrar se abre el primero sin completar.
 - [ ] Corregir el peso de una serie ya registrada.

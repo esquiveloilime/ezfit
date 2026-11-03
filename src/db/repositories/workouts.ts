@@ -20,7 +20,7 @@ export function activeWorkoutQuery(db: Db, owner: string) {
     .limit(1);
 }
 
-/** La última sesión terminada que empezó desde `since` (el inicio de hoy), para la pantalla Hoy. */
+/** Las sesiones terminadas que empezaron desde `since` (el inicio de hoy), de la más temprana a la más reciente. */
 export function finishedSinceQuery(db: Db, owner: string, since: number) {
   return db
     .select()
@@ -33,8 +33,7 @@ export function finishedSinceQuery(db: Db, owner: string, since: number) {
         gte(workouts.startedAt, since),
       ),
     )
-    .orderBy(desc(workouts.startedAt))
-    .limit(1);
+    .orderBy(asc(workouts.startedAt));
 }
 
 export function getActiveWorkout(db: Db, owner: string): WorkoutRow | undefined {

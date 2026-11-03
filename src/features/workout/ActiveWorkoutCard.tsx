@@ -10,8 +10,6 @@ import { formatDuration, formatThousands, formatTimeOfDay, workoutSummary } from
 import { format, t } from '@/i18n';
 import { Button, Card, colors, font } from '@/ui';
 
-import { useStartWorkout } from './useStartWorkout';
-
 /** Nombre de la sesión: el de su rutina o "Sesión libre". */
 function useWorkoutName(routineId: string | null): string {
   const { db } = useDatabase();
@@ -38,13 +36,11 @@ export function ActiveWorkoutCard({ workout }: { workout: WorkoutRow }) {
   );
 }
 
-/** Hoy después de terminar una sesión: "Hoy entrenaste" con un resumen corto. */
+/** Una sesión terminada hoy, con un resumen corto; va bajo "Hoy entrenaste". */
 export function DoneTodayCard({ workout, profile }: { workout: WorkoutRow; profile: ProfileRow }) {
   const { db } = useDatabase();
   const name = useWorkoutName(workout.routineId);
   const { data: sets } = useQuery(workoutSetsQuery(db, workout.id), [workout.id]);
-  const start = useStartWorkout();
-
   const summary = workoutSummary({
     sets: sets.map((s) => ({ ...toLoggedSet(s), workoutExerciseId: s.workoutExerciseId })),
     defaultUnit: profile.weightUnit,
@@ -59,16 +55,12 @@ export function DoneTodayCard({ workout, profile }: { workout: WorkoutRow; profi
   };
 
   return (
-    <>
-      <Text style={styles.label}>{t.today.doneTitle}</Text>
-      <Card>
-        <Text style={styles.title}>{name}</Text>
-        <Text style={styles.body}>
-          {format(summary.volume > 0 ? t.today.doneBodyVolume : t.today.doneBody, values)}
-        </Text>
-      </Card>
-      <Button variant="ghost" label={t.today.startAnother} onPress={() => start(null)} />
-    </>
+    <Card>
+      <Text style={styles.title}>{name}</Text>
+      <Text style={styles.body}>
+        {format(summary.volume > 0 ? t.today.doneBodyVolume : t.today.doneBody, values)}
+      </Text>
+    </Card>
   );
 }
 

@@ -16,26 +16,41 @@ import { ActiveWorkoutCard, DoneTodayCard } from '@/features/workout/ActiveWorko
 import { useStartWorkout } from '@/features/workout/useStartWorkout';
 
 /**
- * Pantalla Hoy (RUT-02, F1, F2). Según el estado del día muestra, en este orden de prioridad:
- * la sesión en curso ("Entrenando"), la sesión ya terminada hoy ("Hoy entrenaste"), la rutina
- * que toca o el descanso según el plan, u opciones si no hay plan.
+ * Pantalla Hoy (RUT-02, F1, F2). Arriba, las sesiones terminadas hoy ("Hoy entrenaste").
+ * Debajo, la sesión en curso ("Entrenando"); si no hay y ya se entrenó, la opción de empezar
+ * otra; si no se ha entrenado, la rutina que toca o el descanso según el plan, u opciones sin plan.
  */
 export function TodayView({ profile }: { profile: ProfileRow }) {
   const { db, owner } = useDatabase();
   const since = startOfDay(new Date());
   const active = useQuery(activeWorkoutQuery(db, owner), [owner]);
   const done = useQuery(finishedSinceQuery(db, owner, since), [owner, since]);
+  const start = useStartWorkout();
   const activeWorkout = active.data[0];
-  const doneWorkout = done.data[0];
+  const doneWorkouts = done.data;
 
-  let content: ReactNode = null;
-  if (!active.loaded || !done.loaded) content = null;
-  else if (activeWorkout) content = <ActiveWorkoutCard workout={activeWorkout} />;
-  else if (doneWorkout) content = <DoneTodayCard workout={doneWorkout} profile={profile} />;
-  else if (profile.activePlanId) content = <PlanToday profile={profile} planId={profile.activePlanId} />;
-  else content = <NoPlan />;
+  if (!active.loaded || !done.loaded) return <Screen title={t.tabs.today}>{null}</Screen>;
 
-  return <Screen title={t.tabs.today}>{content}</Screen>;
+  let next: ReactNode;
+  if (activeWorkout) next = <ActiveWorkoutCard workout={activeWorkout} />;
+  else if (doneWorkouts.length > 0)
+    next = <Button variant="ghost" label={t.today.startAnother} onPress={() => start(null)} />;
+  else if (profile.activePlanId) next = <PlanToday profile={profile} planId={profile.activePlanId} />;
+  else next = <NoPlan />;
+
+  return (
+    <Screen title={t.tabs.today}>
+      {doneWorkouts.length > 0 ? (
+        <>
+          <Text style={styles.label}>{t.today.doneTitle}</Text>
+          {doneWorkouts.map((w) => (
+            <DoneTodayCard key={w.id} workout={w} profile={profile} />
+          ))}
+        </>
+      ) : null}
+      {next}
+    </Screen>
+  );
 }
 
 function PlanToday({ profile, planId }: { profile: ProfileRow; planId: string }) {

@@ -267,8 +267,8 @@ Cada plantilla muestra sus ejercicios con series y rango de repeticiones, y se p
 - El usuario puede tener un plan semanal activo, con una rutina asignada a cada día de entrenamiento.
 - **Hoy** muestra la rutina que corresponde al día actual, o un mensaje de descanso si no toca entrenar.
 - Si eligió una cantidad de días sin días concretos, **Hoy** muestra la siguiente rutina del plan en orden.
-- Si hay una sesión en curso, **Hoy** muestra "Entrenando" con esa sesión y el botón para continuarla, en lugar de la rutina que toca.
-- Si ya terminó una sesión ese día, **Hoy** muestra "Hoy entrenaste" con un resumen corto (duración, series y volumen) y la opción de empezar otra sesión. La siguiente rutina del plan aparece hasta el día siguiente.
+- Si ya terminó sesiones ese día, **Hoy** muestra arriba "Hoy entrenaste" con todas ellas, de la más temprana a la más reciente, cada una con un resumen corto (duración, series y volumen). La siguiente rutina del plan aparece hasta el día siguiente.
+- Si hay una sesión en curso, **Hoy** muestra debajo "Entrenando" con esa sesión y el botón para continuarla, en lugar de la rutina que toca. Si no hay sesión en curso pero ya entrenó ese día, ofrece empezar otra sesión.
 
 **RUT-03 · P1 · Crear rutina propia**
 - Campos: nombre, lista ordenada de ejercicios y, por ejercicio, series objetivo, rango de repeticiones y tiempo de descanso (opcionales).
@@ -290,8 +290,8 @@ Cada plantilla muestra sus ejercicios con series y rango de repeticiones, y se p
 
 **SES-02 · P1 · Gestionar ejercicios durante la sesión**
 - Agregar, quitar y reordenar ejercicios en cualquier momento.
-- Quitar un ejercicio con series registradas pide confirmación.
-- Los ejercicios se muestran plegados: solo el nombre y el avance (por ejemplo, "2 de 4 series", con una marca cuando se completan las series objetivo). Al tocar uno se abre con sus series y los campos para registrar; solo hay uno abierto a la vez. Al entrar a la sesión se abre el primer ejercicio sin completar, y al agregar un ejercicio se abre ese.
+- Quitar un ejercicio siempre pide confirmación; si tiene series registradas, avisa que también se borrarán.
+- Los ejercicios se muestran plegados: solo el nombre y el avance (por ejemplo, "2 de 4 series", con una marca cuando se completan las series objetivo). Al tocar uno se abre con sus series y los campos para registrar; solo hay uno abierto a la vez. El botón para cerrarlo está en el mismo lugar que el de abrirlo, lejos del botón para quitar el ejercicio. Al entrar a la sesión se abre el primer ejercicio sin completar, y al agregar un ejercicio se abre ese.
 
 **SES-03 · P1 · Registrar una serie**
 - Los campos dependen del tipo de registro del ejercicio (peso y repeticiones, solo tiempo, etc.).

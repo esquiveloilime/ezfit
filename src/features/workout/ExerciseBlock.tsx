@@ -94,12 +94,10 @@ export function ExerciseBlock({
     showTechnique: !!item.usesTechnique,
   };
 
+  // Siempre con confirmación: la X está cerca de otros botones y un toque accidental borra el ejercicio.
   function confirmRemove() {
-    if (sets.length === 0) {
-      removeWorkoutExercise(db, item.id);
-      return;
-    }
-    Alert.alert(format(t.workout.removeConfirmTitle, { name }), t.workout.removeConfirmBody, [
+    const body = sets.length > 0 ? t.workout.removeConfirmBody : t.workout.removeConfirmBodyEmpty;
+    Alert.alert(format(t.workout.removeConfirmTitle, { name }), body, [
       { text: t.common.cancel, style: 'cancel' },
       { text: t.workout.removeConfirm, style: 'destructive', onPress: () => removeWorkoutExercise(db, item.id) },
     ]);
@@ -142,13 +140,11 @@ export function ExerciseBlock({
           accessibilityState={{ expanded: true }}
           accessibilityLabel={format(t.workout.collapse, { name })}
           onPress={onToggle}
-          style={({ pressed }) => [styles.titleBox, styles.titleRow, pressed && styles.pressed]}>
-          <View style={styles.flex}>
-            <Text style={styles.name}>{name}</Text>
-            {targetText ? <Text style={styles.meta}>{format(t.workout.target, { target: targetText })}</Text> : null}
-          </View>
-          <Ionicons name="chevron-up" size={22} color={colors.textMuted} />
+          style={({ pressed }) => [styles.titleBox, pressed && styles.pressed]}>
+          <Text style={styles.name}>{name}</Text>
+          {targetText ? <Text style={styles.meta}>{format(t.workout.target, { target: targetText })}</Text> : null}
         </Pressable>
+        <IconButton icon="close" tone="danger" label={format(t.workout.remove, { name })} onPress={confirmRemove} />
         <IconButton
           icon="information-circle-outline"
           label={format(t.workout.openExercise, { name })}
@@ -166,7 +162,8 @@ export function ExerciseBlock({
           disabled={index === total - 1}
           onPress={() => onMove(index, index + 1)}
         />
-        <IconButton icon="close" tone="danger" label={format(t.workout.remove, { name })} onPress={confirmRemove} />
+        {/* Cerrar va en la orilla derecha, en el mismo lugar que la flecha para abrir. */}
+        <IconButton icon="chevron-up" tone="muted" label={format(t.workout.collapse, { name })} onPress={onToggle} />
       </View>
 
       <Text style={styles.meta}>
@@ -442,7 +439,6 @@ const styles = StyleSheet.create({
   setMeta: { fontSize: font.small, color: colors.textMuted },
   header: { flexDirection: 'row', alignItems: 'center' },
   titleBox: { flex: 1, minHeight: minTouch, justifyContent: 'center' },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   collapsed: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   name: { fontSize: font.body, fontWeight: '700', color: colors.primary },
   meta: { fontSize: font.small, color: colors.textMuted },

@@ -204,9 +204,9 @@ Cómo probarlo:
 
 ## Bloque 4 · Running con la app abierta
 
-Los mapas son obligatorios: el maestro los pide como extra y la APK entregada debe mostrarlos. Todo esto funciona en Expo Go, con la pantalla encendida, con o sin cuenta.
+Los mapas son obligatorios: el maestro los pide como extra y la APK entregada debe mostrarlos. Todo esto funciona en Expo Go, con la pantalla encendida, con o sin cuenta, salvo el dibujo del mapa en Android: la clave de Google Maps de Expo Go expiró y el mapa sale negro. El mapa se prueba en una build de desarrollo que se adelanta a este bloque (plan técnico, sección 2).
 
-Tarea paralela del autor: tener la clave de Google Maps (o saber que Google rechazó la tarjeta de débito) antes de terminar este bloque.
+Tarea paralela del autor: sacar la clave de Google Maps (su tarjeta de débito ya fue aceptada) y generar la build de desarrollo con los pasos que da Claude.
 
 ### I-10 · Permisos, mapa y pantalla previa
 
@@ -216,7 +216,7 @@ Cubre: RUN-01, RUN-02.
 
 Cómo probarlo:
 - [ ] La primera vez, la app explica para qué quiere la ubicación antes de que aparezca el permiso de Android.
-- [ ] El mapa muestra tu ubicación real.
+- [ ] En la build de desarrollo, el mapa muestra tu ubicación real.
 - [ ] Negar el permiso (desde ajustes del teléfono): la sección explica cómo activarlo y el resto de la app funciona.
 - [ ] Bajo techo, el indicador de señal marca regular o sin señal.
 
@@ -338,7 +338,7 @@ Cómo probarlo:
 
 ### I-19 · Build de desarrollo y APK
 
-Configurar EAS Build, la clave de Google Maps, el ícono y el nombre de la app. Generar la build de desarrollo e instalarla en el S22. Verificar que todo lo anterior funciona fuera de Expo Go.
+Configurar el ícono y el nombre de la app. EAS Build, la clave de Google Maps y la primera build de desarrollo se adelantaron al bloque 4; aquí se genera la build con todo lo nuevo, se instala en el S22 y se verifica que todo lo anterior funciona fuera de Expo Go.
 
 Cubre: RNF-07, supuestos S-08 y S-09.
 

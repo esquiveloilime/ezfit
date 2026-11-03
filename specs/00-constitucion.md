@@ -1,7 +1,7 @@
 # Constitución del proyecto
 
 **ezfit**, app móvil de gimnasio y running.
-Versión 0.2, 2 de noviembre de 2026.
+Versión 0.3, 3 de noviembre de 2026: el mapa en Android se prueba en la build de desarrollo.
 
 Estos principios mandan sobre cualquier otro documento y sobre cualquier decisión de implementación. Si una tarea choca con uno de ellos, se detiene la tarea y se consulta al autor del proyecto. Solo el autor puede cambiar este documento.
 
@@ -35,7 +35,7 @@ El código debe funcionar en Android y en iOS. En la versión 1 solo se verifica
 
 ## 7. Compatible con Expo Go mientras sea posible
 
-Todo requisito de prioridad P1 debe poder probarse en Expo Go. La única excepción prevista es el seguimiento de running en segundo plano, que necesita una build de desarrollo. No se agregan librerías que rompan la compatibilidad con Expo Go sin que el plan técnico lo indique.
+Todo requisito de prioridad P1 debe poder probarse en Expo Go. Hay dos excepciones: el seguimiento de running en segundo plano, que necesita una build de desarrollo, y el dibujo del mapa en Android, porque la clave de Google Maps que trae Expo Go dejó de funcionar (el autor lo aprobó el 3 de noviembre de 2026). El resto de running, incluida la medición de la ruta, se sigue probando en Expo Go. No se agregan librerías que rompan la compatibilidad con Expo Go sin que el plan técnico lo indique.
 
 ## 8. Incrementos pequeños y comprobables
 

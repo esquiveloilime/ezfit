@@ -1,6 +1,7 @@
 # Plan técnico
 
 **ezfit**, app móvil de gimnasio y running.
+Versión 0.4, 3 de noviembre de 2026: el mapa en Android se prueba en una build de desarrollo desde el bloque 4.
 Versión 0.3, 2 de noviembre de 2026: modo sin cuenta, inicio de sesión con Google, fotos y videos de ejercicios.
 
 Este documento describe **cómo** se construye lo que pide `01-especificacion.md`. No contiene código. Las versiones y límites de servicios se verificaron el 1 de octubre de 2026; las fuentes están al final.
@@ -14,7 +15,7 @@ Este documento describe **cómo** se construye lo que pide `01-especificacion.md
 | Base de datos local | **SQLite** con `expo-sqlite` y **Drizzle ORM** | Funciona en Expo Go, es relacional (igual que los datos de la app), y Drizzle da tipos y migraciones | WatermelonDB y Realm no funcionan en Expo Go; AsyncStorage no sirve para consultas de historial |
 | Backend | **Supabase**: autenticación y base de datos Postgres con seguridad por fila | Mismo modelo relacional que SQLite, lo que simplifica la sincronización; plan gratuito suficiente; no hay que programar un servidor | Firebase: su base de datos no relacional obligaría a mantener dos modelos de datos distintos |
 | Sincronización | **Motor propio y simple**: escribir primero en local, subir pendientes, bajar cambios, gana la última modificación | Los datos son de un solo usuario, así que casi no hay conflictos; evita depender de un servicio extra | PowerSync o similares: más potentes, pero agregan un servicio y complejidad que el proyecto no necesita |
-| Mapas | **react-native-maps** (Google Maps en Android, Apple Maps en iOS) | Es la librería de mapas que funciona dentro de Expo Go | MapLibre y `expo-maps` no funcionan en Expo Go; MapLibre queda como plan B (riesgo R-03) |
+| Mapas | **react-native-maps** (Google Maps en Android, Apple Maps en iOS) | Es la librería de mapas que se carga dentro de Expo Go. En Android, Expo Go la carga pero el mapa sale negro (sección 2), así que el mapa se ve con la build de desarrollo y la clave propia | MapLibre y `expo-maps` no funcionan en Expo Go; MapLibre queda como plan B (riesgo R-03) |
 | Ubicación | **expo-location** | Incluida en Expo Go para seguimiento con la app abierta; soporta segundo plano en una build de desarrollo | Librerías de terceros de pago |
 | Avisos de descanso | **expo-notifications**, solo notificaciones locales | Las notificaciones locales funcionan en Expo Go | Notificaciones push: no se necesitan y no funcionan en Expo Go para Android |
 | Estado en pantalla | **Zustand** para la sesión y la actividad en curso; consultas en vivo de Drizzle para lo demás | Mínimo y fácil de probar | Redux: demasiada estructura para este tamaño |
@@ -40,13 +41,18 @@ Esto condiciona el orden del trabajo.
 | Pesas, rutinas, historial, base de datos local | Sí | Se desarrolla y prueba en Expo Go |
 | Cuenta con correo y sincronización | Sí | Igual |
 | Modo sin cuenta, fotos de ejercicios y botón de tutorial | Sí | Igual |
-| Mapa y seguimiento de running con la app abierta | Sí | Fase A de running, bloque 4 |
+| Seguimiento de running con la app abierta | Sí | Fase A de running, bloque 4 |
+| Dibujo del mapa en Android | **No**: la clave de Google Maps que trae Expo Go expiró y el mapa sale negro (solo se ve el logo de Google) | Build de desarrollo con clave propia desde el bloque 4 (sección 6). La ruta se mide y se guarda igual en Expo Go |
 | Aviso de fin de descanso (notificación local) | Sí | Igual |
 | Running con la pantalla apagada (RUN-10) | **No** en Android | Fase B: build de desarrollo instalada en el S22, bloque 7 |
 | Continuar con Google (CUE-08) | **No** | Se prueba con la build de desarrollo, bloque 7 (I-25). En Expo Go el botón no se muestra y la librería no se carga |
-| Mapa en la APK final | Requiere clave propia de Google Maps | Se configura en el bloque 7 con la tarjeta de débito del autor (riesgo R-03) |
+| Mapa en la APK final | Requiere clave propia de Google Maps | Se configura en el bloque 4, junto con la build de desarrollo, con la tarjeta de débito del autor (riesgo R-03) |
 
-A partir del bloque 7 el desarrollo continúa con una **build de desarrollo**: una versión propia de la app que se instala en el teléfono como APK y se usa igual que Expo Go, pero sin sus limitaciones. Todos los requisitos P1 siguen pudiendo probarse en Expo Go.
+Una **build de desarrollo** es una versión propia de la app que se instala en el teléfono como APK y se usa igual que Expo Go, pero sin sus limitaciones. Se genera por primera vez en el bloque 4, solo para ver el mapa; a partir del bloque 7 el desarrollo continúa con ella. Salvo el dibujo del mapa en Android, todos los requisitos P1 siguen pudiendo probarse en Expo Go.
+
+- **Librería:** `expo-dev-client`, que convierte la app en build de desarrollo. Se agregó en la versión 0.4.
+- **Configuración:** `eas.json` con el perfil `development` (APK de instalación directa). La clave de Google Maps llega como variable de entorno de EAS (`GOOGLE_MAPS_API_KEY`) y `app.config.ts` la pasa al plugin de react-native-maps.
+- **Al iniciar la app:** con `expo-dev-client` instalado, `npx expo start` abre la build de desarrollo; para Expo Go se usa `npx expo start --go`.
 
 ## 3. Arquitectura
 
@@ -264,7 +270,7 @@ Todos estos cálculos viven en la capa de dominio y se prueban con recorridos gr
 | GitHub | Repositorio | Antes de empezar |
 | Expo | Expo Go y builds en la nube | Antes de empezar |
 | Supabase | Cuentas de usuario y base de datos | Bloque 1 |
-| Google Cloud | Clave de Google Maps para la APK y credenciales del inicio de sesión con Google | Maps: antes del bloque 7, con tarjeta de débito (R-03). Google: en I-25, sin tarjeta |
+| Google Cloud | Clave de Google Maps para la build de desarrollo y la APK, y credenciales del inicio de sesión con Google | Maps: en el bloque 4, con tarjeta de débito (R-03). Google: en I-25, sin tarjeta |
 | Claude (plan Pro o superior) | Claude Code; el plan gratuito no lo incluye | Antes de empezar |
 
 ### En el teléfono
@@ -295,7 +301,7 @@ Todos estos cálculos viven en la capa de dominio y se prueban con recorridos gr
 |---|---|---|---|
 | R-01 | Expo SDK 58 está en beta y puede salir como versión estable durante el proyecto; el Expo Go de la tienda solo soporta la versión más reciente | Expo Go deja de abrir el proyecto | No actualizar el SDK a mitad del proyecto. Expo CLI puede instalar en Android la versión de Expo Go que corresponde al proyecto. Desde el bloque 7 se usa la build de desarrollo y el riesgo desaparece |
 | R-02 | El seguimiento en segundo plano no funciona en Expo Go y los Samsung cierran apps en segundo plano para ahorrar batería | RUN-10 no se cumple | Es P2 y está aislado en el bloque 7. La fase A (pantalla encendida) cumple todos los P1 de running |
-| R-03 | Google Cloud pide una cuenta de facturación con tarjeta para emitir la clave de Maps. El autor no tiene tarjeta de crédito, pero sí de débito | Sin clave, el mapa no aparece en la APK | Plan A: registrar la tarjeta de débito (Google acepta muchas tarjetas de débito Visa o Mastercard con compras en línea habilitadas; puede hacer un cargo temporal de verificación que se devuelve). El mapa en Android (Maps SDK for Android) no tiene costo por uso, así que no habrá cobros. Hacerlo cuanto antes, no al final. Plan B: si Google rechaza la tarjeta, cambiar a MapLibre con mapas de OpenStreetMap, que no pide clave ni tarjeta, solo en la build de desarrollo. Plan C: demostrar el mapa en Expo Go |
+| R-03 | Google Cloud pide una cuenta de facturación con tarjeta para emitir la clave de Maps. El autor no tiene tarjeta de crédito, pero sí de débito | Sin clave, el mapa no aparece en la APK | Plan A: registrar la tarjeta de débito (Google acepta muchas tarjetas de débito Visa o Mastercard con compras en línea habilitadas; puede hacer un cargo temporal de verificación que se devuelve). El mapa en Android (Maps SDK for Android) no tiene costo por uso, así que no habrá cobros. Hacerlo cuanto antes, no al final. Plan B: si Google rechaza la tarjeta, cambiar a MapLibre con mapas de OpenStreetMap, que no pide clave ni tarjeta, solo en la build de desarrollo. Plan C ya no es posible: en Android, Expo Go no muestra el mapa (sección 2) |
 | R-04 | El plan gratuito de Supabase pausa los proyectos tras 7 días sin actividad | El inicio de sesión falla el día de la demostración | Revisar el panel de Supabase la víspera de la entrega (24 de noviembre) y reactivar si hace falta. Las pesas siguen funcionando sin conexión, y el modo sin cuenta no depende de Supabase |
 | R-05 | Errores de sincronización que dupliquen o pierdan datos | Pérdida de confianza en la app | Motor simple, pruebas obligatorias (sección 5) y un bloque completo dedicado |
 | R-06 | El tiempo no alcanza | Entrega incompleta | La APK final debe estar lista el 23 de noviembre. Los P2 están al final y se recortan en el orden indicado en `03-tareas.md` |
@@ -335,3 +341,9 @@ Fuentes agregadas en la versión 0.3; se revisan al implementar cada incremento:
 - [@react-native-google-signin/google-signin con Expo](https://react-native-google-signin.github.io/docs/setting-up/expo)
 - [free-exercise-db](https://github.com/yuhonas/free-exercise-db)
 - [expo-network](https://docs.expo.dev/versions/latest/sdk/network/)
+
+Fuentes agregadas en la versión 0.4:
+
+- [Expo Go (SDK 57, Android): react-native-maps muestra el mapa negro](https://github.com/expo/expo/issues/49323)
+- [react-native-maps: Google Maps en blanco en Expo Go](https://github.com/react-native-maps/react-native-maps/issues/5888)
+- [Builds de desarrollo de Expo](https://docs.expo.dev/develop/development-builds/introduction/)

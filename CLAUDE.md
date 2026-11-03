@@ -30,7 +30,7 @@ La prioridad es avanzar rápido. El autor pide bloques completos ("Implementa el
 - **No implementes nada que no esté en la especificación.** Si falta algo o un requisito parece incorrecto, detente y propón el cambio a la especificación. Una vez aprobado, actualiza la especificación y el código en el mismo commit.
 - **Un commit por incremento**, aunque se hagan varios el mismo día. No mezcles refactorizaciones no pedidas.
 - **No agregues dependencias** fuera de las del plan técnico sin explicarlo y sin aprobación.
-- **No rompas la compatibilidad con Expo Go** antes del incremento I-19.
+- **No rompas la compatibilidad con Expo Go** antes del incremento I-19. La única excepción es el dibujo del mapa en Android, que se ve en la build de desarrollo (constitución, principio 7).
 - **Peso:** cada serie guarda su propia unidad (`kg` o `lb`) tal como la eligió el usuario; nunca conviertas al guardar. La unidad por defecto es `lb`.
 - **No actualices la versión de Expo** a mitad del proyecto.
 - **La base de datos local es la fuente de verdad.** Las pantallas nunca leen ni escriben directamente en Supabase; eso solo lo hace la capa de sincronización.
@@ -50,7 +50,9 @@ La prioridad es avanzar rápido. El autor pide bloques completos ("Implementa el
 
 | Para qué | Comando |
 |---|---|
-| Iniciar la app (Expo Go) | `npx expo start` (si la red bloquea la conexión: `npx expo start --tunnel`) |
+| Iniciar la app (Expo Go) | `npx expo start --go` (si la red bloquea la conexión: agregar `--tunnel`) |
+| Iniciar la app (build de desarrollo, para ver el mapa) | `npx expo start` (si la red bloquea la conexión: agregar `--tunnel`) |
+| Generar la build de desarrollo | `npx eas-cli build --profile development --platform android` |
 | Verificar tipos | `npm run typecheck` |
 | Lint | `npm run lint` |
 | Pruebas | `npm test` |

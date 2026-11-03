@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -7,19 +8,34 @@ import { lastFinishedWorkoutQuery, type ProfileRow } from '@/db/repositories/pro
 import { planByIdQuery, planDaysQuery, routineItemsQuery } from '@/db/repositories/routines';
 import { parseWeekdays, todaysPlanDay, type Weekday } from '@/domain/plan';
 import { formatTarget } from '@/domain/routine';
+import { startOfDay } from '@/domain/workout';
+import { activeWorkoutQuery, finishedSinceQuery } from '@/db/repositories/workouts';
 import { format, t } from '@/i18n';
 import { Button, Card, Screen, colors, font, spacing } from '@/ui';
-import { ActiveWorkoutCard } from '@/features/workout/ActiveWorkoutCard';
+import { ActiveWorkoutCard, DoneTodayCard } from '@/features/workout/ActiveWorkoutCard';
 import { useStartWorkout } from '@/features/workout/useStartWorkout';
 
-/** Pantalla Hoy: la rutina del día según el plan, descanso, u opciones si no hay plan (RUT-02, F1, F2). */
+/**
+ * Pantalla Hoy (RUT-02, F1, F2). Según el estado del día muestra, en este orden de prioridad:
+ * la sesión en curso ("Entrenando"), la sesión ya terminada hoy ("Hoy entrenaste"), la rutina
+ * que toca o el descanso según el plan, u opciones si no hay plan.
+ */
 export function TodayView({ profile }: { profile: ProfileRow }) {
-  return (
-    <Screen title={t.tabs.today}>
-      <ActiveWorkoutCard />
-      {profile.activePlanId ? <PlanToday profile={profile} planId={profile.activePlanId} /> : <NoPlan />}
-    </Screen>
-  );
+  const { db, owner } = useDatabase();
+  const since = startOfDay(new Date());
+  const active = useQuery(activeWorkoutQuery(db, owner), [owner]);
+  const done = useQuery(finishedSinceQuery(db, owner, since), [owner, since]);
+  const activeWorkout = active.data[0];
+  const doneWorkout = done.data[0];
+
+  let content: ReactNode = null;
+  if (!active.loaded || !done.loaded) content = null;
+  else if (activeWorkout) content = <ActiveWorkoutCard workout={activeWorkout} />;
+  else if (doneWorkout) content = <DoneTodayCard workout={doneWorkout} profile={profile} />;
+  else if (profile.activePlanId) content = <PlanToday profile={profile} planId={profile.activePlanId} />;
+  else content = <NoPlan />;
+
+  return <Screen title={t.tabs.today}>{content}</Screen>;
 }
 
 function PlanToday({ profile, planId }: { profile: ProfileRow; planId: string }) {

@@ -267,6 +267,8 @@ Cada plantilla muestra sus ejercicios con series y rango de repeticiones, y se p
 - El usuario puede tener un plan semanal activo, con una rutina asignada a cada día de entrenamiento.
 - **Hoy** muestra la rutina que corresponde al día actual, o un mensaje de descanso si no toca entrenar.
 - Si eligió una cantidad de días sin días concretos, **Hoy** muestra la siguiente rutina del plan en orden.
+- Si hay una sesión en curso, **Hoy** muestra "Entrenando" con esa sesión y el botón para continuarla, en lugar de la rutina que toca.
+- Si ya terminó una sesión ese día, **Hoy** muestra "Hoy entrenaste" con un resumen corto (duración, series y volumen) y la opción de empezar otra sesión. La siguiente rutina del plan aparece hasta el día siguiente.
 
 **RUT-03 · P1 · Crear rutina propia**
 - Campos: nombre, lista ordenada de ejercicios y, por ejercicio, series objetivo, rango de repeticiones y tiempo de descanso (opcionales).

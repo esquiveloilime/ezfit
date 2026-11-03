@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull } from 'drizzle-orm';
 
 import { moveItem } from '@/domain/routine';
 import type { LoggedSet, SetValues } from '@/domain/workout';
@@ -16,6 +16,23 @@ export function activeWorkoutQuery(db: Db, owner: string) {
     .select()
     .from(workouts)
     .where(and(eq(workouts.userId, owner), eq(workouts.status, 'in_progress'), isNull(workouts.deletedAt)))
+    .orderBy(desc(workouts.startedAt))
+    .limit(1);
+}
+
+/** La última sesión terminada que empezó desde `since` (el inicio de hoy), para la pantalla Hoy. */
+export function finishedSinceQuery(db: Db, owner: string, since: number) {
+  return db
+    .select()
+    .from(workouts)
+    .where(
+      and(
+        eq(workouts.userId, owner),
+        eq(workouts.status, 'finished'),
+        isNull(workouts.deletedAt),
+        gte(workouts.startedAt, since),
+      ),
+    )
     .orderBy(desc(workouts.startedAt))
     .limit(1);
 }

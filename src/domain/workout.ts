@@ -249,6 +249,11 @@ export function setNumbers(sets: readonly { kind: SetKind }[]): (number | null)[
   return sets.map((s) => (s.kind === 'working' ? ++n : null));
 }
 
+/** Inicio del día local de `date`: lo que empezó desde ahí cuenta como "hoy" en la pantalla Hoy. */
+export function startOfDay(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
 // --- Ejercicios plegados durante la sesión (SES-02) ---
 
 /** Avance de un ejercicio: series efectivas registradas contra las series objetivo de la rutina. */

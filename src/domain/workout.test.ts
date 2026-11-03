@@ -4,6 +4,7 @@ import {
   convertWeight,
   exerciseProgress,
   firstPendingExercise,
+  startOfDay,
   fieldsFor,
   formatDuration,
   formatThousands,
@@ -301,5 +302,13 @@ describe('ejercicios plegados (SES-02)', () => {
     ).toBe('b');
     expect(firstPendingExercise([{ id: 'a', done: 3, target: 3, complete: true }])).toBeNull();
     expect(firstPendingExercise([])).toBeNull();
+  });
+});
+
+describe('startOfDay', () => {
+  it('devuelve la medianoche local del mismo día', () => {
+    const start = startOfDay(new Date(2026, 10, 3, 18, 45, 12));
+    expect(start).toBe(new Date(2026, 10, 3, 0, 0, 0, 0).getTime());
+    expect(startOfDay(new Date(2026, 10, 3, 0, 0, 0))).toBe(start);
   });
 });

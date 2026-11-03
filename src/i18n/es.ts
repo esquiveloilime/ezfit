@@ -49,10 +49,6 @@ export const es = {
     profile: 'Perfil',
   },
   placeholders: {
-    run: {
-      title: 'Correr',
-      body: 'Aquí podrás grabar tus carreras y caminatas con GPS.',
-    },
     history: {
       title: 'Historial',
       body: 'Aquí verás tus sesiones, tus actividades y tu progreso por ejercicio.',
@@ -410,6 +406,26 @@ export const es = {
     muscleGroups,
     equipment,
     trackingTypes,
+  },
+  run: {
+    permissionTitle: 'Para grabar tu recorrido necesitamos tu ubicación',
+    permissionBody:
+      'Con el GPS medimos la distancia, el tiempo y el ritmo, y dibujamos tu ruta en el mapa. Al tocar el botón, Android te preguntará si das permiso.',
+    permissionPrivacy: 'Solo leemos tu ubicación en esta sección y mientras grabas una actividad. Tus rutas son privadas.',
+    permissionAllow: 'Permitir ubicación',
+    deniedTitle: 'La ubicación está desactivada para ezfit',
+    deniedBody: 'Sin ella no se pueden grabar carreras ni caminatas. El resto de la app funciona igual.',
+    deniedSteps:
+      'Para activarla: toca «Abrir ajustes», entra a Permisos › Ubicación y elige «Permitir solo mientras se usa la app».',
+    openSettings: 'Abrir ajustes',
+    servicesOff: 'La ubicación del teléfono está apagada. Actívala desde el panel de ajustes rápidos.',
+    waitingSignal: 'Buscando señal GPS. Al aire libre y lejos de edificios altos se encuentra más rápido.',
+    signal: 'Señal GPS',
+    signalQuality: { good: 'buena', fair: 'regular', none: 'sin señal' },
+    kindLabel: 'Tipo de actividad',
+    kinds: { run: 'Correr', walk: 'Caminar' },
+    mapA11y: 'Mapa con tu ubicación y tu ruta',
+    offlineMap: 'Sin conexión: el mapa aparecerá al recuperarla. Tu ruta se sigue registrando.',
   },
 } as const;
 

@@ -155,50 +155,50 @@ Cómo probarlo:
 
 El bloque más importante para la experiencia de uso. Probar en el gimnasio real si es posible.
 
-### I-07 · Sesión y registro de series
+### I-07 · Sesión y registro de series ✅
 
 Iniciar una sesión desde la rutina de hoy, cualquier rutina o vacía. Agregar, quitar y reordenar ejercicios. Registrar, editar y eliminar series con valores ya llenos. Resumen de la última vez. La sesión en curso sobrevive al cierre de la app.
 
 Cubre: SES-01, SES-02, SES-03, SES-09, SES-10.
 
 Cómo probarlo:
-- [ ] Empezar la rutina de hoy y registrar tres series de un ejercicio: desde la segunda, los campos ya vienen llenos.
-- [ ] Contar los toques para registrar una serie con valores llenos: dos o menos.
-- [ ] Cerrar la app a la fuerza a media sesión y abrirla: todo sigue ahí.
-- [ ] Con una sesión en curso, Hoy muestra "Entrenando" en lugar de "Hoy toca"; al terminarla muestra "Hoy entrenaste" con su resumen. Al empezar y terminar una segunda sesión el mismo día, las dos aparecen bajo "Hoy entrenaste".
-- [ ] Quitar un ejercicio de la sesión siempre pide confirmación, aunque no tenga series.
-- [ ] Agregar un ejercicio que no estaba en la rutina, quitar otro y cambiar el orden.
-- [ ] Los ejercicios aparecen plegados con su avance; al tocar uno se abre y el que estaba abierto se cierra. Al entrar se abre el primero sin completar.
-- [ ] Corregir el peso de una serie ya registrada.
-- [ ] Registrar una serie en lb y la siguiente en kg con un toque en el selector: cada una se guarda y se muestra con su unidad, sin convertir.
-- [ ] Probar un ejercicio de "solo tiempo": pide tiempo, no peso.
+- [x] Empezar la rutina de hoy y registrar tres series de un ejercicio: desde la segunda, los campos ya vienen llenos.
+- [x] Contar los toques para registrar una serie con valores llenos: dos o menos.
+- [x] Cerrar la app a la fuerza a media sesión y abrirla: todo sigue ahí.
+- [x] Con una sesión en curso, Hoy muestra "Entrenando" en lugar de "Hoy toca"; al terminarla muestra "Hoy entrenaste" con su resumen. Al empezar y terminar una segunda sesión el mismo día, las dos aparecen bajo "Hoy entrenaste".
+- [x] Quitar un ejercicio de la sesión siempre pide confirmación, aunque no tenga series.
+- [x] Agregar un ejercicio que no estaba en la rutina, quitar otro y cambiar el orden.
+- [x] Los ejercicios aparecen plegados con su avance; al tocar uno se abre y el que estaba abierto se cierra. Al entrar se abre el primero sin completar.
+- [x] Corregir el peso de una serie ya registrada.
+- [x] Registrar una serie en lb y la siguiente en kg con un toque en el selector: cada una se guarda y se muestra con su unidad, sin convertir.
+- [x] Probar un ejercicio de "solo tiempo": pide tiempo, no peso.
 
-### I-08 · RIR, técnica, máquina, ánimo y cierre de sesión
+### I-08 · RIR, técnica, máquina, ánimo y cierre de sesión ✅
 
 Selectores de RIR y técnica por serie, campo de máquina con sugerencias, series de calentamiento, pantalla de cierre con resumen, estado de ánimo y nota, y descarte de sesión.
 
 Cubre: SES-04, SES-05, SES-06, SES-07, SES-11, SES-12.
 
 Cómo probarlo:
-- [ ] Marcar RIR y técnica en una serie con un toque cada uno.
-- [ ] En un ejercicio propio sin RIR, el selector no aparece.
-- [ ] Anotar una marca de máquina; en la siguiente sesión del mismo ejercicio aparece como sugerencia.
-- [ ] Marcar una serie como calentamiento: se distingue de las demás.
-- [ ] Terminar una sesión con series en kg y en lb: el volumen total sale en la unidad por defecto y es correcto. El resumen es correcto, se puede elegir ánimo y escribir una nota.
-- [ ] Descartar una sesión pide confirmación.
+- [x] Marcar RIR y técnica en una serie con un toque cada uno.
+- [x] En un ejercicio propio sin RIR, el selector no aparece.
+- [x] Anotar una marca de máquina; en la siguiente sesión del mismo ejercicio aparece como sugerencia.
+- [x] Marcar una serie como calentamiento: se distingue de las demás.
+- [x] Terminar una sesión con series en kg y en lb: el volumen total sale en la unidad por defecto y es correcto. El resumen es correcto, se puede elegir ánimo y escribir una nota.
+- [x] Descartar una sesión pide confirmación.
 
-### I-09 · Temporizador de descanso
+### I-09 · Temporizador de descanso ✅
 
 Temporizador automático y manual, ajuste de más y menos 15 segundos, saltar, aviso con sonido y vibración, notificación local con la app en segundo plano, y ajustes de descanso en Perfil.
 
 Cubre: SES-08, AJU-02.
 
 Cómo probarlo:
-- [ ] Al confirmar una serie, el temporizador arranca solo con el tiempo de la rutina.
-- [ ] Sumar 15 segundos y saltarlo funcionan.
-- [ ] Bloquear el teléfono durante el descanso: llega una notificación al terminar.
-- [ ] Cerrar la app a medio descanso y abrirla: el tiempo restante es correcto.
-- [ ] Desactivar el inicio automático en Perfil: ya no arranca solo, pero se puede iniciar a mano.
+- [x] Al confirmar una serie, el temporizador arranca solo con el tiempo de la rutina.
+- [x] Sumar 15 segundos y saltarlo funcionan.
+- [x] Bloquear el teléfono durante el descanso: llega una notificación al terminar.
+- [x] Cerrar la app a medio descanso y abrirla: el tiempo restante es correcto.
+- [x] Desactivar el inicio automático en Perfil: ya no arranca solo, pero se puede iniciar a mano.
 
 ---
 

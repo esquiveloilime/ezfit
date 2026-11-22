@@ -100,6 +100,14 @@ export function AuthForm({ kind }: { kind: Kind }) {
         onPress={() => void submit()}
         loading={busy}
       />
+      {!isSignUp ? (
+        <Button
+          variant="ghost"
+          label={t.auth.forgotLink}
+          onPress={() => router.push('/forgot-password')}
+          disabled={busy}
+        />
+      ) : null}
       <Button
         variant="ghost"
         label={isSignUp ? t.auth.haveAccount : t.auth.noAccount}

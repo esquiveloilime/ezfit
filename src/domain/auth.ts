@@ -23,6 +23,8 @@ export type AuthErrorKind =
   | 'invalid_email'
   | 'email_not_confirmed'
   | 'rate_limit'
+  | 'same_password'
+  | 'link_expired'
   | 'network'
   | 'not_configured'
   | 'unknown';
@@ -53,6 +55,14 @@ export function classifyAuthError(error: unknown): AuthErrorKind {
       return 'invalid_email';
     case 'email_not_confirmed':
       return 'email_not_confirmed';
+    case 'same_password':
+      return 'same_password';
+    case 'otp_expired':
+    case 'session_expired':
+    case 'session_not_found':
+    case 'refresh_token_not_found':
+    case 'refresh_token_already_used':
+      return 'link_expired';
     case 'over_request_rate_limit':
     case 'over_email_send_rate_limit':
       return 'rate_limit';
@@ -64,4 +74,30 @@ export function classifyAuthError(error: unknown): AuthErrorKind {
   if (message.includes('already registered')) return 'email_taken';
   if (message.includes('invalid login credentials')) return 'invalid_credentials';
   return 'unknown';
+}
+
+export type RecoveryTokens = { accessToken: string; refreshToken: string };
+
+/**
+ * Lee los datos del enlace de recuperación de contraseña (CUE-04). Supabase los manda después
+ * del `#` (o como parámetros) del enlace que abre la app. Devuelve `null` si el enlace no es de
+ * recuperación o le falta algo.
+ */
+export function parseRecoveryUrl(url: string): RecoveryTokens | null {
+  const params = new URLSearchParams();
+  const query = url.split('?')[1]?.split('#')[0] ?? '';
+  const hash = url.split('#')[1] ?? '';
+  for (const part of [query, hash]) {
+    for (const [key, value] of new URLSearchParams(part)) params.set(key, value);
+  }
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+  if (params.get('type') !== 'recovery' || !accessToken || !refreshToken) return null;
+  return { accessToken, refreshToken };
+}
+
+/** El enlace llegó, pero Supabase dice que venció o ya se usó. */
+export function recoveryUrlError(url: string): string | null {
+  const hash = url.split('#')[1] ?? url.split('?')[1] ?? '';
+  return new URLSearchParams(hash).get('error_code');
 }

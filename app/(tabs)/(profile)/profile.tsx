@@ -6,7 +6,8 @@ import { SyncStatusCard } from '@/features/account/SyncStatusCard';
 import { useProfile } from '@/features/onboarding/useProfile';
 import { RestSettings } from '@/features/settings/RestSettings';
 import { WeightUnitSetting } from '@/features/settings/WeightUnitSetting';
-import { t } from '@/i18n';
+import { format, t } from '@/i18n';
+import { requestSync, usePendingCount } from '@/sync';
 import { Button, Card, Screen, colors, font, spacing } from '@/ui';
 
 export default function ProfileScreen() {
@@ -15,7 +16,18 @@ export default function ProfileScreen() {
   const signOut = useAccount((s) => s.signOut);
   const { profile } = useProfile();
 
+  const pending = usePendingCount();
+
   function confirmSignOut() {
+    // Con cambios sin subir se avisa y se ofrece subirlos primero (CUE-03).
+    if (pending > 0) {
+      Alert.alert(t.profile.signOutPendingTitle, format(t.profile.signOutPendingBody, { n: pending }), [
+        { text: t.common.cancel, style: 'cancel' },
+        { text: t.sync.button, onPress: () => void requestSync() },
+        { text: t.profile.signOut, style: 'destructive', onPress: () => void signOut() },
+      ]);
+      return;
+    }
     Alert.alert(t.profile.signOutConfirmTitle, t.profile.signOutConfirmBody, [
       { text: t.common.cancel, style: 'cancel' },
       { text: t.profile.signOut, style: 'destructive', onPress: () => void signOut() },

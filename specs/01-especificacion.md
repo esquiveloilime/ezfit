@@ -200,6 +200,7 @@ El usuario crea una cuenta con correo y contraseña.
 
 **CUE-04 · P2 · Recuperar contraseña**
 - Desde la pantalla de inicio de sesión se puede pedir un correo para restablecer la contraseña.
+- El enlace del correo abre la app en la pantalla para escribir la contraseña nueva. Si el enlace venció o ya se usó, la app lo dice y ofrece pedir otro.
 
 **CUE-05 · P1 · Incorporación**
 - Pregunta si el usuario es principiante.

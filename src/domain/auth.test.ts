@@ -1,4 +1,4 @@
-import { classifyAuthError, isValidEmail, isValidPassword, normalizeEmail } from './auth';
+import { classifyAuthError, isValidEmail, isValidPassword, normalizeEmail, parseRecoveryUrl, recoveryUrlError } from './auth';
 
 describe('validación de cuenta (CUE-01)', () => {
   it('acepta correos con formato válido', () => {
@@ -46,5 +46,40 @@ describe('classifyAuthError', () => {
     expect(classifyAuthError(null)).toBe('unknown');
     expect(classifyAuthError('texto')).toBe('unknown');
     expect(classifyAuthError({ code: 'otra_cosa' })).toBe('unknown');
+  });
+});
+
+describe('errores de la recuperación de contraseña (CUE-04)', () => {
+  it('distingue la misma contraseña y el enlace vencido', () => {
+    expect(classifyAuthError({ code: 'same_password' })).toBe('same_password');
+    expect(classifyAuthError({ code: 'otp_expired' })).toBe('link_expired');
+  });
+});
+
+describe('parseRecoveryUrl', () => {
+  it('lee los datos que Supabase pone después del #', () => {
+    expect(
+      parseRecoveryUrl('ezfit://reset-password#access_token=aaa&expires_in=3600&refresh_token=bbb&token_type=bearer&type=recovery'),
+    ).toEqual({ accessToken: 'aaa', refreshToken: 'bbb' });
+  });
+
+  it('también como parámetros, y con la dirección de Expo Go', () => {
+    expect(parseRecoveryUrl('exp://192.168.1.5:8081/--/reset-password?type=recovery&access_token=a&refresh_token=b')).toEqual({
+      accessToken: 'a',
+      refreshToken: 'b',
+    });
+  });
+
+  it('rechaza enlaces que no son de recuperación o incompletos', () => {
+    expect(parseRecoveryUrl('ezfit://reset-password')).toBeNull();
+    expect(parseRecoveryUrl('ezfit://reset-password#access_token=a&refresh_token=b&type=signup')).toBeNull();
+    expect(parseRecoveryUrl('ezfit://reset-password#access_token=a&type=recovery')).toBeNull();
+  });
+});
+
+describe('recoveryUrlError', () => {
+  it('detecta un enlace vencido', () => {
+    expect(recoveryUrlError('ezfit://reset-password#error=access_denied&error_code=otp_expired')).toBe('otp_expired');
+    expect(recoveryUrlError('ezfit://reset-password#access_token=a')).toBeNull();
   });
 });

@@ -70,10 +70,13 @@ export default function RootLayout() {
           <Stack.Protected guard={mode !== 'user'}>
             <Stack.Screen name="(auth)/sign-up" options={{ headerShown: true, title: '' }} />
             <Stack.Screen name="(auth)/sign-in" options={{ headerShown: true, title: '' }} />
+            <Stack.Screen name="(auth)/forgot-password" options={{ headerShown: true, title: '' }} />
           </Stack.Protected>
 
           {/* Aviso de privacidad: desde la bienvenida y desde Perfil (CUE-09). */}
           <Stack.Screen name="privacy" options={{ headerShown: true, title: t.privacy.title }} />
+          {/* Contraseña nueva: se abre desde el enlace del correo, con o sin sesión (CUE-04). */}
+          <Stack.Screen name="reset-password" options={{ headerShown: true, title: '' }} />
         </Stack>
       </WithDatabase>
     </SafeAreaProvider>

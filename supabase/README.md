@@ -28,6 +28,16 @@ La especificación pide que, al crear la cuenta, el usuario pase directo a la ap
 1. Entra a **Authentication** → **Sign In / Providers** → **Email**.
 2. Desactiva **Confirm email** y guarda.
 
+## 3b. Permitir que el correo de recuperación abra la app
+
+Para "¿Olvidaste tu contraseña?" (CUE-04): el enlace del correo abre ezfit directo en la pantalla de contraseña nueva.
+
+1. Entra a **Authentication** → **URL Configuration**.
+2. En **Redirect URLs** toca **Add URL** y agrega estas dos, una por una:
+   - `ezfit://**` (la build de desarrollo y la APK)
+   - `exp://**` (Expo Go)
+3. Guarda.
+
 ## 4. Conectar la app
 
 1. Entra a **Project Settings** → **API Keys** (o al botón **Connect** de arriba).

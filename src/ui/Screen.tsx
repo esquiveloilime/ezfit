@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { type ReactNode, useEffect, useRef } from 'react';
+import { Keyboard, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, font, spacing } from './tokens';
@@ -11,7 +11,37 @@ type Props = {
   scroll?: boolean;
 };
 
+// Espacio que se deja arriba del campo al desplazarse hacia él, para que también se vea su etiqueta.
+const FIELD_MARGIN = 48;
+// Tiempo para que la pantalla termine de encogerse antes de desplazarse.
+const SETTLE_MS = 100;
+
 export function Screen({ title, children, scroll = true }: Props) {
+  const scrollRef = useRef<ScrollView>(null);
+  const contentRef = useRef<View>(null);
+
+  // Al abrir el teclado, se desplaza hasta el campo que se está llenando para que no quede tapado.
+  useEffect(() => {
+    if (!scroll) return undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const sub = Keyboard.addListener('keyboardDidShow', () => {
+      timer = setTimeout(() => {
+        const input = TextInput.State.currentlyFocusedInput();
+        const content = contentRef.current;
+        if (!input || !content) return;
+        input.measureLayout(
+          content,
+          (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - FIELD_MARGIN), animated: true }),
+          () => undefined,
+        );
+      }, SETTLE_MS);
+    });
+    return () => {
+      sub.remove();
+      if (timer) clearTimeout(timer);
+    };
+  }, [scroll]);
+
   const header = title ? (
     <Text style={styles.title} accessibilityRole="header">
       {title}
@@ -20,17 +50,22 @@ export function Screen({ title, children, scroll = true }: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-      {scroll ? (
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {header}
-          {children}
-        </ScrollView>
-      ) : (
-        <View style={[styles.content, styles.fill]}>
-          {header}
-          {children}
-        </View>
-      )}
+      {/* La pantalla se encoge al aparecer el teclado, para que nada quede debajo de él. */}
+      <KeyboardAvoidingView style={styles.fill} behavior="padding">
+        {scroll ? (
+          <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled">
+            <View ref={contentRef} style={styles.content}>
+              {header}
+              {children}
+            </View>
+          </ScrollView>
+        ) : (
+          <View style={[styles.content, styles.fill]}>
+            {header}
+            {children}
+          </View>
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

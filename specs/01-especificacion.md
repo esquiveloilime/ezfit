@@ -5,8 +5,8 @@
 | | |
 |---|---|
 | Nombre | **ezfit** |
-| Versión | 0.3, con las respuestas del autor sobre los supuestos |
-| Fecha | 2 de noviembre de 2026 |
+| Versión | 0.4, con el feedback del autor tras probar la build de desarrollo |
+| Fecha | 21 de noviembre de 2026 (versión 0.3: 2 de noviembre de 2026) |
 | Entrega | Entre el 25 y el 27 de noviembre de 2026: APK instalable y repositorio |
 | Documentos relacionados | `00-constitucion.md`, `02-plan-tecnico.md`, `03-tareas.md` |
 
@@ -153,15 +153,15 @@ También puede, desde una sesión en curso, traer un solo ejercicio de un día a
 
 ### Navegación
 
-Cinco secciones principales, siempre visibles en una barra inferior:
+Cinco secciones principales, siempre visibles en una barra inferior, también en las pantallas que se abren desde cada sección. La única excepción es la pantalla de una actividad de running en curso, para no salir de ella por accidente:
 
 | Sección | Contenido |
 |---|---|
 | **Hoy** | Rutina del día, sesión en curso, accesos rápidos. |
-| **Rutinas** | Rutinas propias, rutinas predeterminadas, catálogo de ejercicios. |
+| **Rutinas** | Rutinas propias, rutinas predeterminadas, catálogo de ejercicios, cada grupo en su tarjeta (RUT-01). |
 | **Correr** | Grabar una actividad. |
-| **Historial** | Sesiones, actividades y progreso por ejercicio. |
-| **Perfil** | Ajustes, plan semanal, cuenta (o botón para crearla), estado de sincronización. |
+| **Historial** | Sesiones y actividades juntas, filtradas por mes; mejores marcas de running; progreso por ejercicio. |
+| **Perfil** | Ajustes, plan semanal, cuenta (o botón para crearla), estado de sincronización, aviso de privacidad (CUE-09). |
 
 ## 6. Requisitos funcionales
 
@@ -211,6 +211,11 @@ El usuario crea una cuenta con correo y contraseña.
 
 **CUE-06 · P3 · Eliminar cuenta**
 - El usuario puede borrar su cuenta y todos sus datos. Es obligatorio para publicar en tiendas.
+
+**CUE-09 · P1 · Aviso de privacidad y descargo de responsabilidad**
+- La bienvenida (CUE-00) dice "Al continuar aceptas el aviso de privacidad y el descargo de responsabilidad", con un enlace para leerlos. En **Perfil** siempre se pueden volver a leer.
+- El aviso de privacidad explica qué datos guarda la app (entrenamientos, actividades con su ruta, ajustes y, con cuenta, el correo), dónde se guardan (en el teléfono y, con cuenta, en la nube para sincronizar), que la ubicación solo se lee mientras se graba una actividad y que los datos no se venden ni se comparten.
+- El descargo dice que ezfit es un proyecto académico que se ofrece tal cual, que no es consejo médico, que se entrena y se corre bajo el propio riesgo, que el autor no se hace responsable de lesiones, daños ni errores en las mediciones, y que al correr hay que poner atención al tráfico.
 
 **CUE-08 · P2 · Continuar con Google**
 - En la bienvenida y en la pantalla de inicio de sesión hay un botón **Continuar con Google**. Con un toque se elige la cuenta de Google y se entra; si es la primera vez, se crea la cuenta de ezfit.
@@ -263,11 +268,13 @@ La app incluye plantillas en tres categorías:
 
 Cada plantilla muestra sus ejercicios con series y rango de repeticiones, y se puede empezar una sesión directamente desde ella.
 
+En la sección **Rutinas**, Mis rutinas, Planes semanales, Por tiempo, Pierna Push y Pull, y el catálogo de ejercicios aparecen cada uno como una tarjeta con cuántos elementos tiene. Al tocar una se abre la lista de ese grupo; así no hay que desplazarse por lo que no interesa.
+
 **RUT-02 · P1 · Plan semanal activo**
 - El usuario puede tener un plan semanal activo, con una rutina asignada a cada día de entrenamiento.
 - **Hoy** muestra la rutina que corresponde al día actual, o un mensaje de descanso si no toca entrenar.
 - Si eligió una cantidad de días sin días concretos, **Hoy** muestra la siguiente rutina del plan en orden.
-- Si ya terminó sesiones ese día, **Hoy** muestra arriba "Hoy entrenaste" con todas ellas, de la más temprana a la más reciente, cada una con un resumen corto (duración, series y volumen). La siguiente rutina del plan aparece hasta el día siguiente.
+- Si ya terminó sesiones ese día, **Hoy** muestra arriba "Hoy entrenaste" con todas ellas, de la más temprana a la más reciente, cada una con un resumen corto (duración, series y volumen). Al tocar una se abre su detalle (HIS-01). La siguiente rutina del plan aparece hasta el día siguiente.
 - Si hay una sesión en curso, **Hoy** muestra debajo "Entrenando" con esa sesión y el botón para continuarla, en lugar de la rutina que toca. Si no hay sesión en curso pero ya entrenó ese día, ofrece empezar otra sesión.
 
 **RUT-03 · P1 · Crear rutina propia**
@@ -355,6 +362,8 @@ Cada plantilla muestra sus ejercicios con series y rango de repeticiones, y se p
 
 **HIS-01 · P1 · Historial de sesiones**
 - Lista de sesiones ordenada por fecha, con rutina, duración y estado de ánimo.
+- Las sesiones de pesas y las actividades de running (RUN-06) aparecen en la misma lista, de la más reciente a la más antigua. Cada una lleva el ícono de su sección (el de Rutinas o el de Correr) para distinguirlas.
+- La lista se filtra por mes: arriba se ve el mes actual con flechas para ir a los anteriores y regresar. Un mes sin registros dice que no hay nada en ese mes.
 - Al abrir una sesión se ve todo lo registrado: ejercicios, series, máquina, cardio, nota.
 
 **HIS-02 · P1 · Historial por ejercicio**
@@ -448,7 +457,16 @@ Running es solo al aire libre, con GPS. Las distancias se muestran siempre en ki
 - El detalle de la actividad muestra el tiempo y el ritmo de cada kilómetro.
 
 **RUN-12 · P3 · Extras**
-- Pausa automática al detenerse, elevación, exportar la ruta, compartir una imagen del recorrido.
+- Pausa automática al detenerse, elevación, exportar la ruta.
+
+**RUN-13 · P2 · Mejores marcas**
+- Para correr y para caminar, por separado, la app guarda dos marcas: la actividad más larga y la de mejor ritmo promedio. Para el ritmo solo cuentan actividades de al menos 1 km.
+- En **Historial** se ven las marcas con su fecha; al tocar una se abre esa actividad. Si todavía no hay actividades de ese tipo, no se muestra esa marca.
+- Si se elimina la actividad que tenía la marca, la marca pasa a la siguiente mejor.
+
+**RUN-14 · P2 · Compartir el resumen como imagen**
+- Desde el resumen (RUN-05) y el detalle de una actividad (RUN-06) se puede compartir o guardar una imagen con el mapa de la ruta, distancia, tiempo, ritmo promedio y velocidad promedio, la fecha y el nombre de la app.
+- Se comparte con el menú de compartir del teléfono, que también permite guardarla en la galería.
 
 ### 6.9 Sin conexión y sincronización (SIN)
 

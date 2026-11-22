@@ -1,6 +1,7 @@
 # Plan técnico
 
 **ezfit**, app móvil de gimnasio y running.
+Versión 0.5, 21 de noviembre de 2026: librerías para compartir el resumen de una actividad como imagen (RUN-14).
 Versión 0.4, 3 de noviembre de 2026: el mapa en Android se prueba en una build de desarrollo desde el bloque 4.
 Versión 0.3, 2 de noviembre de 2026: modo sin cuenta, inicio de sesión con Google, fotos y videos de ejercicios.
 
@@ -29,6 +30,7 @@ Este documento describe **cómo** se construye lo que pide `01-especificacion.md
 | Fotos de ejercicios | Imágenes de **free-exercise-db** (dominio público), incluidas dentro de la app y mostradas con el componente de imagen de React Native | Sin pagos ni problemas de derechos, se ven sin internet, sin dependencias nuevas | Descargarlas de internet: no se verían en un gimnasio sin señal |
 | Videos tutoriales | Abrir YouTube con `Linking`, que ya trae React Native | Sin reproductor propio ni dependencias | Reproductor dentro de la app: más peso y complejidad, fuera de alcance |
 | Estado de la conexión | **expo-network** | Funciona en Expo Go; lo usan la sincronización (para subir al recuperar la conexión) y el botón de tutorial | `@react-native-community/netinfo`: equivalente, pero no es parte de Expo |
+| Compartir una actividad como imagen | **react-native-view-shot** para convertir la tarjeta del resumen en imagen y **expo-sharing** para abrir el menú de compartir del teléfono (RUN-14) | Las dos vienen en Expo Go; el menú de compartir ya permite guardar en la galería, así que no se pide permiso de fotos | `expo-media-library`: pide permiso de la galería solo para guardar, y el menú de compartir ya lo hace |
 
 Las dependencias `@react-native-google-signin/google-signin` y `expo-network` se agregaron en la versión 0.3 y el autor las aprobó el 2 de noviembre de 2026.
 

@@ -1,6 +1,7 @@
 # Tareas y calendario
 
 **ezfit**, app móvil de gimnasio y running.
+Versión 0.4, 21 de noviembre de 2026: feedback del autor tras probar la build de desarrollo (barra inferior siempre visible, rutinas en tarjetas, aviso de privacidad, historial por mes, mejores marcas y compartir como imagen).
 Versión 0.3, 2 de noviembre de 2026: modo sin cuenta, Google, fotos y videos.
 
 El trabajo se divide en **26 incrementos** agrupados en **9 bloques**. No hay calendario de commits: el maestro no los revisa, así que se avanza lo más rápido posible y varios bloques pueden hacerse el mismo día. Los identificadores entre paréntesis (por ejemplo, SES-03) remiten a `01-especificacion.md`.
@@ -308,12 +309,15 @@ Cómo probarlo:
 
 ### I-17 · Historial de sesiones y por ejercicio
 
-Lista de sesiones por fecha, detalle de sesión e historial por ejercicio con filtro por máquina, accesible desde catálogo, historial y sesión en curso.
+Lista de sesiones y actividades juntas, con su ícono y filtrada por mes; detalle de sesión, también desde "Hoy entrenaste"; mejores marcas de running; e historial por ejercicio con filtro por máquina, accesible desde catálogo, historial y sesión en curso.
 
-Cubre: HIS-01, HIS-02.
+Cubre: HIS-01, HIS-02, RUN-13, RUT-02 (abrir una sesión desde Hoy).
 
 Cómo probarlo:
-- [ ] Historial muestra las sesiones y las actividades de running por fecha.
+- [ ] Historial muestra las sesiones y las actividades de running por fecha, cada una con el ícono de Rutinas o de Correr.
+- [ ] Con las flechas del mes se ven los registros de meses anteriores; un mes vacío lo dice.
+- [ ] En Hoy, tocar una sesión de "Hoy entrenaste" abre su detalle.
+- [ ] Las mejores marcas muestran la caminata y la carrera más largas y las de mejor ritmo; al eliminar una, la marca pasa a la siguiente.
 - [ ] El detalle de una sesión muestra todo lo registrado, incluidos máquina, cardio y nota.
 - [ ] El historial de un ejercicio muestra sus series de todas las fechas.
 - [ ] Filtrar por una máquina deja solo las series hechas en ella.
@@ -418,9 +422,9 @@ Cómo probarlo:
 
 ### I-23 · Requisitos P2 restantes
 
-En este orden, hasta donde alcance el tiempo: parciales por kilómetro, récords personales, editar sesiones pasadas, cambiar plan y días de entrenamiento.
+En este orden, hasta donde alcance el tiempo: parciales por kilómetro, récords personales, editar sesiones pasadas, cambiar plan y días de entrenamiento, y compartir el resumen de una actividad como imagen.
 
-Cubre: RUN-11, HIS-07, HIS-06, AJU-04.
+Cubre: RUN-11, HIS-07, HIS-06, AJU-04, RUN-14.
 
 Cómo probarlo:
 - [ ] Cada función terminada cumple sus criterios de la especificación.
@@ -441,13 +445,14 @@ Cómo probarlo:
 
 Se recorta en este orden, de lo primero a lo último:
 
-1. I-23 completo (P2 restantes).
-2. La gráfica de I-21 (HIS-05).
-3. Las recomendaciones de I-21 (REC-01).
-4. I-26 (fotos): los ejercicios muestran el ícono del grupo muscular. El botón de tutorial sigue.
-5. I-25 (Google): queda solo correo y contraseña.
-6. I-20 (segundo plano): la app se entrega con el aviso de pantalla encendida.
-7. El cronómetro de cardio (CAR-02) y las series de calentamiento (SES-12).
+1. Compartir una actividad como imagen (RUN-14).
+2. El resto de I-23 (P2 restantes).
+3. La gráfica de I-21 (HIS-05).
+4. Las recomendaciones de I-21 (REC-01).
+5. I-26 (fotos): los ejercicios muestran el ícono del grupo muscular. El botón de tutorial sigue.
+6. I-25 (Google): queda solo correo y contraseña.
+7. I-20 (segundo plano): la app se entrega con el aviso de pantalla encendida.
+8. El cronómetro de cardio (CAR-02) y las series de calentamiento (SES-12).
 
 Nunca se recorta: I-22 (pulido), I-24 (entrega), ni ningún requisito P1.
 
@@ -457,14 +462,14 @@ Si un bloque pasa de su fecha límite, el siguiente empieza por terminarlo. Si e
 
 | Módulo | Requisitos | Incrementos |
 |---|---|---|
-| Cuenta | CUE-00 a CUE-05, CUE-07, CUE-08 | I-03, I-06, I-13, I-14, I-15, I-25 |
+| Cuenta | CUE-00 a CUE-05, CUE-07 a CUE-09 | I-03, I-06, I-13, I-14, I-15, I-25 |
 | Ejercicios | EJE-01 a EJE-06 | I-02, I-04, I-26 |
-| Rutinas | RUT-01 a RUT-05 | I-05, I-06, I-18 |
+| Rutinas | RUT-01 a RUT-05 | I-05, I-06, I-17, I-18 |
 | Sesión | SES-01 a SES-12 | I-07, I-08, I-09 |
 | Cardio | CAR-01, CAR-02 | I-16 |
 | Historial | HIS-01 a HIS-07 | I-17, I-18, I-21, I-23 |
 | Recomendaciones | REC-01 | I-21 |
-| Running | RUN-01 a RUN-11 | I-10, I-11, I-12, I-20, I-23 |
+| Running | RUN-01 a RUN-11, RUN-13, RUN-14 | I-10, I-11, I-12, I-17, I-20, I-23 |
 | Sincronización | SIN-01 a SIN-06 | I-13, I-14, I-15 |
 | Ajustes | AJU-01 a AJU-04 | I-06, I-09, I-21, I-23 |
 | No funcionales | RNF-01 a RNF-08 | I-01, I-15, I-19, I-22, I-24 |

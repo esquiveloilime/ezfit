@@ -126,3 +126,29 @@ export function copyName(name: string, suffix: string): string {
   const full = `${name} ${suffix}`;
   return full.length <= LIMITS.name ? full : full.slice(0, LIMITS.name);
 }
+
+/** Grupos de la sección Rutinas; cada uno se muestra como una tarjeta (RUT-01). */
+export const ROUTINE_SECTIONS = ['mine', 'plans', 'time', 'split'] as const;
+export type RoutineSection = (typeof ROUTINE_SECTIONS)[number];
+
+export function isRoutineSection(value: unknown): value is RoutineSection {
+  return typeof value === 'string' && (ROUTINE_SECTIONS as readonly string[]).includes(value);
+}
+
+type TemplateLike = { name: string; category: string; estimatedMinutes: number | null };
+
+/**
+ * Reparte las plantillas en Por tiempo y en Pierna, Push y Pull (anexo A). Las de músculo se
+ * agrupan por el prefijo de su nombre ("Push 45 min") y quedan de menor a mayor duración.
+ */
+export function groupTemplates<T extends TemplateLike>(templates: readonly T[], splitPrefixes: readonly string[]) {
+  const byMinutes = (a: T, b: T) => (a.estimatedMinutes ?? 0) - (b.estimatedMinutes ?? 0);
+  const muscle = templates.filter((r) => r.category === 'muscle');
+  return {
+    byTime: templates.filter((r) => r.category === 'time').sort(byMinutes),
+    split: splitPrefixes.map((prefix) => ({
+      prefix,
+      routines: muscle.filter((r) => r.name.startsWith(`${prefix} `)).sort(byMinutes),
+    })),
+  };
+}

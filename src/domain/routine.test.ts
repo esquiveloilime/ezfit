@@ -3,6 +3,8 @@ import {
   type DraftItem,
   formatRest,
   formatTarget,
+  groupTemplates,
+  isRoutineSection,
   moveItem,
   validateRoutineDraft,
 } from './routine';
@@ -103,5 +105,38 @@ describe('formatos', () => {
   it('nombre de la copia', () => {
     expect(copyName('Pecho', '(copia)')).toBe('Pecho (copia)');
     expect(copyName('x'.repeat(58), '(copia)')).toHaveLength(60);
+  });
+});
+
+describe('groupTemplates', () => {
+  const r = (name: string, category: string, estimatedMinutes: number | null) => ({ name, category, estimatedMinutes });
+  const templates = [
+    r('Rutina de 60 min', 'time', 60),
+    r('Push 60 min', 'muscle', 60),
+    r('Rutina de 30 min', 'time', 30),
+    r('Pierna 45 min', 'muscle', 45),
+    r('Push 30 min', 'muscle', 30),
+    r('Plan de 3 días', 'plan', null),
+  ];
+
+  it('separa las de tiempo, ordenadas por duración', () => {
+    expect(groupTemplates(templates, []).byTime.map((x) => x.name)).toEqual(['Rutina de 30 min', 'Rutina de 60 min']);
+  });
+
+  it('agrupa las de músculo por prefijo y deja vacío el grupo sin rutinas', () => {
+    const { split } = groupTemplates(templates, ['Pierna', 'Push', 'Pull']);
+    expect(split.map((g) => [g.prefix, g.routines.map((x) => x.name)])).toEqual([
+      ['Pierna', ['Pierna 45 min']],
+      ['Push', ['Push 30 min', 'Push 60 min']],
+      ['Pull', []],
+    ]);
+  });
+});
+
+describe('isRoutineSection', () => {
+  it('acepta solo los grupos conocidos', () => {
+    expect(isRoutineSection('plans')).toBe(true);
+    expect(isRoutineSection('otra')).toBe(false);
+    expect(isRoutineSection(undefined)).toBe(false);
   });
 });

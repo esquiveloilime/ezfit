@@ -4,7 +4,7 @@
 import { SYNCED_TABLES } from '@/db/schema';
 
 import type { Row, SyncedTable } from './columns';
-import { toRemote } from './transform';
+import { shouldApplyRemote, toRemote } from './transform';
 
 /** Lo que el motor necesita de la base de datos del teléfono. */
 export interface Local {
@@ -21,7 +21,20 @@ export interface Local {
   replaceProfile(localId: string, remote: Row): void;
   /** Cambia el identificador del perfil del teléfono por el que ya tiene la cuenta. */
   renameProfile(localId: string, remoteId: string): void;
+  /** Hasta dónde se bajó cada tabla la última vez. */
+  cursor(table: SyncedTable): Cursor | null;
+  setCursor(table: SyncedTable, cursor: Cursor): void;
+  /** Versión del teléfono de cada registro, para decidir si se aplica el del servidor. */
+  versions(table: SyncedTable, ids: readonly string[]): Map<string, { updated_at: number; sync_status: string }>;
+  /** Guarda los registros bajados, ya marcados como sincronizados. */
+  apply(table: SyncedTable, rows: readonly Row[]): void;
 }
+
+/**
+ * Punto de corte de la bajada: la fecha del servidor y, para desempatar los registros que
+ * se guardaron en el mismo instante, su id (plan técnico, sección 5: reloj).
+ */
+export type Cursor = { at: string; id: string };
 
 /** Lo que el motor necesita de Supabase. */
 export interface Remote {
@@ -29,6 +42,8 @@ export interface Remote {
   upsert(table: SyncedTable, rows: Row[]): Promise<void>;
   /** El perfil de la cuenta en el servidor, si existe. */
   profile(userId: string): Promise<Row | null>;
+  /** Registros del usuario modificados después del punto de corte, ordenados por fecha del servidor e id. */
+  pull(table: SyncedTable, userId: string, after: Cursor | null, limit: number): Promise<Row[]>;
 }
 
 /** Cuántos registros se mandan por petición. */
@@ -73,4 +88,43 @@ export async function push(local: Local, remote: Remote, owner: string): Promise
     }
   }
   return uploaded;
+}
+
+/**
+ * Baja lo que cambió en el servidor desde la última vez. Un registro bajado se aplica solo
+ * si el del teléfono no está pendiente o si el del servidor es más reciente (SIN-05).
+ */
+export async function pull(local: Local, remote: Remote, owner: string): Promise<number> {
+  let applied = 0;
+  for (const table of SYNCED_TABLES) {
+    let after = local.cursor(table);
+    for (;;) {
+      const rows = await remote.pull(table, owner, after, BATCH_SIZE);
+      if (rows.length === 0) break;
+      const versions = local.versions(
+        table,
+        rows.map((r) => String(r.id)),
+      );
+      const fresh = rows.filter((r) => {
+        const mine = versions.get(String(r.id)) ?? null;
+        // Lo que este teléfono acaba de subir regresa igual: no hace falta volver a guardarlo.
+        if (mine?.sync_status === 'synced' && mine.updated_at === Number(r.updated_at)) return false;
+        return shouldApplyRemote(mine, { updated_at: r.updated_at ?? 0 });
+      });
+      local.apply(table, fresh);
+      applied += fresh.length;
+      const last = rows[rows.length - 1]!;
+      after = { at: String(last.server_updated_at), id: String(last.id) };
+      local.setCursor(table, after);
+      if (rows.length < BATCH_SIZE) break;
+    }
+  }
+  return applied;
+}
+
+/** Una sincronización completa: primero se sube y luego se baja. */
+export async function sync(local: Local, remote: Remote, owner: string): Promise<{ uploaded: number; applied: number }> {
+  const uploaded = await push(local, remote, owner);
+  const applied = await pull(local, remote, owner);
+  return { uploaded, applied };
 }

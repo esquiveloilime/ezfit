@@ -167,7 +167,9 @@ Al abrir la app, al recuperar la conexión, al terminar una sesión o una activi
 
 ### Reglas
 
-- **Conflictos:** gana la modificación más reciente, registro por registro.
+- **Conflictos:** gana la modificación más reciente, registro por registro. En el servidor, un disparador ignora la subida de una versión más antigua que la guardada (migración 0004), y en el teléfono el registro bajado solo se aplica según la regla de la bajada.
+- **Teléfono nuevo:** la primera vez que se abre la base de una cuenta, la app espera a terminar la bajada antes de mostrar las pantallas, con la opción de continuar sin esperar; así no pide la incorporación a quien ya la hizo (SIN-04).
+- **Running:** una actividad se sube hasta que se guarda o se descarta; mientras está en curso o en el resumen solo existe en el teléfono que la grabó.
 - **Reloj:** el punto de corte de cada bajada usa una marca de tiempo puesta por el servidor, para no perder cambios si el reloj del teléfono está mal.
 - **Fallos:** si una subida falla, los registros siguen pendientes y se reintenta en la siguiente ocasión. El estado de error se muestra en **Perfil** (SIN-03).
 - **Seguridad:** cada tabla en Supabase tiene reglas por fila: un usuario solo puede leer y escribir registros cuyo `user_id` es el suyo. El catálogo y las plantillas son de solo lectura para todos.

@@ -15,9 +15,14 @@ void SplashScreen.preventAutoHideAsync();
 configureNotifications();
 
 /** Abre la base de datos del dueño actual; en la bienvenida no hace falta ninguna. */
-function WithDatabase({ owner, children }: { owner: string | null; children: ReactNode }) {
+function WithDatabase({ owner, synced, children }: { owner: string | null; synced: boolean; children: ReactNode }) {
   if (!owner) return <>{children}</>;
-  return <DatabaseProvider owner={owner}>{children}</DatabaseProvider>;
+  return (
+    <DatabaseProvider owner={owner}>
+      {/* Solo con cuenta: en modo sin cuenta no se sincroniza nada (CUE-07). */}
+      {synced ? <AutoSync>{children}</AutoSync> : children}
+    </DatabaseProvider>
+  );
 }
 
 export default function RootLayout() {
@@ -41,9 +46,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <WithDatabase key={owner ?? 'welcome'} owner={owner}>
-        {/* Solo con cuenta: en modo sin cuenta no se sincroniza nada (CUE-07). */}
-        {mode === 'user' ? <AutoSync /> : null}
+      <WithDatabase key={owner ?? 'welcome'} owner={owner} synced={mode === 'user'}>
         <Stack
           screenOptions={{
             headerShown: false,

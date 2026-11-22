@@ -19,5 +19,20 @@ export function supabaseRemote(client: SupabaseClient): Remote {
       if (error) throw new Error(`No se pudo leer el perfil: ${error.message}`);
       return data ?? null;
     },
+
+    async pull(table, userId, after, limit) {
+      let query = client.from(table).select('*').eq('user_id', userId);
+      if (after) {
+        // Después del punto de corte; con la misma fecha, los de id mayor.
+        query = query.or(`server_updated_at.gt."${after.at}",and(server_updated_at.eq."${after.at}",id.gt.${after.id})`);
+      }
+      const { data, error } = await query
+        .order('server_updated_at', { ascending: true })
+        .order('id', { ascending: true })
+        .limit(limit)
+        .returns<Row[]>();
+      if (error) throw new Error(`No se pudo bajar ${table}: ${error.message}`);
+      return data ?? [];
+    },
   };
 }

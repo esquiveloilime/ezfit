@@ -4,12 +4,12 @@ import { create } from 'zustand';
 import { isOnline } from '@/services/network';
 import { getSupabase } from '@/services/supabase';
 
-import { push } from './engine';
-import { sqliteLocal } from './sqliteLocal';
+import { sync } from './engine';
+import { markRestored, sqliteLocal } from './sqliteLocal';
 import { supabaseRemote } from './supabaseRemote';
 
-// Cuándo y cómo se ejecuta la sincronización (plan técnico, sección 5; SIN-02). Nunca
-// bloquea la pantalla: corre en segundo plano y, si falla, todo sigue pendiente.
+// Cuándo y cómo se ejecuta la sincronización (plan técnico, sección 5; SIN-02, SIN-03).
+// Nunca bloquea la pantalla: corre en segundo plano y, si falla, todo sigue pendiente.
 
 export type SyncStatus = 'idle' | 'syncing' | 'offline' | 'error';
 
@@ -24,7 +24,7 @@ let again = false;
 
 export function setSyncTarget(value: { sqlite: SQLiteDatabase; owner: string } | null): void {
   target = value;
-  if (!value) useSyncStore.setState({ status: 'idle', lastSyncedAt: null });
+  useSyncStore.setState({ status: 'idle', lastSyncedAt: null });
 }
 
 async function runOnce(): Promise<void> {
@@ -37,7 +37,8 @@ async function runOnce(): Promise<void> {
   }
   useSyncStore.setState({ status: 'syncing' });
   try {
-    await push(sqliteLocal(current.sqlite), supabaseRemote(client), current.owner);
+    await sync(sqliteLocal(current.sqlite), supabaseRemote(client), current.owner);
+    markRestored(current.sqlite);
     // Si mientras tanto se cambió de cuenta, no se reporta nada de la anterior.
     if (target === current) useSyncStore.setState({ status: 'idle', lastSyncedAt: Date.now() });
   } catch (error) {

@@ -16,6 +16,8 @@ Se hace una sola vez, desde la computadora.
 1. En el menú izquierdo entra a **SQL Editor** y toca **New query**.
 2. Abre el archivo `supabase/migrations/0001_esquema.sql` de este proyecto, copia todo su contenido, pégalo y toca **Run**. Debe decir *Success*.
 3. Repite con `supabase/migrations/0002_catalogo.sql` (los 83 ejercicios del catálogo).
+4. Repite con `supabase/migrations/0003_plantillas.sql` (las rutinas y planes predeterminados).
+5. Repite con `supabase/migrations/0004_gana_el_mas_reciente.sql` (para que un teléfono que estuvo sin conexión no reemplace un cambio más reciente de otro teléfono).
 
 Las migraciones se aplican siempre en orden de número, una sola vez cada una. `0002_catalogo.sql` sí se puede volver a ejecutar sin problema.
 

@@ -1,5 +1,5 @@
 import type { Row, SyncedTable } from './columns';
-import { BATCH_SIZE, type Local, push, type Remote } from './engine';
+import { BATCH_SIZE, type Cursor, type Local, pull, push, type Remote, sync } from './engine';
 
 const USER = '11111111-1111-4111-8111-111111111111';
 
@@ -37,6 +37,30 @@ class FakeLocal implements Local {
     this.tables.get('profiles')!.delete(localId);
     this.put('profiles', { ...row, id: remoteId });
   }
+  cursors = new Map<SyncedTable, Cursor>();
+  cursor(table: SyncedTable) {
+    return this.cursors.get(table) ?? null;
+  }
+  setCursor(table: SyncedTable, cursor: Cursor) {
+    this.cursors.set(table, cursor);
+  }
+  versions(table: SyncedTable, ids: readonly string[]) {
+    const out = new Map<string, { updated_at: number; sync_status: string }>();
+    for (const id of ids) {
+      const row = this.get(table, id);
+      if (row) out.set(id, { updated_at: Number(row.updated_at), sync_status: String(row.sync_status) });
+    }
+    return out;
+  }
+  applied = 0;
+  apply(table: SyncedTable, rows: readonly Row[]) {
+    for (const row of rows) {
+      const copy = { ...row };
+      delete copy.server_updated_at;
+      this.put(table, { ...copy, sync_status: 'synced' });
+      this.applied++;
+    }
+  }
 }
 
 /** Supabase en memoria: inserta o actualiza por id, como el `upsert` real. */
@@ -46,12 +70,29 @@ class FakeRemote implements Remote {
   failOnCall: number | null = null;
   onUpsert: (() => void) | null = null;
 
+  /** Reloj del servidor: todo lo de una misma petición queda con la misma fecha, como en Postgres. */
+  clock = 0;
   async upsert(table: SyncedTable, rows: Row[]) {
     this.calls++;
     if (this.failOnCall === this.calls) throw new Error('sin conexión');
     if (!this.tables.has(table)) this.tables.set(table, new Map());
-    for (const row of rows) this.tables.get(table)!.set(String(row.id), row);
+    const at = `t${String(++this.clock).padStart(6, '0')}`;
+    const stored = this.tables.get(table)!;
+    for (const row of rows) {
+      // Como la migración 0004: una versión más antigua que la guardada se ignora.
+      const old = stored.get(String(row.id));
+      if (old && Number(row.updated_at) < Number(old.updated_at)) continue;
+      stored.set(String(row.id), { ...row, server_updated_at: at });
+    }
     this.onUpsert?.();
+  }
+  async pull(table: SyncedTable, userId: string, after: Cursor | null, limit: number) {
+    const key = (r: Row) => `${String(r.server_updated_at)}|${String(r.id)}`;
+    const from = after ? `${after.at}|${after.id}` : '';
+    return [...(this.tables.get(table)?.values() ?? [])]
+      .filter((r) => r.user_id === userId && key(r) > from)
+      .sort((a, b) => (key(a) < key(b) ? -1 : 1))
+      .slice(0, limit);
   }
   async profile(userId: string) {
     return [...(this.tables.get('profiles')?.values() ?? [])].find((r) => r.user_id === userId) ?? null;
@@ -183,5 +224,126 @@ describe('push', () => {
       expect(uploaded.size).toBe(1);
       expect(uploaded.get('acct')?.weight_unit).toBe('kg');
     });
+  });
+});
+
+describe('pull', () => {
+  it('un teléfono nuevo recupera todo lo de la cuenta, ya sincronizado (SIN-04)', async () => {
+    const phoneA = new FakeLocal();
+    const phoneB = new FakeLocal();
+    const remote = new FakeRemote();
+    phoneA.put('workouts', workout('w1'));
+    phoneA.put('runs', { id: 'r1', updated_at: 1, kind: 'run', status: 'finished', started_at: 1, route: 'abc' });
+    await sync(phoneA, remote, USER);
+
+    await sync(phoneB, remote, USER);
+
+    expect(phoneB.get('workouts', 'w1')?.sync_status).toBe('synced');
+    expect(phoneB.get('runs', 'r1')?.route).toBe('abc');
+    expect('server_updated_at' in phoneB.get('runs', 'r1')!).toBe(false);
+  });
+
+  it('solo baja los registros de la cuenta', async () => {
+    const phone = new FakeLocal();
+    const remote = new FakeRemote();
+    await remote.upsert('workouts', [{ ...workout('ajeno'), user_id: 'otra-cuenta' }]);
+
+    await pull(phone, remote, USER);
+    expect(phone.get('workouts', 'ajeno')).toBeNull();
+  });
+
+  it('un pendiente del teléfono no se reemplaza por una versión más antigua del servidor', async () => {
+    const phone = new FakeLocal();
+    const remote = new FakeRemote();
+    await remote.upsert('workouts', [{ ...workout('w1', { updated_at: 5, notes: 'servidor' }), user_id: USER }]);
+    phone.put('workouts', workout('w1', { updated_at: 9, notes: 'teléfono' }));
+
+    await pull(phone, remote, USER);
+    expect(phone.get('workouts', 'w1')?.notes).toBe('teléfono');
+    expect(phone.get('workouts', 'w1')?.sync_status).toBe('pending');
+  });
+
+  it('si el mismo registro cambió en dos teléfonos, queda el más reciente en los dos (SIN-05)', async () => {
+    const phoneA = new FakeLocal();
+    const phoneB = new FakeLocal();
+    const remote = new FakeRemote();
+    phoneA.put('workouts', workout('w1', { notes: 'original' }));
+    await sync(phoneA, remote, USER);
+    await sync(phoneB, remote, USER);
+
+    phoneA.put('workouts', workout('w1', { updated_at: 10, notes: 'de A, antes' }));
+    phoneB.put('workouts', workout('w1', { updated_at: 20, notes: 'de B, después' }));
+    await sync(phoneB, remote, USER);
+    await sync(phoneA, remote, USER);
+    await sync(phoneB, remote, USER);
+
+    expect(phoneA.get('workouts', 'w1')?.notes).toBe('de B, después');
+    expect(phoneB.get('workouts', 'w1')?.notes).toBe('de B, después');
+  });
+
+  it('un borrado hecho sin conexión llega al servidor y a otro teléfono', async () => {
+    const phoneA = new FakeLocal();
+    const phoneB = new FakeLocal();
+    const remote = new FakeRemote();
+    phoneA.put('routines', { id: 'rt1', updated_at: 1, name: 'Mi rutina', category: 'own' });
+    await sync(phoneA, remote, USER);
+    await sync(phoneB, remote, USER);
+
+    // Sin conexión: el borrado queda pendiente en el teléfono A.
+    phoneA.put('routines', { id: 'rt1', updated_at: 2, name: 'Mi rutina', category: 'own', deleted_at: 2 });
+    await sync(phoneA, remote, USER);
+    await sync(phoneB, remote, USER);
+
+    expect(remote.tables.get('routines')!.get('rt1')?.deleted_at).toBe(2);
+    expect(phoneB.get('routines', 'rt1')?.deleted_at).toBe(2);
+  });
+
+  it('la segunda bajada solo trae lo nuevo', async () => {
+    const phone = new FakeLocal();
+    const remote = new FakeRemote();
+    await remote.upsert('workouts', [{ ...workout('w1'), user_id: USER }]);
+    await pull(phone, remote, USER);
+    phone.applied = 0;
+
+    await remote.upsert('workouts', [{ ...workout('w2'), user_id: USER }]);
+    await pull(phone, remote, USER);
+    expect(phone.applied).toBe(1);
+  });
+
+  it('no se salta registros guardados en el mismo instante aunque sean más que una tanda', async () => {
+    const phone = new FakeLocal();
+    const remote = new FakeRemote();
+    const many = Array.from({ length: BATCH_SIZE * 2 + 1 }, (_, i) => ({
+      id: `s${String(i).padStart(4, '0')}`,
+      user_id: USER,
+      updated_at: 1,
+      workout_exercise_id: 'we1',
+      position: i,
+      performed_at: 1,
+    }));
+    await remote.upsert('sets', many);
+
+    await pull(phone, remote, USER);
+    expect(phone.tables.get('sets')?.size).toBe(BATCH_SIZE * 2 + 1);
+  });
+
+  it('del modo sin cuenta a una cuenta con datos: conserva los de los dos lados y los ajustes de la cuenta', async () => {
+    const otherPhone = new FakeLocal();
+    const remote = new FakeRemote();
+    otherPhone.put('profiles', { id: 'acct', updated_at: 1, weight_unit: 'lb', onboarding_completed: 1 });
+    otherPhone.put('workouts', workout('de-la-cuenta'));
+    await sync(otherPhone, remote, USER);
+
+    // Datos del modo sin cuenta, ya con el dueño nuevo (CUE-07).
+    const phone = new FakeLocal();
+    phone.put('profiles', { id: 'guest', updated_at: 9, weight_unit: 'kg', onboarding_completed: 1 });
+    phone.put('workouts', workout('del-telefono'));
+    await sync(phone, remote, USER);
+
+    expect(phone.get('workouts', 'de-la-cuenta')).not.toBeNull();
+    expect(phone.get('workouts', 'del-telefono')).not.toBeNull();
+    expect(remote.count('workouts')).toBe(2);
+    expect(phone.profile(USER)?.weight_unit).toBe('lb');
+    expect(remote.count('profiles')).toBe(1);
   });
 });

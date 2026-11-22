@@ -6,7 +6,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseProvider } from '@/db/DatabaseProvider';
 import { ownerFor, useAccount } from '@/features/account/accountStore';
-import { t } from '@/i18n';
 import { configureNotifications } from '@/services/notifications';
 import { colors } from '@/ui';
 
@@ -54,38 +53,10 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)/welcome" />
           </Stack.Protected>
 
-          {/* Pantallas principales: con o sin cuenta. */}
+          {/* Pantallas principales: con o sin cuenta. Las de cada sección viven dentro de (tabs). */}
           <Stack.Protected guard={mode !== 'welcome'}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
-            <Stack.Screen
-              name="exercises/index"
-              options={{ headerShown: true, title: t.exercises.catalogTitle }}
-            />
-            <Stack.Screen
-              name="exercises/[id]"
-              options={{ headerShown: true, title: t.exercises.detailTitle }}
-            />
-            <Stack.Screen name="exercises/new" options={{ headerShown: true, title: '' }} />
-            <Stack.Screen name="exercises/edit/[id]" options={{ headerShown: true, title: '' }} />
-            <Stack.Screen
-              name="exercises/pick"
-              options={{ headerShown: true, title: t.exercises.pickTitle }}
-            />
-            <Stack.Screen
-              name="routines/[id]"
-              options={{ headerShown: true, title: t.routines.detailTitle }}
-            />
-            <Stack.Screen name="routines/edit" options={{ headerShown: true, title: '' }} />
-            <Stack.Screen
-              name="plans/[id]"
-              options={{ headerShown: true, title: t.routines.planTitle }}
-            />
-            <Stack.Screen name="workout/index" options={{ headerShown: true, title: t.workout.title }} />
-            <Stack.Screen name="workout/finish" options={{ headerShown: true, title: '' }} />
-            <Stack.Screen name="run/live" options={{ headerShown: true, title: t.tabs.run }} />
-            <Stack.Screen name="run/summary" options={{ headerShown: true, title: t.run.summaryTitle }} />
-            <Stack.Screen name="runs/[id]" options={{ headerShown: true, title: t.run.detailTitle }} />
           </Stack.Protected>
 
           {/* Registro e inicio de sesión: desde la bienvenida o desde el modo sin cuenta. */}

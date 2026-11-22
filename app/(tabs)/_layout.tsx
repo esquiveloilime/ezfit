@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, Tabs, useSegments } from 'expo-router';
 import type { ComponentProps } from 'react';
 import type { ColorValue } from 'react-native';
 
@@ -18,6 +18,10 @@ function tabIcon(name: IconName) {
 
 export default function TabsLayout() {
   const { loading, profile } = useProfile();
+  const segments = useSegments();
+  // La barra se ve en todas las pantallas salvo mientras se graba una actividad, para no
+  // salir de ella por accidente (navegación, especificación sección 5).
+  const recording = segments.at(-1) === 'live';
   if (loading) return null;
   // La incorporación se muestra una sola vez por cuenta o por teléfono sin cuenta (CUE-05).
   if (!profile?.onboardingCompleted) return <Redirect href="/onboarding" />;
@@ -29,26 +33,26 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontSize: font.small },
-        tabBarStyle: { backgroundColor: colors.surface, minHeight: 60 },
+        tabBarStyle: recording ? { display: 'none' } : { backgroundColor: colors.surface, minHeight: 60 },
       }}>
       <Tabs.Screen
-        name="index"
+        name="(today)"
         options={{ title: t.tabs.today, tabBarIcon: tabIcon('today-outline') }}
       />
       <Tabs.Screen
-        name="routines"
+        name="(routines)"
         options={{ title: t.tabs.routines, tabBarIcon: tabIcon('barbell-outline') }}
       />
       <Tabs.Screen
-        name="run"
+        name="(run)"
         options={{ title: t.tabs.run, tabBarIcon: tabIcon('walk-outline') }}
       />
       <Tabs.Screen
-        name="history"
+        name="(history)"
         options={{ title: t.tabs.history, tabBarIcon: tabIcon('time-outline') }}
       />
       <Tabs.Screen
-        name="profile"
+        name="(profile)"
         options={{ title: t.tabs.profile, tabBarIcon: tabIcon('person-outline') }}
       />
     </Tabs>

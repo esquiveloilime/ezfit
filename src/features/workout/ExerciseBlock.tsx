@@ -134,16 +134,17 @@ export function ExerciseBlock({
 
   return (
     <Card>
+      {/* El nombre va arriba con todo el ancho y los botones en una fila debajo. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: true }}
+        accessibilityLabel={format(t.workout.collapse, { name })}
+        onPress={onToggle}
+        style={({ pressed }) => [styles.titleBox, pressed && styles.pressed]}>
+        <Text style={styles.name}>{name}</Text>
+        {targetText ? <Text style={styles.meta}>{format(t.workout.target, { target: targetText })}</Text> : null}
+      </Pressable>
       <View style={styles.header}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded: true }}
-          accessibilityLabel={format(t.workout.collapse, { name })}
-          onPress={onToggle}
-          style={({ pressed }) => [styles.titleBox, pressed && styles.pressed]}>
-          <Text style={styles.name}>{name}</Text>
-          {targetText ? <Text style={styles.meta}>{format(t.workout.target, { target: targetText })}</Text> : null}
-        </Pressable>
         <IconButton icon="close" tone="danger" label={format(t.workout.remove, { name })} onPress={confirmRemove} />
         <IconButton
           icon="information-circle-outline"
@@ -162,6 +163,7 @@ export function ExerciseBlock({
           disabled={index === total - 1}
           onPress={() => onMove(index, index + 1)}
         />
+        <View style={styles.spacer} />
         {/* Cerrar va en la orilla derecha, en el mismo lugar que la flecha para abrir. */}
         <IconButton icon="chevron-up" tone="muted" label={format(t.workout.collapse, { name })} onPress={onToggle} />
       </View>
@@ -438,6 +440,7 @@ const styles = StyleSheet.create({
   warmupText: { color: colors.textMuted },
   setMeta: { fontSize: font.small, color: colors.textMuted },
   header: { flexDirection: 'row', alignItems: 'center' },
+  spacer: { flex: 1 },
   titleBox: { flex: 1, minHeight: minTouch, justifyContent: 'center' },
   collapsed: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   name: { fontSize: font.body, fontWeight: '700', color: colors.primary },

@@ -7,6 +7,7 @@ import { discardRun, runByIdQuery, type RunRow, saveRun } from '@/db/repositorie
 import { useQuery } from '@/db/useQuery';
 import { dayPart, decodeRoute } from '@/domain/run';
 import { t } from '@/i18n';
+import { requestSync } from '@/sync';
 import { Button, EmptyState, Screen, TextField, colors, font } from '@/ui';
 
 import { RunMap } from './RunMap';
@@ -42,6 +43,8 @@ function Summary({ run }: { run: RunRow }) {
     try {
       const fallback = t.run.defaultName[run.kind][dayPart(new Date(run.startedAt))];
       saveRun(db, run.id, { name: name.trim() || fallback, notes: notes.trim() || null });
+      // Al guardar una actividad se sube sola (SIN-02).
+      void requestSync();
       router.back();
     } catch (error) {
       console.error('No se pudo guardar la actividad', error);

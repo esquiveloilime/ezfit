@@ -16,6 +16,7 @@ import { useQuery } from '@/db/useQuery';
 import { canSaveWorkout, formatDuration, formatThousands, workoutSummary } from '@/domain/workout';
 import { useProfile } from '@/features/onboarding/useProfile';
 import { format, t } from '@/i18n';
+import { requestSync } from '@/sync';
 import { Button, Card, Chip, EmptyState, Screen, TextField, colors, font, spacing } from '@/ui';
 
 import { stopRest } from './restTimer';
@@ -66,6 +67,8 @@ function Finish({ workout, profile }: { workout: WorkoutRow; profile: ProfileRow
     try {
       stopRest(db);
       finishWorkout(db, workout.id, { mood, notes: notes.trim() || null });
+      // Al terminar una sesión se sube sola (SIN-02).
+      void requestSync();
       done();
     } catch (error) {
       console.error('No se pudo guardar la sesión', error);

@@ -12,3 +12,14 @@ export async function isOnline(): Promise<boolean> {
     return false;
   }
 }
+
+/** Avisa cada vez que el teléfono recupera internet. Devuelve la función para dejar de escuchar. */
+export function onReconnect(callback: () => void): () => void {
+  let online: boolean | null = null;
+  const subscription = Network.addNetworkStateListener((state) => {
+    const now = state.isConnected === true && state.isInternetReachable !== false;
+    if (now && online === false) callback();
+    online = now;
+  });
+  return () => subscription.remove();
+}

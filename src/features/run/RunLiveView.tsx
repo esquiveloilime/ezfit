@@ -58,13 +58,20 @@ export function RunLiveView() {
   }
 
   return (
-    <Screen>
+    // Sin desplazamiento: el mapa ocupa lo que sobra y pausar y terminar siempre se ven.
+    <Screen scroll={false}>
       <Stack.Screen options={{ title: t.run.kinds[active.kind] }} />
-      <RunMap follow={follow} segments={segments} showsUser height={280} />
-      <View style={styles.row}>
-        <SignalBadge quality={signalQuality(lastFix, now)} />
-        {paused ? <Text style={styles.paused}>{t.run.pausedTag}</Text> : null}
-      </View>
+      <RunMap
+        follow={follow}
+        segments={segments}
+        showsUser
+        overlay={
+          <View style={styles.row}>
+            <SignalBadge quality={signalQuality(lastFix, now)} />
+            {paused ? <Text style={styles.paused}>{t.run.pausedTag}</Text> : null}
+          </View>
+        }
+      />
 
       <Card>
         <Metric label={t.run.time} value={formatElapsed(seconds)} big />
@@ -81,12 +88,18 @@ export function RunLiveView() {
         </View>
       </Card>
 
-      {paused ? (
-        <Button label={t.run.resume} onPress={() => resumeRun(db)} />
-      ) : (
-        <Button label={t.run.pause} onPress={() => pauseRun(db)} />
-      )}
-      <Button variant="secondary" label={t.run.finish} onPress={confirmFinish} />
+      <View style={styles.actions}>
+        <View style={styles.action}>
+          {paused ? (
+            <Button label={t.run.resume} onPress={() => resumeRun(db)} />
+          ) : (
+            <Button label={t.run.pause} onPress={() => pauseRun(db)} />
+          )}
+        </View>
+        <View style={styles.action}>
+          <Button variant="secondary" label={t.run.finish} onPress={confirmFinish} />
+        </View>
+      </View>
       <Text style={styles.hint}>{t.run.keepScreenOn}</Text>
     </Screen>
   );
@@ -113,6 +126,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     overflow: 'hidden',
   },
+  actions: { flexDirection: 'row', gap: spacing.md },
+  action: { flex: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   metric: { flexGrow: 1, flexBasis: '28%', gap: 2 },
   metricBig: { alignItems: 'center' },

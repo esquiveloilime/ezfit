@@ -319,6 +319,7 @@ En la sección **Rutinas**, Mis rutinas, Planes semanales, Por tiempo, Pierna Pu
 
 **SES-06 · P1 · Máquina usada**
 - En cada ejercicio de la sesión hay un campo de texto libre para anotar la máquina o marca usada.
+- Para ocupar poco espacio, el campo se muestra como una sola línea ("Máquina: Hammer Strength", o "Anotar máquina o marca" si está vacío); al tocarla se abre para escribir y al terminar vuelve a ser una línea.
 - Al escribir, sugiere las máquinas que el usuario ya anotó antes para ese ejercicio.
 - Por defecto viene la última máquina usada en ese ejercicio.
 
@@ -332,6 +333,9 @@ En la sección **Rutinas**, Mis rutinas, Planes semanales, Por tiempo, Pierna Pu
 - Mientras corre se puede sumar o restar 15 segundos, o saltarlo.
 - Al terminar avisa con sonido y vibración. Si la app está en segundo plano o la pantalla apagada, avisa con una notificación.
 - El inicio automático se puede desactivar en ajustes.
+
+**SES-13 · P2 · Descanso en la barra de notificaciones**
+- Mientras corre un descanso y la app está minimizada, la barra de notificaciones muestra el ícono de ezfit y una notificación con el tiempo que queda del descanso. Se quita al terminar o saltar el descanso.
 
 **SES-09 · P1 · Editar y eliminar series**
 - Cualquier serie de la sesión en curso se puede corregir o eliminar.

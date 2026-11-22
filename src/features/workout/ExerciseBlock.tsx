@@ -390,6 +390,8 @@ function MachineField({
   const { db, owner } = useDatabase();
   const [value, setValue] = useState(saved ?? '');
   const [focused, setFocused] = useState(false);
+  // Plegado ocupa una sola línea; se abre al tocarlo (SES-06).
+  const [editing, setEditing] = useState(false);
   const history = useMemo(() => machineHistory(db, owner, exerciseId), [db, owner, exerciseId]);
   const suggestions = focused ? machineSuggestions(history, value, 4) : [];
 
@@ -398,9 +400,28 @@ function MachineField({
     if (machine !== saved) setMachine(db, workoutExerciseId, machine);
   }
 
+  if (!editing) {
+    const current = cleanMachine(value);
+    const text = current ? format(t.workout.machineLine, { name: current }) : t.workout.machineAdd;
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={current ? format(t.workout.machineEdit, { name: current }) : t.workout.machineAdd}
+        onPress={() => setEditing(true)}
+        style={({ pressed }) => [styles.machineLine, pressed && styles.pressed]}>
+        <Ionicons name="construct-outline" size={18} color={colors.textMuted} />
+        <Text style={[styles.machineText, !current && styles.machineEmpty]} numberOfLines={1}>
+          {text}
+        </Text>
+        <Ionicons name="pencil-outline" size={18} color={colors.primary} />
+      </Pressable>
+    );
+  }
+
   return (
     <View style={styles.machine}>
       <TextField
+        autoFocus
         label={t.workout.machine}
         placeholder={t.workout.machinePlaceholder}
         value={value}
@@ -408,6 +429,7 @@ function MachineField({
         onFocus={() => setFocused(true)}
         onBlur={() => {
           setFocused(false);
+          setEditing(false);
           save(value);
         }}
         maxLength={60}
@@ -423,6 +445,7 @@ function MachineField({
               onPress={() => {
                 setValue(m);
                 save(m);
+                setEditing(false);
               }}
             />
           ))}
@@ -434,6 +457,9 @@ function MachineField({
 
 const styles = StyleSheet.create({
   machine: { gap: spacing.xs },
+  machineLine: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: minTouch },
+  machineText: { flex: 1, fontSize: font.body, color: colors.text },
+  machineEmpty: { color: colors.primary },
   suggestions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   warmupRow: { backgroundColor: colors.warningSoft },
   warmupNumber: { color: colors.warning },

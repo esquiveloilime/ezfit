@@ -422,9 +422,9 @@ Cómo probarlo:
 
 ### I-23 · Requisitos P2 restantes
 
-En este orden, hasta donde alcance el tiempo: parciales por kilómetro, récords personales, editar sesiones pasadas, cambiar plan y días de entrenamiento, y compartir el resumen de una actividad como imagen.
+En este orden, hasta donde alcance el tiempo: parciales por kilómetro, récords personales, editar sesiones pasadas, cambiar plan y días de entrenamiento, compartir el resumen de una actividad como imagen y el descanso en la barra de notificaciones.
 
-Cubre: RUN-11, HIS-07, HIS-06, AJU-04, RUN-14.
+Cubre: RUN-11, HIS-07, HIS-06, AJU-04, RUN-14, SES-13.
 
 Cómo probarlo:
 - [ ] Cada función terminada cumple sus criterios de la especificación.
@@ -445,14 +445,15 @@ Cómo probarlo:
 
 Se recorta en este orden, de lo primero a lo último:
 
-1. Compartir una actividad como imagen (RUN-14).
-2. El resto de I-23 (P2 restantes).
-3. La gráfica de I-21 (HIS-05).
-4. Las recomendaciones de I-21 (REC-01).
-5. I-26 (fotos): los ejercicios muestran el ícono del grupo muscular. El botón de tutorial sigue.
-6. I-25 (Google): queda solo correo y contraseña.
-7. I-20 (segundo plano): la app se entrega con el aviso de pantalla encendida.
-8. El cronómetro de cardio (CAR-02) y las series de calentamiento (SES-12).
+1. El descanso en la barra de notificaciones (SES-13).
+2. Compartir una actividad como imagen (RUN-14).
+3. El resto de I-23 (P2 restantes).
+4. La gráfica de I-21 (HIS-05).
+5. Las recomendaciones de I-21 (REC-01).
+6. I-26 (fotos): los ejercicios muestran el ícono del grupo muscular. El botón de tutorial sigue.
+7. I-25 (Google): queda solo correo y contraseña.
+8. I-20 (segundo plano): la app se entrega con el aviso de pantalla encendida.
+9. El cronómetro de cardio (CAR-02) y las series de calentamiento (SES-12).
 
 Nunca se recorta: I-22 (pulido), I-24 (entrega), ni ningún requisito P1.
 
@@ -465,7 +466,7 @@ Si un bloque pasa de su fecha límite, el siguiente empieza por terminarlo. Si e
 | Cuenta | CUE-00 a CUE-05, CUE-07 a CUE-09 | I-03, I-06, I-13, I-14, I-15, I-25 |
 | Ejercicios | EJE-01 a EJE-06 | I-02, I-04, I-26 |
 | Rutinas | RUT-01 a RUT-05 | I-05, I-06, I-17, I-18 |
-| Sesión | SES-01 a SES-12 | I-07, I-08, I-09 |
+| Sesión | SES-01 a SES-13 | I-07, I-08, I-09, I-23 |
 | Cardio | CAR-01, CAR-02 | I-16 |
 | Historial | HIS-01 a HIS-07 | I-17, I-18, I-21, I-23 |
 | Recomendaciones | REC-01 | I-21 |

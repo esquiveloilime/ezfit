@@ -6,7 +6,7 @@ import { useAccount } from '@/features/account/accountStore';
 import { t } from '@/i18n';
 import { Button, Screen, colors, font, spacing } from '@/ui';
 
-/** Pantalla de bienvenida (CUE-00). "Continuar con Google" llega en I-25 (CUE-08). */
+/** Pantalla de bienvenida (CUE-00), con el aviso de privacidad (CUE-09). "Continuar con Google" llega en I-25 (CUE-08). */
 export default function WelcomeScreen() {
   const startGuest = useAccount((s) => s.startGuest);
   const [busy, setBusy] = useState(false);
@@ -45,6 +45,8 @@ export default function WelcomeScreen() {
           onPress={() => router.push('/sign-in')}
           disabled={busy}
         />
+        <Text style={styles.legal}>{t.privacy.accept}</Text>
+        <Button variant="ghost" label={t.privacy.read} onPress={() => router.push('/privacy')} />
       </View>
     </Screen>
   );
@@ -55,5 +57,6 @@ const styles = StyleSheet.create({
   brand: { fontSize: 44, fontWeight: '800', color: colors.primary },
   tagline: { fontSize: font.body, color: colors.textMuted, textAlign: 'center' },
   actions: { gap: spacing.md },
+  legal: { fontSize: font.small, color: colors.textMuted, textAlign: 'center', marginTop: spacing.md },
   note: { fontSize: font.small, color: colors.textMuted, textAlign: 'center', marginBottom: spacing.md },
 });

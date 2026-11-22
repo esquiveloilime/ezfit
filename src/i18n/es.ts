@@ -56,6 +56,56 @@ export const es = {
     signIn: 'Iniciar sesión',
     guestNote: 'Puedes crear tu cuenta después sin perder nada de lo que registres.',
   },
+  privacy: {
+    title: 'Aviso de privacidad',
+    accept: 'Al continuar aceptas el aviso de privacidad y el descargo de responsabilidad.',
+    read: 'Leer el aviso de privacidad',
+    profileEntry: 'Aviso de privacidad y responsabilidad',
+    intro:
+      'ezfit es un proyecto académico. Aquí se explica qué datos guarda la app, para qué, y los límites de su responsabilidad.',
+    sections: [
+      {
+        title: 'Qué datos guarda',
+        items: [
+          'Tus entrenamientos: ejercicios, series, peso, repeticiones, notas y estado de ánimo.',
+          'Tus actividades de running y caminata, con la ruta que grabaste.',
+          'Tus ajustes y tu plan semanal.',
+          'Si creas una cuenta, tu correo electrónico.',
+        ],
+      },
+      {
+        title: 'Dónde se guardan',
+        items: [
+          'Sin cuenta, todo se queda solo en tu teléfono.',
+          'Con cuenta, se guarda una copia en la nube (Supabase) para respaldarla y usarla en otro teléfono. Solo tú puedes ver tus datos.',
+        ],
+      },
+      {
+        title: 'Tu ubicación',
+        items: [
+          'La app solo lee tu ubicación mientras grabas una actividad en Correr, y la usa para medir la distancia y dibujar la ruta.',
+        ],
+      },
+      {
+        title: 'Lo que no hacemos',
+        items: [
+          'No vendemos ni compartimos tus datos con nadie.',
+          'No hay publicidad ni rastreo.',
+        ],
+      },
+      {
+        title: 'Descargo de responsabilidad',
+        items: [
+          'ezfit se ofrece tal cual, sin garantías de ningún tipo.',
+          'No es consejo médico. Consulta a un médico antes de empezar a entrenar y detente si sientes dolor, mareo o falta de aire.',
+          'Entrenas y corres bajo tu propio riesgo. El autor no se hace responsable de lesiones, daños o pérdidas por usar la app.',
+          'La distancia, el ritmo y las demás mediciones son aproximadas y pueden tener errores.',
+          'Al correr o caminar, pon atención al tráfico y a tu alrededor; no mires el teléfono al cruzar la calle.',
+        ],
+      },
+    ],
+    updated: 'Última actualización: 21 de noviembre de 2026.',
+  },
   auth: {
     signUpTitle: 'Crear cuenta',
     signUpIntro: 'Con una cuenta tus datos se respaldan en la nube y puedes usarlos en otro teléfono.',

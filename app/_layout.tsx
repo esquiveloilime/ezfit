@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseProvider } from '@/db/DatabaseProvider';
 import { ownerFor, useAccount } from '@/features/account/accountStore';
+import { t } from '@/i18n';
 import { configureNotifications } from '@/services/notifications';
 import { colors } from '@/ui';
 
@@ -64,6 +65,9 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)/sign-up" options={{ headerShown: true, title: '' }} />
             <Stack.Screen name="(auth)/sign-in" options={{ headerShown: true, title: '' }} />
           </Stack.Protected>
+
+          {/* Aviso de privacidad: desde la bienvenida y desde Perfil (CUE-09). */}
+          <Stack.Screen name="privacy" options={{ headerShown: true, title: t.privacy.title }} />
         </Stack>
       </WithDatabase>
     </SafeAreaProvider>

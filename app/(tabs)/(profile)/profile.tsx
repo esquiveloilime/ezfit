@@ -48,6 +48,7 @@ export default function ProfileScreen() {
       <Text style={styles.section}>{t.settings.title}</Text>
       {profile ? <WeightUnitSetting profile={profile} /> : null}
       {profile ? <RestSettings profile={profile} /> : null}
+      <Button variant="secondary" label={t.privacy.profileEntry} onPress={() => router.push('/privacy')} />
     </Screen>
   );
 }

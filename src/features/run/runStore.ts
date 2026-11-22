@@ -69,14 +69,18 @@ function onFix(db: Db, fix: Fix) {
   });
 }
 
-/** Empieza a grabar: crea la actividad, lee el GPS y mantiene la pantalla encendida (RUN-03). */
-export async function beginRun(db: Db, owner: string, kind: RunKind): Promise<void> {
+/**
+ * Empieza a grabar: crea la actividad, lee el GPS y mantiene la pantalla encendida (RUN-03).
+ * `seed` es la última lectura de la pantalla previa, para que el mapa de la actividad empiece
+ * centrado en el usuario sin esperar la primera lectura nueva.
+ */
+export async function beginRun(db: Db, owner: string, kind: RunKind, seed: Fix | null = null): Promise<void> {
   if (useRunStore.getState().active) return;
   const now = Date.now();
   const runId = startRun(db, owner, kind, now);
   const clock = startClock(now);
   saveClock(db, runId, clock);
-  useRunStore.setState({ active: { runId, kind, clock, points: [], distance: 0 } });
+  useRunStore.setState({ active: { runId, kind, clock, points: [], distance: 0 }, lastFix: seed });
   void activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => undefined);
   try {
     stopWatching?.();

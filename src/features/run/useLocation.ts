@@ -5,6 +5,7 @@ import { AppState } from 'react-native';
 import type { Fix } from '@/domain/run';
 import {
   getLocationPermission,
+  lastKnownLocation,
   locationServicesEnabled,
   type Permission,
   requestLocationPermission,
@@ -45,10 +46,12 @@ export function useLocationPermission() {
 
 /**
  * Lecturas del GPS mientras la pantalla está a la vista (RNF-05: solo en Correr). También
- * avisa si la ubicación del teléfono está apagada.
+ * avisa si la ubicación del teléfono está apagada. `center` es donde se centra el mapa: la
+ * lectura actual o, mientras llega, la última ubicación conocida del teléfono.
  */
 export function useLiveFix(enabled: boolean) {
   const [fix, setFix] = useState<Fix | null>(null);
+  const [lastKnown, setLastKnown] = useState<Fix | null>(null);
   const [servicesOn, setServicesOn] = useState(true);
 
   useFocusEffect(
@@ -58,6 +61,9 @@ export function useLiveFix(enabled: boolean) {
       let cancelled = false;
       void locationServicesEnabled().then((on) => {
         if (!cancelled) setServicesOn(on);
+      });
+      void lastKnownLocation().then((known) => {
+        if (!cancelled && known) setLastKnown(known);
       });
       watchLocation(setFix)
         .then((remove) => {
@@ -72,7 +78,7 @@ export function useLiveFix(enabled: boolean) {
     }, [enabled]),
   );
 
-  return { fix, servicesOn };
+  return { fix, servicesOn, center: fix ?? lastKnown };
 }
 
 /** Fuerza a volver a dibujar cada `ms` milisegundos (para la antigüedad de la señal y los relojes). */

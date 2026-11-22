@@ -122,7 +122,7 @@ function PermissionGate() {
 
 function RunPreview() {
   const { db, owner } = useDatabase();
-  const { fix, servicesOn } = useLiveFix(true);
+  const { fix, servicesOn, center } = useLiveFix(true);
   const now = useNow();
   const [kind, setKind] = useState<RunKind>('run');
   const [starting, setStarting] = useState(false);
@@ -132,7 +132,7 @@ function RunPreview() {
     if (starting) return;
     setStarting(true);
     try {
-      await beginRun(db, owner, kind);
+      await beginRun(db, owner, kind, fix);
       router.push('/run/live');
     } catch (error) {
       console.error('No se pudo iniciar la actividad', error);
@@ -143,9 +143,9 @@ function RunPreview() {
   }
 
   return (
-    <Screen title={t.tabs.run}>
-      <RunMap follow={fix} showsUser />
-      <SignalBadge quality={quality} />
+    // Sin desplazamiento: el mapa ocupa lo que sobra y el botón de iniciar siempre se ve.
+    <Screen title={t.tabs.run} scroll={false}>
+      <RunMap follow={center} showsUser overlay={<SignalBadge quality={quality} />} />
       {!servicesOn ? <Text style={styles.warning}>{t.run.servicesOff}</Text> : null}
       {servicesOn && quality === 'none' ? <Text style={styles.hint}>{t.run.waitingSignal}</Text> : null}
       <ChipGroup

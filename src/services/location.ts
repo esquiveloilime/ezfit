@@ -32,6 +32,25 @@ export async function locationServicesEnabled(): Promise<boolean> {
   }
 }
 
+/**
+ * Última ubicación que el teléfono ya conoce, sin esperar al GPS. Sirve solo para centrar el
+ * mapa al abrir; no cuenta como señal ni se guarda en la ruta.
+ */
+export async function lastKnownLocation(): Promise<Fix | null> {
+  try {
+    const location = await Location.getLastKnownPositionAsync();
+    if (!location) return null;
+    return {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      accuracy: location.coords.accuracy ?? null,
+      timestamp: location.timestamp,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function openAppSettings(): void {
   void Linking.openSettings();
 }

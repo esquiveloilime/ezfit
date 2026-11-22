@@ -27,7 +27,9 @@ const VIBRATION_PATTERN = [0, 400, 200, 400];
  * vibración (AJU-02).
  */
 function channelId({ sound, vibration }: RestAlert): string {
-  return `rest-${sound ? 's' : 'n'}${vibration ? 'v' : 'n'}`;
+  // "v2": los canales anteriores pedían un sonido propio llamado "default" que no existe; como un
+  // canal no se puede corregir, se crean nuevos.
+  return `rest-v2-${sound ? 's' : 'n'}${vibration ? 'v' : 'n'}`;
 }
 
 let configured = false;
@@ -75,7 +77,8 @@ async function ensureChannel(alert: RestAlert, name: string): Promise<string | u
     await setNotificationChannelAsync(id, {
       name,
       importance: AndroidImportance.HIGH,
-      sound: alert.sound ? 'default' : null,
+      // Sin nombre de sonido se usa el del teléfono; un nombre se busca como archivo propio de la app.
+      sound: alert.sound ? undefined : null,
       enableVibrate: alert.vibration,
       vibrationPattern: alert.vibration ? VIBRATION_PATTERN : null,
     });
@@ -106,7 +109,7 @@ export async function scheduleRestEnd(endsAt: number, alert: RestAlert, message:
       content: {
         title: message.title,
         body: message.body,
-        sound: alert.sound ? 'default' : false,
+        sound: alert.sound,
         vibrate: alert.vibration ? VIBRATION_PATTERN : undefined,
         data: { kind: REST_KIND },
       },

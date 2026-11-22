@@ -40,9 +40,6 @@ export function RestTimerBar({ workoutId, profile }: { workoutId: string; profil
   } else {
     content = (
       <View style={styles.idle}>
-        <Text style={styles.caption} accessibilityLiveRegion="polite">
-          {finishedAt !== null ? t.rest.finished : t.rest.manual}
-        </Text>
         <View style={styles.row}>
           {REST_PRESETS.map((seconds) => (
             <BarButton
@@ -53,12 +50,16 @@ export function RestTimerBar({ workoutId, profile }: { workoutId: string; profil
             />
           ))}
         </View>
+        <Text style={[styles.caption, styles.centered]} accessibilityLiveRegion="polite">
+          {finishedAt !== null ? t.rest.finished : t.rest.manual}
+        </Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.bar, timer && styles.barActive]}>
+    // Sin la orilla de abajo: la barra de secciones queda debajo y ya deja ese espacio.
+    <SafeAreaView edges={['left', 'right']} style={[styles.bar, timer && styles.barActive]}>
       {content}
     </SafeAreaView>
   );
@@ -76,25 +77,30 @@ function BarButton({ label, a11y, onPress, strong = false }: { label: string; a1
   );
 }
 
+// Un poco menos que el mínimo táctil general para que la barra sea delgada; el ancho de cada
+// botón compensa y el área para tocar sigue siendo amplia.
+const BUTTON_HEIGHT = 40;
+
 const styles = StyleSheet.create({
   bar: {
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
   },
   barActive: { backgroundColor: colors.primarySoft, borderTopColor: colors.primary },
-  idle: { gap: spacing.xs },
+  idle: { gap: 2 },
+  centered: { textAlign: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   clockBox: { flex: 1 },
   caption: { fontSize: font.small, color: colors.textMuted },
-  clock: { fontSize: font.heading, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
+  clock: { fontSize: font.title, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
   button: {
     flex: 1,
     minWidth: minTouch,
-    minHeight: minTouch,
+    minHeight: BUTTON_HEIGHT,
     paddingHorizontal: spacing.sm,
     borderRadius: radius.md,
     borderWidth: 1,

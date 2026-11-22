@@ -67,4 +67,4 @@ La prioridad es avanzar rápido. El autor pide bloques completos ("Implementa el
 
 ## Estado
 
-Bloque actual: 4, running con la app abierta. Los bloques 1 (I-01 a I-03) y 2 (I-04 a I-06) quedaron probados y cerrados el 2 de noviembre de 2026, y el bloque 3 (I-07 a I-09) el 3 de noviembre de 2026.
+Bloque actual: 5, sincronización. Los bloques 1 (I-01 a I-03) y 2 (I-04 a I-06) quedaron probados y cerrados el 2 de noviembre de 2026, el bloque 3 (I-07 a I-09) el 3 de noviembre y el bloque 4 (I-10 a I-12) el 22 de noviembre de 2026, junto con las correcciones del feedback de la build de desarrollo (especificación 0.4).

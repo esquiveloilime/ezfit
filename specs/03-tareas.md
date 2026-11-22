@@ -209,43 +209,43 @@ Los mapas son obligatorios: el maestro los pide como extra y la APK entregada de
 
 Tarea paralela del autor: sacar la clave de Google Maps (su tarjeta de débito ya fue aceptada) y generar la build de desarrollo con los pasos que da Claude.
 
-### I-10 · Permisos, mapa y pantalla previa
+### I-10 · Permisos, mapa y pantalla previa ✅
 
 Explicación y solicitud del permiso de ubicación, mapa centrado en la ubicación actual, indicador de señal GPS y selector de tipo de actividad.
 
 Cubre: RUN-01, RUN-02.
 
 Cómo probarlo:
-- [ ] La primera vez, la app explica para qué quiere la ubicación antes de que aparezca el permiso de Android.
-- [ ] En la build de desarrollo, el mapa muestra tu ubicación real.
-- [ ] Negar el permiso (desde ajustes del teléfono): la sección explica cómo activarlo y el resto de la app funciona.
-- [ ] Bajo techo, el indicador de señal marca regular o sin señal.
+- [x] La primera vez, la app explica para qué quiere la ubicación antes de que aparezca el permiso de Android.
+- [x] En la build de desarrollo, el mapa muestra tu ubicación real.
+- [x] Negar el permiso (desde ajustes del teléfono): la sección explica cómo activarlo y el resto de la app funciona.
+- [x] Bajo techo, el indicador de señal marca regular o sin señal.
 
-### I-11 · Seguimiento en vivo
+### I-11 · Seguimiento en vivo ✅
 
 Grabación de la actividad con tiempo, distancia, ritmo actual y promedio. Ruta dibujada en vivo. Pausar, reanudar y terminar. Filtrado de puntos. Guardado de puntos conforme llegan y recuperación si la app se cierra. Funcionamiento sin internet. Aviso de mantener la pantalla encendida.
 
 Cubre: RUN-03, RUN-04, RUN-07, RUN-08, RUN-09.
 
 Cómo probarlo (en la calle):
-- [ ] Caminar o correr 1 km medido (pista o ruta conocida): la app marca entre 0.95 y 1.05 km.
-- [ ] La línea sigue el camino real, sin saltos.
-- [ ] Quedarse quieto 2 minutos: la distancia casi no cambia.
-- [ ] Pausar, caminar 50 metros, reanudar: ese tramo no cuenta ni se une con una línea.
-- [ ] Cerrar la app a media actividad y abrirla: ofrece guardar lo registrado.
-- [ ] Con datos móviles y wifi apagados: la distancia y la ruta se siguen registrando.
+- [x] Caminar o correr 1 km medido (pista o ruta conocida): la app marca entre 0.95 y 1.05 km.
+- [x] La línea sigue el camino real, sin saltos.
+- [x] Quedarse quieto 2 minutos: la distancia casi no cambia.
+- [x] Pausar, caminar 50 metros, reanudar: ese tramo no cuenta ni se une con una línea.
+- [x] Cerrar la app a media actividad y abrirla: ofrece guardar lo registrado.
+- [x] Con datos móviles y wifi apagados: la distancia y la ruta se siguen registrando.
 
-### I-12 · Resumen, guardado e historial de actividades
+### I-12 · Resumen, guardado e historial de actividades ✅
 
 Pantalla de resumen con el mapa de la ruta completa y las métricas, nombre y notas, guardar o descartar, lista de actividades y detalle.
 
 Cubre: RUN-05, RUN-06.
 
 Cómo probarlo:
-- [ ] Al terminar, el mapa muestra toda la ruta ajustada a la pantalla.
-- [ ] Distancia, tiempo, ritmo y velocidad promedio son coherentes entre sí.
-- [ ] La actividad guardada aparece en Historial y su detalle coincide con el resumen.
-- [ ] Eliminar una actividad pide confirmación.
+- [x] Al terminar, el mapa muestra toda la ruta ajustada a la pantalla.
+- [x] Distancia, tiempo, ritmo y velocidad promedio son coherentes entre sí.
+- [x] La actividad guardada aparece en Historial y su detalle coincide con el resumen.
+- [x] Eliminar una actividad pide confirmación.
 
 ---
 

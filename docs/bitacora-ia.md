@@ -55,7 +55,8 @@ Registro de cómo se usó inteligencia artificial para construir **ezfit**. Las 
 - I-21: sugerencia de peso con reglas fijas (sin IA dentro de la app, supuesto S-07), incremento de peso y gráfica de progreso. La IA dibujó la gráfica sin librería para no agregar dependencias.
 - I-26: la IA confirmó la licencia de free-exercise-db (dominio público) y eligió a mano 81 fotos para los 83 ejercicios. Al probarlas, al autor no le gustó cómo se veían y pidió regresar al ícono; la IA retiró las fotos y lo anotó en la especificación.
 - Al probar las sugerencias de peso, el autor corrigió la regla: con 5 repeticiones o menos hay que bajar el peso y buscar al menos 6, y con 6 se puede bajar un poco o intentar una más. La IA actualizó la especificación y el código.
-- Continuar con Google falló en la primera prueba. La IA agregó registro de errores para encontrar la causa.
+- Continuar con Google falló en la primera prueba. La IA agregó registro de errores; el mensaje mostró que el proveedor de Google estaba apagado en Supabase. El autor lo activó siguiendo los pasos de la IA y funcionó.
+- El autor pidió cambiar el color verde. La IA propuso cuatro opciones y el autor eligió grafito.
 - Recorte para entregar a tiempo: el autor decidió dejar pendientes los requisitos P2 de I-23.
 - Preparación del APK independiente (perfil `preview` de EAS) y de la entrega.
 

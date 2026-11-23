@@ -228,7 +228,7 @@ El usuario crea una cuenta con correo y contraseña.
 
 **EJE-01 · P1 · Catálogo incluido**
 - La app trae al menos 80 ejercicios en español, disponibles sin conexión.
-- Cada ejercicio tiene: nombre, grupo muscular principal, grupos secundarios, tipo de equipo (barra, mancuernas, máquina, polea, peso corporal, otro), tipo de registro (EJE-03) y, cuando exista, una fotografía (EJE-05) y un enlace a un video tutorial (EJE-06).
+- Cada ejercicio tiene: nombre, grupo muscular principal, grupos secundarios, tipo de equipo (barra, mancuernas, máquina, polea, peso corporal, otro), tipo de registro (EJE-03) y, cuando exista, un enlace a un video tutorial (EJE-06).
 - Todos los grupos musculares (pecho, espalda, hombro, bíceps, tríceps, cuádriceps, femoral, glúteo, pantorrilla, abdomen) tienen al menos 5 ejercicios.
 
 **EJE-02 · P1 · Buscar y filtrar**
@@ -246,7 +246,7 @@ Si un ejercicio no está en el catálogo, el usuario lo crea.
 - Un ejercicio propio se puede editar o archivar. Archivado ya no aparece al elegir ejercicios, pero su historial se conserva.
 - Los ejercicios del catálogo no se pueden editar ni borrar.
 
-**EJE-05 · P2 · Fotografía del ejercicio**
+**EJE-05 · P2 · Fotografía del ejercicio** · **Retirado** el 22 de noviembre de 2026: el autor probó las fotos y prefiere el ícono. Todos los ejercicios muestran el mismo ícono. El texto original queda como referencia.
 - Los ejercicios del catálogo muestran una fotografía de cómo se ejecutan, en el catálogo, en el selector de ejercicios y en la ficha del ejercicio dentro de la sesión.
 - Las fotografías vienen dentro de la app, así que se ven sin conexión.
 - Solo se usan fotografías con licencia libre que permita incluirlas en la app y en el repositorio; la fuente y la licencia se anotan en el repositorio.

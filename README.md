@@ -67,7 +67,3 @@ Quedaron fuera de esta entrega, por tiempo:
 - Descanso en la barra de notificaciones.
 
 Están anotados en `specs/03-tareas.md` (I-23).
-
-## Créditos
-
-Las fotos de los ejercicios vienen de [free-exercise-db](https://github.com/yuhonas/free-exercise-db), con licencia Unlicense (dominio público). El detalle está en `assets/exercises/FUENTE.md`.

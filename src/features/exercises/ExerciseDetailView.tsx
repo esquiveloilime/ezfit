@@ -68,7 +68,7 @@ export function ExerciseDetailView({ id }: { id: string }) {
   return (
     <Screen title={e.name}>
       <View style={styles.thumb}>
-        <ExerciseThumb imageKey={e.imageKey} muscleGroup={e.muscleGroup} size={140} wide />
+        <ExerciseThumb imageKey={e.imageKey} size={140} />
       </View>
       <Button
         label={t.exercises.watchTutorial}

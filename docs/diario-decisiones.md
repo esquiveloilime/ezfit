@@ -18,6 +18,8 @@ Decisiones importantes del proyecto, en orden. Cada una dice qué se decidió, p
 | 22 nov | Agregar `expo-task-manager` para correr con la pantalla apagada | Android necesita una tarea en segundo plano para seguir leyendo el GPS | Entregar con el aviso de mantener la pantalla encendida |
 | 22 nov | Gráfica de progreso dibujada sin librería | La librería propuesta pedía dos librerías nativas más; solo se necesita una línea | `react-native-gifted-charts` |
 | 22 nov | Fotos de free-exercise-db dentro de la app | Dominio público (Unlicense, confirmada) y se ven sin internet | Descargarlas de internet; Wikimedia Commons (plan B) |
+| 22 nov | **Retirar las fotos de los ejercicios** (EJE-05) | El autor las probó en el teléfono y prefiere el ícono: la ficha y el catálogo se veían mejor sin foto | Mantener las fotos |
+| 22 nov | Sugerencia de peso con umbrales de 5 y 6 repeticiones (REC-01) | Al probarla, el autor notó que con pocas repeticiones conviene bajar el peso y buscar al menos 6, en lugar de comparar solo con el rango de la rutina | La regla original de "mayoría por debajo del mínimo del rango" |
 | 22 nov | **Recorte:** I-23 (P2 restantes) queda pendiente y el pulido se limita a lo que falle en las pruebas | Entregar el APK hoy | Seguir agregando funciones y arriesgar la entrega |
 | 22 nov | Entregar un APK independiente (perfil `preview` de EAS) | La build de desarrollo necesita la computadora con `expo start`; el APK funciona solo | Entregar la build de desarrollo o Expo Go |
 

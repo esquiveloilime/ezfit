@@ -5,8 +5,8 @@
 
 import type { Equipment, MuscleGroup, TrackingType } from '@/domain/exercise';
 
-/** 2: se agregaron las fotos (EJE-05). */
-export const CATALOG_VERSION = 2;
+/** 3: borra las claves de foto que cargó la versión 2 (EJE-05 retirado). */
+export const CATALOG_VERSION = 3;
 
 export type CatalogExercise = {
   n: number;

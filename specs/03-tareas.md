@@ -398,6 +398,8 @@ Confirmar la licencia de free-exercise-db, elegir una foto por ejercicio del cat
 
 Cubre: EJE-05.
 
+**Estado (22 de noviembre de 2026):** implementado y retirado a petición del autor tras probarlo: prefiere el ícono. EJE-05 queda retirado de la especificación.
+
 Cómo probarlo:
 - [ ] Revisar el catálogo: al menos 60 ejercicios tienen foto y cada foto corresponde a su ejercicio. Avisar cuáles no coinciden.
 - [ ] En modo avión, las fotos se siguen viendo.

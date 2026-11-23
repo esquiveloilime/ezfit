@@ -251,6 +251,8 @@ Todos estos cálculos viven en la capa de dominio y se prueban con recorridos gr
 
 ### Fotos (EJE-05)
 
+**Retirado** el 22 de noviembre de 2026 a petición del autor (ver especificación, EJE-05). Se implementó en I-26 y se deshizo; la columna `image_key` queda sin usar. Lo que sigue es el plan original.
+
 - **Fuente:** free-exercise-db, un repositorio público con unos 800 ejercicios y sus fotos, con licencia Unlicense (dominio público). La licencia se vuelve a confirmar al empezar I-26 y se guarda un archivo con la fuente y la licencia en `assets/exercises/`. Plan B: Wikimedia Commons, solo con fotos de licencia libre y anotando la atribución que pida cada una.
 - Una foto por ejercicio, elegida a mano para que corresponda con el ejercicio del catálogo. Meta: 60 de los 80 ejercicios con foto.
 - Peso total menor a 8 MB. Si se pasa, las imágenes se reducen una sola vez en la computadora, sin agregar nada a la app.

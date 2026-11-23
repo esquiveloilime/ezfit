@@ -58,3 +58,15 @@ El archivo `.env` no se sube al repositorio.
 ## Antes de la entrega
 
 El plan gratuito pausa el proyecto tras 7 días sin uso (riesgo R-04). El 24 de noviembre entra al panel y, si aparece pausado, toca **Restore**.
+
+## Activar Continuar con Google (CUE-08)
+
+Sin esto, Google sí muestra las cuentas, pero Supabase responde *Provider (issuer "https://accounts.google.com") is not enabled* y la app dice "Algo salió mal".
+
+1. En Google Cloud (APIs y servicios › Credenciales), abre el **ID de cliente de tipo "Aplicación web"** y copia su **ID de cliente** y su **Secreto del cliente**.
+2. En el panel de Supabase: **Authentication › Sign In / Providers › Google**.
+3. Activa **Enable Sign in with Google**.
+4. En **Client IDs** pega el ID de cliente web. Si quieres, agrega después, separado por coma, el ID del cliente Android.
+5. En **Client Secret (for OAuth)** pega el secreto del cliente web.
+6. Activa **Skip nonce checks** (la app de Android no envía *nonce*).
+7. Toca **Save**. No hace falta generar otra build: el cambio es del lado de Supabase.

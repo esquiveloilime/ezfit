@@ -2,9 +2,10 @@
 // Los componentes usan estos valores en lugar de números sueltos.
 
 export const colors = {
-  primary: '#0E7C66',
-  primaryPressed: '#0A5E4D',
-  primarySoft: '#E3F2EE',
+  // Grafito, a juego con el ícono negro y blanco (elegido por el autor el 22 de noviembre de 2026).
+  primary: '#18181B',
+  primaryPressed: '#000000',
+  primarySoft: '#ECECEE',
   onPrimary: '#FFFFFF',
   background: '#F6F7F9',
   surface: '#FFFFFF',

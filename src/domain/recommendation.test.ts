@@ -73,14 +73,33 @@ describe('sugerencia de peso (REC-01)', () => {
     expect(rec).toMatchObject({ action: 'keep', reason: 'technique' });
   });
 
-  it('la mayoría por debajo del mínimo: baja un incremento', () => {
-    const rec = recommend({ lastSets: [set(135, 6), set(135, 7), set(135, 9)] });
-    expect(rec).toMatchObject({ action: 'decrease', reason: 'belowMin', weight: 130, reps: 8 });
+  it('20 lb × 3 (caso del autor): baja el peso y busca al menos 6', () => {
+    const rec = recommend({ lastSets: [set(20, 3)] });
+    expect(rec).toMatchObject({ action: 'decrease', reason: 'tooFew', weight: 15, reps: 6, alternative: null });
   });
 
-  it('la mitad exacta por debajo del mínimo no es mayoría: mantiene', () => {
-    const rec = recommend({ lastSets: [set(135, 6), set(135, 10)] });
-    expect(rec).toMatchObject({ action: 'keep', reason: 'notAllTop', weight: 135, reps: 11 });
+  it('con 5 repeticiones todavía sugiere bajar', () => {
+    expect(recommend({ lastSets: [set(135, 5), set(135, 4)] })).toMatchObject({ action: 'decrease', reason: 'tooFew' });
+  });
+
+  it('con 6 repeticiones da dos opciones: intentar 7 o bajar un poco', () => {
+    const rec = recommend({ lastSets: [set(135, 6), set(135, 5)] });
+    expect(rec).toMatchObject({
+      action: 'keep',
+      reason: 'atSix',
+      weight: 135,
+      reps: 7,
+      alternative: { weight: 130, reps: 7 },
+    });
+  });
+
+  it('con 6 repeticiones y sin peso que quitar, no hay segunda opción', () => {
+    expect(recommend({ lastSets: [set(5, 6)] })?.alternative).toBeNull();
+  });
+
+  it('con 7 repeticiones, aunque esté por debajo del rango, mantiene e intenta una más', () => {
+    const rec = recommend({ lastSets: [set(135, 7), set(135, 6)] });
+    expect(rec).toMatchObject({ action: 'keep', reason: 'notAllTop', weight: 135, reps: 8, alternative: null });
   });
 
   it('técnica promedio de 2 o menos: baja aunque las repeticiones salieran', () => {

@@ -209,11 +209,17 @@ export function ExerciseBlock({
       {recommendation && !startedExercise && editingId === null ? (
         <Suggestion
           recommendation={recommendation}
-          onApply={(rec) => {
+          onApply={(choice) => {
             const base = prefillSet({ index: sets.length, lastSession: last?.sets ?? [], today: sets.map(toLoggedSet), defaultUnit });
             setApplied({
               at: sets.length,
-              input: { ...base, kind: 'working', weight: formatNumber(rec.weight), unit: rec.unit, reps: String(rec.reps) },
+              input: {
+                ...base,
+                kind: 'working',
+                weight: formatNumber(choice.weight),
+                unit: recommendation.unit,
+                reps: String(choice.reps),
+              },
             });
           }}
         />
@@ -291,12 +297,13 @@ function Suggestion({
   onApply,
 }: {
   recommendation: Recommendation;
-  onApply: (rec: Recommendation) => void;
+  onApply: (choice: { weight: number; reps: number }) => void;
 }) {
   const values = {
     weight: formatNumber(rec.weight),
     unit: t.units[rec.unit],
     reps: rec.reps,
+    best: rec.bestReps,
     min: rec.range.min,
     max: rec.range.max,
     technique: rec.techniqueAverage === null ? '' : formatNumber(Math.round(rec.techniqueAverage * 10) / 10),
@@ -304,19 +311,34 @@ function Suggestion({
   const title = format(t.workout.suggestion[rec.action], values);
   const reason = format(t.workout.suggestion.reasons[rec.reason], values);
   const icon = rec.action === 'increase' ? 'trending-up' : rec.action === 'decrease' ? 'trending-down' : 'repeat';
+  const alt = rec.alternative;
+  const altValues = alt ? { weight: formatNumber(alt.weight), unit: values.unit, reps: alt.reps } : null;
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={format(t.workout.suggestion.applyA11y, { ...values, reason })}
-      onPress={() => onApply(rec)}
-      style={({ pressed }) => [styles.suggestion, pressed && styles.pressed]}>
-      <Ionicons name={icon} size={22} color={colors.primary} />
-      <View style={styles.flex}>
-        <Text style={styles.suggestionTitle}>{title}</Text>
-        <Text style={styles.meta}>{reason}</Text>
-        <Text style={styles.suggestionHint}>{t.workout.suggestion.apply}</Text>
-      </View>
-    </Pressable>
+    <View style={styles.suggestionBox}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={format(t.workout.suggestion.applyA11y, { ...values, reason })}
+        onPress={() => onApply({ weight: rec.weight, reps: rec.reps })}
+        style={({ pressed }) => [styles.suggestion, pressed && styles.pressed]}>
+        <Ionicons name={icon} size={22} color={colors.primary} />
+        <View style={styles.flex}>
+          <Text style={styles.suggestionTitle}>{title}</Text>
+          <Text style={styles.meta}>{reason}</Text>
+          <Text style={styles.suggestionHint}>{t.workout.suggestion.apply}</Text>
+        </View>
+      </Pressable>
+      {/* Con una mejor serie de 6, la segunda opción es bajar un poco el peso (REC-01). */}
+      {alt && altValues ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={format(t.workout.suggestion.alternativeA11y, altValues)}
+          onPress={() => onApply(alt)}
+          style={({ pressed }) => [styles.suggestion, pressed && styles.pressed]}>
+          <Ionicons name="trending-down" size={22} color={colors.primary} />
+          <Text style={[styles.flex, styles.suggestionHint]}>{format(t.workout.suggestion.alternative, altValues)}</Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
@@ -578,6 +600,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   editActions: { flexDirection: 'row', gap: spacing.sm },
+  suggestionBox: { gap: spacing.xs },
   suggestion: {
     flexDirection: 'row',
     alignItems: 'center',

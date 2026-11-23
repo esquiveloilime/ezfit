@@ -6,6 +6,11 @@ import { convertWeight, type LoggedSet, type WeightUnit } from './workout';
 /** Rango de repeticiones cuando el ejercicio no viene de una rutina (REC-01). */
 export const DEFAULT_REP_RANGE = { min: 8, max: 12 } as const;
 
+/** Con una mejor serie de estas repeticiones o menos, se sugiere bajar el peso (REC-01). */
+export const LOW_REPS = 5;
+/** Repeticiones mínimas que se buscan al bajar el peso. */
+export const MIN_TARGET_REPS = 6;
+
 /** Incremento por defecto según la unidad (REC-01). */
 export const DEFAULT_INCREMENTS: Record<WeightUnit, number> = { kg: 2.5, lb: 5 };
 
@@ -20,8 +25,9 @@ export type RecommendationAction = 'increase' | 'decrease' | 'keep';
 /** Por qué se sugiere: se muestra en una línea junto a la sugerencia. */
 export type RecommendationReason =
   | 'allTop' // todas las series al máximo del rango, con reserva y buena técnica
-  | 'belowMin' // la mayoría quedó por debajo del mínimo
   | 'lowTechnique' // técnica promedio de 2 o menos
+  | 'tooFew' // la mejor serie fue de 5 repeticiones o menos
+  | 'atSix' // la mejor serie fue de 6: mantener e intentar 7, o bajar un poco
   | 'notAllTop' // no todas llegaron al máximo
   | 'noReserve' // llegaron al máximo pero sin reserva (RIR 0)
   | 'technique'; // llegaron al máximo, pero la técnica promedio no llegó a 4
@@ -34,6 +40,10 @@ export type Recommendation = {
   unit: WeightUnit;
   /** Repeticiones con las que se llenan los campos al tocar la sugerencia. */
   reps: number;
+  /** Segunda opción, solo con una mejor serie de 6: bajar el peso un incremento. */
+  alternative: { weight: number; reps: number } | null;
+  /** Repeticiones de la mejor serie con el peso más alto, para explicarlo. */
+  bestReps: number;
   /** Rango usado para decidir, para explicarlo. */
   range: { min: number; max: number };
   /** Técnica promedio de la última sesión, si se registró. */
@@ -57,7 +67,8 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 /**
  * Sugerencia para hoy a partir de las series efectivas de la última sesión del ejercicio
  * (REC-01). Sin series efectivas con peso y repeticiones, no hay sugerencia. El RIR y la
- * técnica solo cuentan cuando se registraron.
+ * técnica solo cuentan cuando se registraron. Las reglas se revisan en el orden de la tabla
+ * de la especificación.
  */
 export function recommend(input: {
   lastSets: readonly LoggedSet[];
@@ -84,22 +95,30 @@ export function recommend(input: {
   const allTop = working.every((s) => s.reps >= range.max);
   const withReserve = working.every((s) => s.rir === null || s.rir >= 1);
   const goodTechnique = techniqueAverage === null || techniqueAverage >= 4;
-  const belowMin = working.filter((s) => s.reps < range.min).length > working.length / 2;
   const poorTechnique = techniqueAverage !== null && techniqueAverage <= 2;
 
-  const common = { unit, range, techniqueAverage };
+  const common = { unit, range, techniqueAverage, bestReps: repsAtTop, alternative: null };
   const step = increments[unit];
+  const lighter = round2(Math.max(0, base - step));
 
   if (allTop && withReserve && goodTechnique) {
     return { ...common, action: 'increase', reason: 'allTop', weight: round2(base + step), reps: range.min };
   }
-  if (belowMin || poorTechnique) {
+  if (poorTechnique) {
+    return { ...common, action: 'decrease', reason: 'lowTechnique', weight: lighter, reps: Math.max(repsAtTop, MIN_TARGET_REPS) };
+  }
+  if (repsAtTop <= LOW_REPS) {
+    return { ...common, action: 'decrease', reason: 'tooFew', weight: lighter, reps: MIN_TARGET_REPS };
+  }
+  if (repsAtTop === MIN_TARGET_REPS) {
     return {
       ...common,
-      action: 'decrease',
-      reason: belowMin ? 'belowMin' : 'lowTechnique',
-      weight: round2(Math.max(0, base - step)),
-      reps: range.min,
+      action: 'keep',
+      reason: 'atSix',
+      weight: base,
+      reps: MIN_TARGET_REPS + 1,
+      // Sin peso que quitar, no hay segunda opción.
+      alternative: lighter > 0 ? { weight: lighter, reps: MIN_TARGET_REPS + 1 } : null,
     };
   }
   const reason: RecommendationReason = !allTop ? 'notAllTop' : !withReserve ? 'noReserve' : 'technique';

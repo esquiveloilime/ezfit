@@ -398,12 +398,18 @@ En la sección **Rutinas**, Mis rutinas, Planes semanales, Por tiempo, Pierna Pu
 **REC-01 · P2 · Sugerencia al iniciar un ejercicio**
 Aplica solo a ejercicios de peso y repeticiones. Usa las series efectivas de la última sesión terminada de ese ejercicio (en la misma máquina, si se anotó) y el rango de repeticiones de la rutina (si no hay rutina, 8 a 12).
 
+Se revisan en este orden; aplica la primera que se cumpla. "Mejor serie" es la de más repeticiones con el peso más alto de la sesión.
+
 | Situación en la última sesión | Sugerencia |
 |---|---|
-| Todas las series llegaron al máximo del rango, con RIR de 1 o más y técnica promedio de 4 o más (cuando se registraron) | Subir el peso un incremento |
-| La mayoría de las series quedó por debajo del mínimo del rango, o la técnica promedio fue de 2 o menos | Bajar el peso un incremento |
-| Cualquier otro caso | Mantener el peso e intentar una repetición más |
 | No hay sesiones anteriores del ejercicio | No se muestra sugerencia |
+| Todas las series llegaron al máximo del rango, con RIR de 1 o más y técnica promedio de 4 o más (cuando se registraron) | Subir el peso un incremento |
+| La técnica promedio fue de 2 o menos | Bajar el peso un incremento |
+| La mejor serie fue de 5 repeticiones o menos | Bajar el peso un incremento y buscar al menos 6 repeticiones |
+| La mejor serie fue de 6 repeticiones | Dos opciones a elegir: mantener el peso e intentar 7, o bajar el peso un incremento |
+| Cualquier otro caso | Mantener el peso e intentar una repetición más |
+
+Corrección del autor del 22 de noviembre de 2026, tras probar la sugerencia: antes se bajaba el peso cuando la mayoría de las series quedaba por debajo del mínimo del rango.
 
 - La sugerencia se da en la unidad en que se registraron las series de la última sesión. El incremento por defecto es 2.5 kg o 5 lb, según esa unidad, y se puede cambiar (AJU-03).
 - La sugerencia explica en una línea por qué se hace.

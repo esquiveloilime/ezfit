@@ -426,6 +426,7 @@ Running es solo al aire libre, con GPS. Las distancias se muestran siempre en ki
 **RUN-03 · P1 · Seguimiento en vivo**
 - Durante la actividad se muestran: tiempo en movimiento, distancia (km), ritmo actual y ritmo promedio (min/km).
 - La ruta se dibuja en el mapa conforme avanza el usuario y el mapa lo sigue.
+- Las métricas van en una franja compacta debajo del mapa; el mapa ocupa el resto de la pantalla.
 - La pantalla no se apaga sola mientras la actividad está activa.
 
 **RUN-04 · P1 · Pausar, reanudar y terminar**

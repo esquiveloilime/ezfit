@@ -14,7 +14,7 @@ import {
   splitSegments,
 } from '@/domain/run';
 import { t } from '@/i18n';
-import { Button, Card, EmptyState, Screen, colors, font, radius, spacing } from '@/ui';
+import { Button, EmptyState, Screen, colors, font, radius, spacing } from '@/ui';
 
 import { RunMap } from './RunMap';
 import { finishRun, pauseRun, resumeRun, useRunStore } from './runStore';
@@ -73,20 +73,21 @@ export function RunLiveView() {
         }
       />
 
-      <Card>
-        <Metric label={t.run.time} value={formatElapsed(seconds)} big />
-        <View style={styles.grid}>
-          <Metric label={t.run.distance} value={`${formatKm(active.distance)} ${t.run.km}`} />
-          <Metric
-            label={t.run.currentPace}
-            value={`${paused ? formatPace(null) : formatPace(currentPace(active.points, now))} ${t.run.paceUnit}`}
-          />
-          <Metric
-            label={t.run.avgPace}
-            value={`${formatPace(paceSecondsPerKm(active.distance, seconds))} ${t.run.paceUnit}`}
-          />
-        </View>
-      </Card>
+      {/* Métricas en una sola franja, para que el mapa ocupe el mayor espacio posible. */}
+      <View style={styles.panel}>
+        <Metric label={t.run.time} value={formatElapsed(seconds)} />
+        <Metric label={t.run.distance} value={formatKm(active.distance)} unit={t.run.km} />
+        <Metric
+          label={t.run.currentPace}
+          value={paused ? formatPace(null) : formatPace(currentPace(active.points, now))}
+          unit={t.run.paceUnit}
+        />
+        <Metric
+          label={t.run.avgPace}
+          value={formatPace(paceSecondsPerKm(active.distance, seconds))}
+          unit={t.run.paceUnit}
+        />
+      </View>
 
       <View style={styles.actions}>
         <View style={styles.action}>
@@ -105,11 +106,17 @@ export function RunLiveView() {
   );
 }
 
-function Metric({ label, value, big = false }: { label: string; value: string; big?: boolean }) {
+function Metric({ label, value, unit }: { label: string; value: string; unit?: string }) {
+  const spoken = unit ? `${value} ${unit}` : value;
   return (
-    <View style={[styles.metric, big && styles.metricBig]} accessibilityLabel={`${label}: ${value}`}>
-      <Text style={styles.metricLabel}>{label}</Text>
-      <Text style={[styles.metricValue, big && styles.metricValueBig]}>{value}</Text>
+    <View style={styles.metric} accessibilityLabel={`${label}: ${spoken}`}>
+      <Text style={styles.metricLabel} numberOfLines={2}>
+        {label}
+      </Text>
+      <Text style={styles.metricValue} numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+      </Text>
+      {unit ? <Text style={styles.metricUnit}>{unit}</Text> : null}
     </View>
   );
 }
@@ -128,11 +135,19 @@ const styles = StyleSheet.create({
   },
   actions: { flexDirection: 'row', gap: spacing.md },
   action: { flex: 1 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  metric: { flexGrow: 1, flexBasis: '28%', gap: 2 },
-  metricBig: { alignItems: 'center' },
-  metricLabel: { fontSize: font.small, color: colors.textMuted },
+  panel: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  metric: { flex: 1, alignItems: 'center' },
+  metricLabel: { fontSize: font.small, color: colors.textMuted, textAlign: 'center' },
   metricValue: { fontSize: font.title, fontWeight: '700', color: colors.text },
-  metricValueBig: { fontSize: 44 },
+  metricUnit: { fontSize: font.small, color: colors.textMuted },
   hint: { fontSize: font.small, color: colors.textMuted, textAlign: 'center' },
 });

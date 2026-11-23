@@ -6,7 +6,8 @@ import { colors, font, spacing } from './tokens';
 type Props<T extends string> = {
   label: string;
   options: readonly T[];
-  value: T;
+  /** Vacío mientras no se ha elegido ninguna. */
+  value: T | null;
   labelFor: (option: T) => string;
   onChange: (option: T) => void;
 };

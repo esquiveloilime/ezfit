@@ -358,7 +358,7 @@ En la sección **Rutinas**, Mis rutinas, Planes semanales, Por tiempo, Pierna Pu
 
 **CAR-01 · P1 · Registrar cardio**
 - A una sesión se le agregan uno o más bloques de cardio. Una sesión puede ser solo de cardio.
-- Campos: aparato (caminadora, elíptica, bicicleta fija, escaladora, remo, otro), duración, nivel y velocidad. Opcionales: distancia, inclinación, notas.
+- Campos: aparato (caminadora, elíptica, bicicleta fija, escaladora, remo, otro), duración, nivel y velocidad. Opcionales: distancia, inclinación, notas. Solo el aparato y la duración son obligatorios: nivel y velocidad se piden, pero se pueden dejar vacíos si el aparato no los muestra. La duración se escribe en minutos y segundos, la velocidad en km/h y la distancia en km.
 - Los campos vienen llenos con los valores de la última vez que se usó ese aparato.
 
 **CAR-02 · P2 · Cronómetro de cardio**

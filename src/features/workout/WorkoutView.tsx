@@ -25,6 +25,7 @@ import { useProfile } from '@/features/onboarding/useProfile';
 import { format, t } from '@/i18n';
 import { Button, EmptyState, Screen, type ScreenHandle, colors, font } from '@/ui';
 
+import { CardioSection } from './CardioSection';
 import { ExerciseBlock, type WorkoutItem } from './ExerciseBlock';
 import { RestTimerBar } from './RestTimerBar';
 import { startRest, stopRest } from './restTimer';
@@ -144,6 +145,7 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
             }}
           />
         ) : null}
+        <CardioSection workoutId={workout.id} />
         <Button label={t.workout.finish} onPress={() => router.push('/workout/finish')} />
         <Button variant="ghost" label={t.workout.discard} onPress={confirmDiscard} />
       </Screen>

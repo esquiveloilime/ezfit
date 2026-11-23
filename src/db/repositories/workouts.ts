@@ -5,7 +5,7 @@ import type { LoggedSet, SetValues } from '@/domain/workout';
 
 import type { Db } from '../client';
 import { newRecord, softDeleted, touched } from '../records';
-import { exercises, routineExercises, sets, workoutExercises, workouts } from '../schema';
+import { cardioEntries, exercises, routineExercises, sets, workoutExercises, workouts } from '../schema';
 
 export type WorkoutRow = typeof workouts.$inferSelect;
 export type SetRow = typeof sets.$inferSelect;
@@ -343,7 +343,7 @@ export function finishWorkout(db: Db, workoutId: string, values: { mood: number 
     .run();
 }
 
-/** Descarta la sesión con sus ejercicios y series (SES-11, borrado lógico). */
+/** Descarta la sesión con sus ejercicios, series y cardio (SES-11, borrado lógico). */
 export function discardWorkout(db: Db, workoutId: string): void {
   const now = Date.now();
   db.transaction((tx) => {
@@ -363,6 +363,10 @@ export function discardWorkout(db: Db, workoutId: string): void {
         .where(and(inArray(workoutExercises.id, items), isNull(workoutExercises.deletedAt)))
         .run();
     }
+    tx.update(cardioEntries)
+      .set(softDeleted(now))
+      .where(and(eq(cardioEntries.workoutId, workoutId), isNull(cardioEntries.deletedAt)))
+      .run();
     tx.update(workouts).set(softDeleted(now)).where(eq(workouts.id, workoutId)).run();
   });
 }

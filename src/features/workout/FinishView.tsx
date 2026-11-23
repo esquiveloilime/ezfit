@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
+import { workoutCardioQuery } from '@/db/repositories/cardio';
 import type { ProfileRow } from '@/db/repositories/profile';
 import {
   activeWorkoutQuery,
@@ -43,11 +44,12 @@ export function FinishView() {
 function Finish({ workout, profile }: { workout: WorkoutRow; profile: ProfileRow }) {
   const { db } = useDatabase();
   const { data: sets, loaded } = useQuery(workoutSetsQuery(db, workout.id), [workout.id]);
+  const { data: cardio, loaded: cardioLoaded } = useQuery(workoutCardioQuery(db, workout.id), [workout.id]);
   const [endedAt] = useState(() => Date.now());
   const [mood, setMood] = useState<number | null>(workout.mood);
   const [notes, setNotes] = useState(workout.notes ?? '');
 
-  if (!loaded) return <Screen>{null}</Screen>;
+  if (!loaded || !cardioLoaded) return <Screen>{null}</Screen>;
 
   const summary = workoutSummary({
     sets: sets.map((s) => ({ ...toLoggedSet(s), workoutExerciseId: s.workoutExerciseId })),
@@ -55,8 +57,8 @@ function Finish({ workout, profile }: { workout: WorkoutRow; profile: ProfileRow
     startedAt: workout.startedAt,
     endedAt,
   });
-  // El cardio (CAR-01) todavía no se registra; cuando exista, también cuenta aquí.
-  const canSave = canSaveWorkout(sets.length, 0);
+  // Una sesión puede ser solo de cardio (CAR-01).
+  const canSave = canSaveWorkout(sets.length, cardio.length);
 
   function done() {
     router.dismissAll();
@@ -113,6 +115,7 @@ function Finish({ workout, profile }: { workout: WorkoutRow; profile: ProfileRow
         <Row label={t.finish.duration} value={formatDuration(summary.durationSeconds)} />
         <Row label={t.finish.exercises} value={String(summary.exercises)} />
         <Row label={t.finish.sets} value={setsText} />
+        {cardio.length > 0 ? <Row label={t.finish.cardio} value={String(cardio.length)} /> : null}
         <Row
           label={t.finish.volume}
           value={format(t.finish.volumeValue, { n: formatThousands(summary.volume), unit: t.units[summary.unit] })}

@@ -1,0 +1,1 @@
+ALTER TABLE `workout_exercises` ADD `reference_workout_exercise_id` text;

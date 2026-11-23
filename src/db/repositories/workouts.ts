@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt, ne } from 'drizzle-orm';
 
 import { moveItem } from '@/domain/routine';
 import type { LoggedSet, SetValues } from '@/domain/workout';
@@ -124,6 +124,7 @@ export function workoutItemsQuery(db: Db, workoutId: string) {
       exerciseId: workoutExercises.exerciseId,
       position: workoutExercises.position,
       machine: workoutExercises.machine,
+      referenceId: workoutExercises.referenceWorkoutExerciseId,
       name: exercises.name,
       trackingType: exercises.trackingType,
       usesRir: exercises.usesRir,
@@ -205,6 +206,102 @@ export function startWorkout(db: Db, owner: string, routineId: string | null): {
   });
 }
 
+/**
+ * Repite una sesión pasada (HIS-03): una sesión nueva con los mismos ejercicios, en el mismo
+ * orden y con la misma máquina. Cada ejercicio apunta al de la sesión de origen para mostrar
+ * sus series como referencia; la sesión de origen no cambia. Si ya hay una sesión en curso,
+ * no crea otra y devuelve la que existe.
+ */
+export function repeatWorkout(db: Db, owner: string, sourceWorkoutId: string): { id: string; resumed: boolean } {
+  const now = Date.now();
+  return db.transaction((tx) => {
+    const active = tx
+      .select({ id: workouts.id })
+      .from(workouts)
+      .where(and(eq(workouts.userId, owner), eq(workouts.status, 'in_progress'), isNull(workouts.deletedAt)))
+      .get();
+    if (active) return { id: active.id, resumed: true };
+
+    const source = tx.select().from(workouts).where(eq(workouts.id, sourceWorkoutId)).get();
+    const record = newRecord(owner, now);
+    tx.insert(workouts)
+      .values({ ...record, routineId: source?.routineId ?? null, startedAt: now, status: 'in_progress' })
+      .run();
+    const items = tx
+      .select()
+      .from(workoutExercises)
+      .where(and(eq(workoutExercises.workoutId, sourceWorkoutId), isNull(workoutExercises.deletedAt)))
+      .orderBy(asc(workoutExercises.position))
+      .all();
+    items.forEach((item, position) => {
+      tx.insert(workoutExercises)
+        .values({
+          ...newRecord(owner, now),
+          workoutId: record.id,
+          exerciseId: item.exerciseId,
+          position,
+          machine: item.machine,
+          referenceWorkoutExerciseId: item.id,
+        })
+        .run();
+    });
+    return { id: record.id, resumed: false };
+  });
+}
+
+/**
+ * Trae a la sesión en curso un ejercicio de una sesión pasada (HIS-04), al final, con la
+ * máquina de ese día y sus series como referencia.
+ */
+export function addWorkoutExerciseFrom(db: Db, owner: string, workoutId: string, sourceItemId: string): string | null {
+  const source = db.select().from(workoutExercises).where(eq(workoutExercises.id, sourceItemId)).get();
+  if (!source) return null;
+  const items = activeItems(db, workoutId);
+  const position = items.length ? Math.max(...items.map((i) => i.position)) + 1 : 0;
+  const record = newRecord(owner);
+  db.insert(workoutExercises)
+    .values({
+      ...record,
+      workoutId,
+      exerciseId: source.exerciseId,
+      position,
+      machine: source.machine,
+      referenceWorkoutExerciseId: source.id,
+    })
+    .run();
+  return record.id;
+}
+
+/** Sesiones terminadas recientes con sus ejercicios, para elegir uno y traerlo (HIS-04). */
+export function recentWorkoutItemsQuery(db: Db, owner: string, excludeWorkoutId: string, limit = 200) {
+  return db
+    .select({
+      id: workoutExercises.id,
+      workoutId: workouts.id,
+      startedAt: workouts.startedAt,
+      routineName: routines.name,
+      exerciseId: workoutExercises.exerciseId,
+      name: exercises.name,
+      machine: workoutExercises.machine,
+      position: workoutExercises.position,
+    })
+    .from(workoutExercises)
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .leftJoin(routines, eq(routines.id, workouts.routineId))
+    .leftJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
+    .where(
+      and(
+        eq(workouts.userId, owner),
+        eq(workouts.status, 'finished'),
+        isNull(workouts.deletedAt),
+        isNull(workoutExercises.deletedAt),
+        ne(workouts.id, excludeWorkoutId),
+      ),
+    )
+    .orderBy(desc(workouts.startedAt), asc(workoutExercises.position))
+    .limit(limit);
+}
+
 function activeItems(db: Db, workoutId: string) {
   return db
     .select({ id: workoutExercises.id, position: workoutExercises.position })
@@ -281,7 +378,14 @@ export function deleteSet(db: Db, setId: string): void {
   db.update(sets).set(softDeleted()).where(eq(sets.id, setId)).run();
 }
 
-export type LastSession = { workoutExerciseId: string; startedAt: number; machine: string | null; sets: LoggedSet[] };
+export type LastSession = {
+  workoutExerciseId: string;
+  startedAt: number;
+  machine: string | null;
+  sets: LoggedSet[];
+  /** Viene de la sesión elegida al repetirla o al traer el ejercicio (HIS-03, HIS-04), no de la última vez. */
+  fromReference?: boolean;
+};
 
 /**
  * Lo que se hizo la última vez en cada ejercicio (SES-03): las series de la sesión
@@ -338,6 +442,39 @@ export function lastSessions(
       startedAt: row.startedAt,
       machine: row.machine,
       sets: own.map(toLoggedSet),
+    });
+  }
+  return result;
+}
+
+/**
+ * Series de referencia de los ejercicios que se repitieron o se trajeron de una sesión
+ * pasada (HIS-03, HIS-04), por ejercicio de referencia. Las series no se copian: se leen
+ * de la sesión de origen.
+ */
+export function referenceSessions(db: Db, referenceIds: readonly string[]): Map<string, LastSession> {
+  const result = new Map<string, LastSession>();
+  if (referenceIds.length === 0) return result;
+  const items = db
+    .select({ id: workoutExercises.id, machine: workoutExercises.machine, startedAt: workouts.startedAt })
+    .from(workoutExercises)
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .where(inArray(workoutExercises.id, [...referenceIds]))
+    .all();
+  if (items.length === 0) return result;
+  const setRows = db
+    .select()
+    .from(sets)
+    .where(and(inArray(sets.workoutExerciseId, items.map((i) => i.id)), isNull(sets.deletedAt)))
+    .orderBy(asc(sets.position), asc(sets.performedAt))
+    .all();
+  for (const item of items) {
+    result.set(item.id, {
+      workoutExerciseId: item.id,
+      startedAt: item.startedAt,
+      machine: item.machine,
+      sets: setRows.filter((s) => s.workoutExerciseId === item.id).map(toLoggedSet),
+      fromReference: true,
     });
   }
   return result;

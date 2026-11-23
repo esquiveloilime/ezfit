@@ -152,3 +152,24 @@ export function groupTemplates<T extends TemplateLike>(templates: readonly T[], 
     })),
   };
 }
+
+/**
+ * Rutina a partir de una sesión terminada (RUT-05): los mismos ejercicios, en el mismo
+ * orden, con tantas series objetivo como series efectivas se hicieron. Los calentamientos no
+ * cuentan; un ejercicio sin series efectivas queda sin objetivo. Repeticiones y descanso
+ * quedan vacíos para llenarlos al editar la rutina.
+ */
+export function routineFromSession(items: readonly { exerciseId: string; sets: readonly { kind: string }[] }[]): SavedItem[] {
+  return items.map((item, position) => {
+    const working = item.sets.filter((s) => s.kind === 'working').length;
+    return {
+      routineExerciseId: null,
+      exerciseId: item.exerciseId,
+      position,
+      targetSets: working === 0 ? null : Math.min(working, LIMITS.sets.max),
+      repsMin: null,
+      repsMax: null,
+      restSeconds: null,
+    };
+  });
+}

@@ -18,6 +18,7 @@ Se hace una sola vez, desde la computadora.
 3. Repite con `supabase/migrations/0002_catalogo.sql` (los 83 ejercicios del catálogo).
 4. Repite con `supabase/migrations/0003_plantillas.sql` (las rutinas y planes predeterminados).
 5. Repite con `supabase/migrations/0004_gana_el_mas_reciente.sql` (para que un teléfono que estuvo sin conexión no reemplace un cambio más reciente de otro teléfono).
+6. Repite con `supabase/migrations/0005_referencia_de_series.sql` (para repetir sesiones y traer ejercicios de otro día con sus series de referencia). Sin ella, las sesiones dejan de subirse a la nube.
 
 Las migraciones se aplican siempre en orden de número, una sola vez cada una. `0002_catalogo.sql` sí se puede volver a ejecutar sin problema.
 

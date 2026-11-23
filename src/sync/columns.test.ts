@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 import { SYNCED_TABLES } from '@/db/schema';
@@ -6,16 +6,22 @@ import { SYNCED_TABLES } from '@/db/schema';
 import { booleanColumns, LOCAL_ONLY_COLUMN, localColumns, SERVER_ONLY_COLUMN } from './columns';
 import { shouldApplyRemote, toLocal, toRemote } from './transform';
 
-/** Columnas de cada tabla según la migración de Supabase. */
+/** Columnas de cada tabla según las migraciones de Supabase: las tablas y las columnas agregadas después. */
 function remoteColumns(): Map<string, string[]> {
-  const sql = readFileSync(join(__dirname, '../../supabase/migrations/0001_esquema.sql'), 'utf8');
+  const dir = join(__dirname, '../../supabase/migrations');
   const out = new Map<string, string[]>();
-  for (const match of sql.matchAll(/create table public\.(\w+) \(([\s\S]*?)\n\);/g)) {
-    const columns = match[2]!
-      .split('\n')
-      .map((line) => line.trim().match(/^([a-z_]+) /)?.[1])
-      .filter((c): c is string => Boolean(c));
-    out.set(match[1]!, columns);
+  for (const file of readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()) {
+    const sql = readFileSync(join(dir, file), 'utf8');
+    for (const match of sql.matchAll(/create table public\.(\w+) \(([\s\S]*?)\n\);/g)) {
+      const columns = match[2]!
+        .split('\n')
+        .map((line) => line.trim().match(/^([a-z_]+) /)?.[1])
+        .filter((c): c is string => Boolean(c));
+      out.set(match[1]!, columns);
+    }
+    for (const match of sql.matchAll(/alter table public\.(\w+) add column (\w+) /g)) {
+      out.get(match[1]!)?.push(match[2]!);
+    }
   }
   return out;
 }

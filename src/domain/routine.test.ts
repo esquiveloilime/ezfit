@@ -6,6 +6,7 @@ import {
   groupTemplates,
   isRoutineSection,
   moveItem,
+  routineFromSession,
   validateRoutineDraft,
 } from './routine';
 
@@ -138,5 +139,28 @@ describe('isRoutineSection', () => {
     expect(isRoutineSection('plans')).toBe(true);
     expect(isRoutineSection('otra')).toBe(false);
     expect(isRoutineSection(undefined)).toBe(false);
+  });
+});
+
+describe('routineFromSession (RUT-05)', () => {
+  it('copia los ejercicios en orden con sus series efectivas como objetivo', () => {
+    const items = routineFromSession([
+      { exerciseId: 'press', sets: [{ kind: 'warmup' }, { kind: 'working' }, { kind: 'working' }, { kind: 'working' }] },
+      { exerciseId: 'remo', sets: [{ kind: 'working' }, { kind: 'working' }] },
+    ]);
+    expect(items).toEqual([
+      { routineExerciseId: null, exerciseId: 'press', position: 0, targetSets: 3, repsMin: null, repsMax: null, restSeconds: null },
+      { routineExerciseId: null, exerciseId: 'remo', position: 1, targetSets: 2, repsMin: null, repsMax: null, restSeconds: null },
+    ]);
+  });
+
+  it('sin series efectivas, el ejercicio queda sin objetivo', () => {
+    expect(routineFromSession([{ exerciseId: 'a', sets: [{ kind: 'warmup' }] }])[0]?.targetSets).toBeNull();
+    expect(routineFromSession([{ exerciseId: 'a', sets: [] }])[0]?.targetSets).toBeNull();
+  });
+
+  it('no pasa del máximo de series de una rutina', () => {
+    const sets = Array.from({ length: 25 }, () => ({ kind: 'working' }));
+    expect(routineFromSession([{ exerciseId: 'a', sets }])[0]?.targetSets).toBe(20);
   });
 });

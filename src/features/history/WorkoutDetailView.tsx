@@ -1,6 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, Stack } from 'expo-router';
-import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
@@ -27,12 +26,14 @@ import { cardioSummary } from '@/features/workout/CardioSection';
 import { format, t } from '@/i18n';
 import { Button, Card, EmptyState, Screen, colors, font, minTouch, radius, spacing } from '@/ui';
 
+import { SessionActions } from './SessionActions';
+
 /**
  * Detalle de una sesión terminada (HIS-01): resumen, ánimo, nota, cada ejercicio con su
  * máquina y sus series, y el cardio. Se abre desde Historial y desde "Hoy entrenaste".
- * `actions` son los botones de abajo (repetir, guardar como rutina).
+ * Abajo, repetirla (HIS-03) y guardarla como rutina (RUT-05).
  */
-export function WorkoutDetailView({ id, actions }: { id: string; actions?: ReactNode }) {
+export function WorkoutDetailView({ id }: { id: string }) {
   const { db } = useDatabase();
   const { profile } = useProfile();
   const workoutQuery = useQuery(workoutByIdQuery(db, id), [id]);
@@ -127,7 +128,17 @@ export function WorkoutDetailView({ id, actions }: { id: string; actions?: React
         </>
       ) : null}
 
-      {actions}
+      <SessionActions
+        workoutId={workout.id}
+        suggestedName={
+          workout.routineName ??
+          format(t.sessionDetail.routineFromSessionName, {
+            day: new Date(workout.startedAt).getDate(),
+            month: t.monthsShort[new Date(workout.startedAt).getMonth()] ?? '',
+          })
+        }
+        items={items.map((i) => ({ exerciseId: i.exerciseId, sets: setsByItem.get(i.id) ?? [] }))}
+      />
     </Screen>
   );
 }

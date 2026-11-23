@@ -32,6 +32,7 @@ import {
   validateSet,
   type WeightUnit,
 } from '@/domain/workout';
+import { formatRunDate } from '@/features/run/RunStats';
 import { format, t } from '@/i18n';
 import { Button, Card, Chip, IconButton, TextField, colors, font, minTouch, radius, spacing } from '@/ui';
 
@@ -45,6 +46,7 @@ export type WorkoutItem = {
   usesRir: boolean | null;
   usesTechnique: boolean | null;
   machine: string | null;
+  referenceId: string | null;
 };
 
 export type Target = { targetSets: number | null; repsMin: number | null; repsMax: number | null } | undefined;
@@ -174,7 +176,11 @@ export function ExerciseBlock({
       </View>
 
       <Text style={styles.meta}>
-        {last ? format(t.workout.lastTime, { summary: summarizeSets(last.sets) }) : t.workout.noLastTime}
+        {last
+          ? last.fromReference
+            ? format(t.workout.referenceTime, { date: formatRunDate(last.startedAt), summary: summarizeSets(last.sets) })
+            : format(t.workout.lastTime, { summary: summarizeSets(last.sets) })
+          : t.workout.noLastTime}
       </Text>
 
       <MachineField workoutExerciseId={item.id} exerciseId={item.exerciseId} saved={item.machine} />

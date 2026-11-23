@@ -133,7 +133,7 @@ Toda tabla sincronizada tiene:
 | `plans` | Planes semanales | nombre, días por semana |
 | `plan_days` | Rutina de cada día de un plan | plan, orden, rutina, día de la semana (opcional) |
 | `workouts` | Sesiones | rutina de origen (opcional), inicio, fin, estado (en curso, terminada), ánimo, notas |
-| `workout_exercises` | Ejercicios de una sesión | sesión, ejercicio, orden, máquina, notas |
+| `workout_exercises` | Ejercicios de una sesión | sesión, ejercicio, orden, máquina, notas, ejercicio de referencia (de la sesión pasada cuyas series se muestran al repetirla o al traerlo, HIS-03 y HIS-04) |
 | `sets` | Series | ejercicio de sesión, orden, tipo (calentamiento, efectiva), peso, unidad, repeticiones, duración, distancia, RIR, técnica, hora |
 | `cardio_entries` | Bloques de cardio | sesión, aparato, duración, nivel, velocidad, distancia, inclinación, notas |
 | `runs` | Actividades de running | tipo, nombre, inicio, fin, tiempo en movimiento, distancia, ritmo promedio, ruta simplificada, notas, estado |

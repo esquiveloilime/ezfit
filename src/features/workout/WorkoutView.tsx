@@ -8,9 +8,11 @@ import { routineByIdQuery } from '@/db/repositories/routines';
 import {
   activeWorkoutQuery,
   addWorkoutExercise,
+  addWorkoutExerciseFrom,
   discardWorkout,
   lastSessions,
   moveWorkoutExercise,
+  referenceSessions,
   routineTargets,
   type WorkoutRow,
   type WorkoutSet,
@@ -62,7 +64,18 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
     () => lastSessions(db, owner, exerciseKey ? exerciseKey.split(',') : [], workout.id),
     [db, owner, exerciseKey, workout.id],
   );
+  // Ejercicios repetidos o traídos de una sesión pasada: sus series de ese día son la referencia (HIS-03, HIS-04).
+  const referenceKey = items.map((i) => i.referenceId ?? '').filter(Boolean).join(',');
+  const references = useMemo(
+    () => referenceSessions(db, referenceKey ? referenceKey.split(',') : []),
+    [db, referenceKey],
+  );
   const targets = useMemo(() => routineTargets(db, workout.routineId), [db, workout.routineId]);
+
+  function lastFor(item: { exerciseId: string; referenceId: string | null }) {
+    const reference = item.referenceId ? references.get(item.referenceId) : undefined;
+    return reference && reference.sets.length > 0 ? reference : last.get(item.exerciseId);
+  }
 
   const setsByItem = useMemo(() => {
     const map = new Map<string, WorkoutSet[]>();
@@ -127,7 +140,7 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
                 index={index}
                 total={items.length}
                 sets={setsByItem.get(item.id) ?? []}
-                last={last.get(item.exerciseId)}
+                last={lastFor(item)}
                 target={targets.get(item.exerciseId)}
                 defaultUnit={profile.weightUnit}
                 increments={increments}
@@ -142,6 +155,13 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
             onPick={(onPicked) => {
               openPicker(onPicked);
               router.push('/exercises/pick');
+            }}
+            onBring={(onPicked) => {
+              openPicker((sourceItemId) => {
+                const id = addWorkoutExerciseFrom(db, owner, workout.id, sourceItemId);
+                if (id) onPicked(id);
+              });
+              router.push('/workout/bring');
             }}
           />
         ) : null}
@@ -166,6 +186,7 @@ function ExerciseList({
   render,
   onAdd,
   onPick,
+  onBring,
 }: {
   items: WorkoutItem[];
   progress: Map<string, ExerciseProgress>;
@@ -173,6 +194,8 @@ function ExerciseList({
   render: (item: WorkoutItem, index: number, open: boolean, onToggle: () => void) => ReactNode;
   onAdd: (exerciseId: string) => string;
   onPick: (onPicked: (exerciseId: string) => void) => void;
+  /** Traer un ejercicio de una sesión pasada (HIS-04); recibe el ejercicio ya agregado. */
+  onBring: (onAdded: (workoutExerciseId: string) => void) => void;
 }) {
   const [openId, setOpenId] = useState<string | null>(() =>
     firstPendingExercise(items.map((i) => ({ id: i.id, ...(progress.get(i.id) ?? exerciseProgress([], null)) }))),
@@ -219,6 +242,7 @@ function ExerciseList({
         label={t.workout.addExercise}
         onPress={() => onPick((exerciseId) => openByUser(onAdd(exerciseId)))}
       />
+      <Button variant="ghost" label={t.workout.bringExercise} onPress={() => onBring(openByUser)} />
     </>
   );
 }

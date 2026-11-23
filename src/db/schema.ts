@@ -129,6 +129,12 @@ export const workoutExercises = sqliteTable(
     position: integer('position').notNull(),
     machine: text('machine'),
     notes: text('notes'),
+    /**
+     * Ejercicio de una sesión pasada cuyas series se muestran como referencia, al repetir esa
+     * sesión (HIS-03) o al traer el ejercicio a la sesión en curso (HIS-04). Vacío: se usa la
+     * última vez que se hizo el ejercicio.
+     */
+    referenceWorkoutExerciseId: text('reference_workout_exercise_id'),
   },
   (t) => [
     index('workout_exercises_workout_idx').on(t.workoutId),

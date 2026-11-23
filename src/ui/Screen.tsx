@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, type Ref, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import { Keyboard, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,6 +9,15 @@ type Props = {
   children: ReactNode;
   /** Desactivar cuando el contenido ya es una lista con su propio desplazamiento. */
   scroll?: boolean;
+  ref?: Ref<ScreenHandle>;
+};
+
+/** Acciones que una pantalla puede pedirle a `Screen`. */
+export type ScreenHandle = {
+  /** Desplaza hasta el campo que tiene el cursor, por ejemplo después de enfocarlo por un error. */
+  scrollToFocused: () => void;
+  /** Desplaza hasta que `view` (que debe estar dentro de la pantalla) quede arriba. */
+  scrollToView: (view: View) => void;
 };
 
 // Espacio que se deja arriba del campo al desplazarse hacia él, para que también se vea su etiqueta.
@@ -16,31 +25,45 @@ const FIELD_MARGIN = 48;
 // Tiempo para que la pantalla termine de encogerse antes de desplazarse.
 const SETTLE_MS = 100;
 
-export function Screen({ title, children, scroll = true }: Props) {
+export function Screen({ title, children, scroll = true, ref }: Props) {
   const scrollRef = useRef<ScrollView>(null);
   const contentRef = useRef<View>(null);
+
+  const scrollToFocused = useCallback(() => {
+    const input = TextInput.State.currentlyFocusedInput();
+    const content = contentRef.current;
+    if (!input || !content) return;
+    input.measureLayout(
+      content,
+      (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - FIELD_MARGIN), animated: true }),
+      () => undefined,
+    );
+  }, []);
+
+  const scrollToView = useCallback((view: View) => {
+    const content = contentRef.current;
+    if (!content) return;
+    view.measureLayout(
+      content,
+      (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - spacing.sm), animated: true }),
+      () => undefined,
+    );
+  }, []);
+
+  useImperativeHandle(ref, () => ({ scrollToFocused, scrollToView }), [scrollToFocused, scrollToView]);
 
   // Al abrir el teclado, se desplaza hasta el campo que se está llenando para que no quede tapado.
   useEffect(() => {
     if (!scroll) return undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const sub = Keyboard.addListener('keyboardDidShow', () => {
-      timer = setTimeout(() => {
-        const input = TextInput.State.currentlyFocusedInput();
-        const content = contentRef.current;
-        if (!input || !content) return;
-        input.measureLayout(
-          content,
-          (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - FIELD_MARGIN), animated: true }),
-          () => undefined,
-        );
-      }, SETTLE_MS);
+      timer = setTimeout(scrollToFocused, SETTLE_MS);
     });
     return () => {
       sub.remove();
       if (timer) clearTimeout(timer);
     };
-  }, [scroll]);
+  }, [scroll, scrollToFocused]);
 
   const header = title ? (
     <Text style={styles.title} accessibilityRole="header">

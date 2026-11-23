@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { type Ref, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, type TextInputProps, View } from 'react-native';
 
 import { colors, font, minTouch, radius, spacing } from './tokens';
@@ -12,9 +12,10 @@ type Props = Omit<TextInputProps, 'style' | 'secureTextEntry'> & {
    * Los textos del botón se pasan desde quien usa el campo (vienen de src/i18n).
    */
   password?: { showLabel: string; hideLabel: string };
+  ref?: Ref<TextInput>;
 };
 
-export function TextField({ label, error, password, ...inputProps }: Props) {
+export function TextField({ label, error, password, ref, ...inputProps }: Props) {
   const [visible, setVisible] = useState(false);
   const hidden = password ? !visible : false;
 
@@ -23,6 +24,7 @@ export function TextField({ label, error, password, ...inputProps }: Props) {
       <Text style={styles.label}>{label}</Text>
       <View style={[styles.box, error ? styles.boxError : null]}>
         <TextInput
+          ref={ref}
           accessibilityLabel={label}
           placeholderTextColor={colors.textMuted}
           style={styles.input}

@@ -5,6 +5,6 @@ export { ChipGroup } from './ChipGroup';
 export { ToggleRow } from './ToggleRow';
 export { EmptyState } from './EmptyState';
 export { IconButton } from './IconButton';
-export { Screen } from './Screen';
+export { Screen, type ScreenHandle } from './Screen';
 export { TextField } from './TextField';
 export * from './tokens';

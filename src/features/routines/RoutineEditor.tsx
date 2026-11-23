@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, type TextInput, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
 import { useQuery } from '@/db/useQuery';
@@ -11,7 +11,7 @@ import { newId } from '@/domain/id';
 import { type DraftErrors, type DraftItem, type RoutineDraft, validateRoutineDraft } from '@/domain/routine';
 import { useExercisePicker } from '@/features/exercises/pickerStore';
 import { format, t } from '@/i18n';
-import { Button, Card, Screen, TextField, colors, font, minTouch, spacing } from '@/ui';
+import { Button, Card, Screen, type ScreenHandle, TextField, colors, font, minTouch, spacing } from '@/ui';
 
 import { useRoutineDraft } from './draftStore';
 
@@ -27,6 +27,8 @@ export function RoutineEditor({ id }: { id: string | undefined }) {
   const openPicker = useExercisePicker((s) => s.open);
   const [errors, setErrors] = useState<DraftErrors>({});
   const [saveError, setSaveError] = useState(false);
+  const screenRef = useRef<ScreenHandle>(null);
+  const nameRef = useRef<TextInput>(null);
 
   // Nombres de todos los ejercicios (incluidos los archivados que ya estaban en la rutina).
   const { data: allExercises } = useQuery(
@@ -73,6 +75,11 @@ export function RoutineEditor({ id }: { id: string | undefined }) {
     const result = validateRoutineDraft(draft);
     if (!result.ok) {
       setErrors(result.errors);
+      // Sin nombre, se lleva al usuario al campo para que vea qué falta (RUT-03).
+      if (result.errors.name) {
+        nameRef.current?.focus();
+        screenRef.current?.scrollToFocused();
+      }
       return;
     }
     setErrors({});
@@ -94,8 +101,9 @@ export function RoutineEditor({ id }: { id: string | undefined }) {
         : null;
 
   return (
-    <Screen title={id ? t.routines.editor.editTitle : t.routines.editor.newTitle}>
+    <Screen ref={screenRef} title={id ? t.routines.editor.editTitle : t.routines.editor.newTitle}>
       <TextField
+        ref={nameRef}
         label={t.routines.editor.name}
         placeholder={t.routines.editor.namePlaceholder}
         value={draft.name}

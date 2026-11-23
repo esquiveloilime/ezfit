@@ -281,6 +281,7 @@ En la sección **Rutinas**, Mis rutinas, Planes semanales, Por tiempo, Pierna Pu
 **RUT-03 · P1 · Crear rutina propia**
 - Campos: nombre, lista ordenada de ejercicios y, por ejercicio, series objetivo, rango de repeticiones y tiempo de descanso (opcionales).
 - Los ejercicios se eligen del catálogo con EJE-02, o se crean al momento con EJE-03.
+- Si se intenta guardar sin nombre, la pantalla se desplaza al campo del nombre, lo marca en rojo y pone el cursor ahí.
 
 **RUT-04 · P1 · Editar, duplicar y eliminar rutinas**
 - Las rutinas propias se pueden editar, duplicar y eliminar (con confirmación).

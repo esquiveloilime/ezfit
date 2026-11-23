@@ -295,44 +295,44 @@ Cómo probarlo:
 
 Las tablas de este bloque ya existen y ya se sincronizan; cada incremento verifica que sus datos suben y bajan.
 
-### I-16 · Cardio en aparatos
+### I-16 · Cardio en aparatos ✅
 
 Bloques de cardio dentro de la sesión, sesiones solo de cardio, valores llenos de la última vez y cronómetro opcional.
 
 Cubre: CAR-01, CAR-02.
 
 Cómo probarlo:
-- [ ] Agregar a una sesión un bloque de caminadora con tiempo, nivel y velocidad.
-- [ ] La siguiente vez que eliges caminadora, vienen los valores anteriores.
-- [ ] Guardar una sesión que solo tiene cardio.
-- [ ] Usar el cronómetro en lugar de escribir el tiempo.
+- [x] Agregar a una sesión un bloque de caminadora con tiempo, nivel y velocidad.
+- [x] La siguiente vez que eliges caminadora, vienen los valores anteriores.
+- [x] Guardar una sesión que solo tiene cardio.
+- [x] Usar el cronómetro en lugar de escribir el tiempo.
 
-### I-17 · Historial de sesiones y por ejercicio
+### I-17 · Historial de sesiones y por ejercicio ✅
 
 Lista de sesiones y actividades juntas, con su ícono y filtrada por mes; detalle de sesión, también desde "Hoy entrenaste"; mejores marcas de running; e historial por ejercicio con filtro por máquina, accesible desde catálogo, historial y sesión en curso.
 
 Cubre: HIS-01, HIS-02, RUN-13, RUT-02 (abrir una sesión desde Hoy).
 
 Cómo probarlo:
-- [ ] Historial muestra las sesiones y las actividades de running por fecha, cada una con el ícono de Rutinas o de Correr.
-- [ ] Con las flechas del mes se ven los registros de meses anteriores; un mes vacío lo dice.
-- [ ] En Hoy, tocar una sesión de "Hoy entrenaste" abre su detalle.
-- [ ] Las mejores marcas muestran la caminata y la carrera más largas y las de mejor ritmo; al eliminar una, la marca pasa a la siguiente.
-- [ ] El detalle de una sesión muestra todo lo registrado, incluidos máquina, cardio y nota.
-- [ ] El historial de un ejercicio muestra sus series de todas las fechas.
-- [ ] Filtrar por una máquina deja solo las series hechas en ella.
+- [x] Historial muestra las sesiones y las actividades de running por fecha, cada una con el ícono de Rutinas o de Correr.
+- [x] Con las flechas del mes se ven los registros de meses anteriores; un mes vacío lo dice.
+- [x] En Hoy, tocar una sesión de "Hoy entrenaste" abre su detalle.
+- [x] Las mejores marcas muestran la caminata y la carrera más largas y las de mejor ritmo; al eliminar una, la marca pasa a la siguiente.
+- [x] El detalle de una sesión muestra todo lo registrado, incluidos máquina, cardio y nota.
+- [x] El historial de un ejercicio muestra sus series de todas las fechas.
+- [x] Filtrar por una máquina deja solo las series hechas en ella.
 
-### I-18 · Repetir sesiones y traer ejercicios
+### I-18 · Repetir sesiones y traer ejercicios ✅
 
 Repetir una sesión anterior, traer un ejercicio de un día anterior a la sesión en curso y guardar una sesión como rutina.
 
 Cubre: HIS-03, HIS-04, RUT-05.
 
 Cómo probarlo:
-- [ ] "Repetir hoy" en una sesión pasada abre una sesión nueva con los mismos ejercicios y las series de ese día como referencia.
-- [ ] Modificar la sesión nueva no cambia la original.
-- [ ] En una sesión en curso, traer un ejercicio de otro día.
-- [ ] Guardar una sesión terminada como rutina y encontrarla en Rutinas.
+- [x] "Repetir hoy" en una sesión pasada abre una sesión nueva con los mismos ejercicios y las series de ese día como referencia.
+- [x] Modificar la sesión nueva no cambia la original.
+- [x] En una sesión en curso, traer un ejercicio de otro día.
+- [x] Guardar una sesión terminada como rutina y encontrarla en Rutinas.
 
 **Punto de control:** al cerrar este bloque, todos los requisitos P1 están completos y probados en Expo Go.
 

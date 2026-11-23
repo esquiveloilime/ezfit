@@ -67,4 +67,4 @@ La prioridad es avanzar rápido. El autor pide bloques completos ("Implementa el
 
 ## Estado
 
-Bloque actual: 6, cardio, historial y copiar. Los bloques 1 (I-01 a I-03) y 2 (I-04 a I-06) quedaron probados y cerrados el 2 de noviembre de 2026, el bloque 3 (I-07 a I-09) el 3 de noviembre, el bloque 4 (I-10 a I-12) el 22 de noviembre de 2026, junto con las correcciones del feedback de la build de desarrollo (especificación 0.4), y el bloque 5 (I-13 a I-15) el 22 de noviembre de 2026.
+Bloque actual: 7, APK, Google, segundo plano, recomendaciones y fotos. Los bloques 1 (I-01 a I-03) y 2 (I-04 a I-06) quedaron probados y cerrados el 2 de noviembre de 2026, el bloque 3 (I-07 a I-09) el 3 de noviembre, el bloque 4 (I-10 a I-12) el 22 de noviembre de 2026, junto con las correcciones del feedback de la build de desarrollo (especificación 0.4), el bloque 5 (I-13 a I-15) el 22 de noviembre de 2026 y el bloque 6 (I-16 a I-18) el 22 de noviembre de 2026.

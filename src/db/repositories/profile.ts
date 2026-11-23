@@ -79,3 +79,12 @@ export function lastFinishedWorkoutQuery(db: Db, owner: string) {
     .orderBy(desc(workouts.endedAt))
     .limit(1);
 }
+
+/** Cambia el incremento de peso de una unidad (AJU-03). */
+export function setWeightIncrement(db: Db, owner: string, unit: WeightUnit, value: number): void {
+  const column = unit === 'kg' ? { weightIncrementKg: value } : { weightIncrementLb: value };
+  db.update(profiles)
+    .set({ ...column, ...touched() })
+    .where(and(eq(profiles.userId, owner), isNull(profiles.deletedAt)))
+    .run();
+}

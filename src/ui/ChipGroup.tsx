@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Chip } from './Chip';
 import { colors, font, spacing } from './tokens';
 
-type Props<T extends string> = {
+type Props<T extends string | number> = {
   label: string;
   options: readonly T[];
   /** Vacío mientras no se ha elegido ninguna. */
@@ -13,7 +13,7 @@ type Props<T extends string> = {
 };
 
 /** Elegir una opción de una lista corta, con botones que se acomodan en varias filas. */
-export function ChipGroup<T extends string>({ label, options, value, labelFor, onChange }: Props<T>) {
+export function ChipGroup<T extends string | number>({ label, options, value, labelFor, onChange }: Props<T>) {
   return (
     <View style={styles.container} accessibilityRole="radiogroup" accessibilityLabel={label}>
       <Text style={styles.label}>{label}</Text>

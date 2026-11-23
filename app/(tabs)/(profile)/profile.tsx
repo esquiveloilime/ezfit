@@ -4,6 +4,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useAccount } from '@/features/account/accountStore';
 import { SyncStatusCard } from '@/features/account/SyncStatusCard';
 import { useProfile } from '@/features/onboarding/useProfile';
+import { IncrementSetting } from '@/features/settings/IncrementSetting';
 import { RestSettings } from '@/features/settings/RestSettings';
 import { WeightUnitSetting } from '@/features/settings/WeightUnitSetting';
 import { format, t } from '@/i18n';
@@ -61,6 +62,7 @@ export default function ProfileScreen() {
       {mode === 'user' ? <SyncStatusCard /> : null}
       <Text style={styles.section}>{t.settings.title}</Text>
       {profile ? <WeightUnitSetting profile={profile} /> : null}
+      {profile ? <IncrementSetting profile={profile} /> : null}
       {profile ? <RestSettings profile={profile} /> : null}
       <Button variant="secondary" label={t.privacy.profileEntry} onPress={() => router.push('/privacy')} />
     </Screen>

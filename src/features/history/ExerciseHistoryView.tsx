@@ -7,11 +7,13 @@ import { useDatabase } from '@/db/DatabaseProvider';
 import { exerciseByIdQuery } from '@/db/repositories/exercises';
 import { exerciseHistoryQuery, toLoggedSet } from '@/db/repositories/workouts';
 import { useQuery } from '@/db/useQuery';
-import { groupExerciseHistory, historyMachines } from '@/domain/history';
+import { bestWeightProgress, groupExerciseHistory, historyMachines } from '@/domain/history';
+import { useProfile } from '@/features/onboarding/useProfile';
 import { formatRunDate } from '@/features/run/RunStats';
 import { format, t } from '@/i18n';
 import { Card, Chip, EmptyState, Screen, colors, font, minTouch, spacing } from '@/ui';
 
+import { ProgressChart } from './ProgressChart';
 import { SetList } from './WorkoutDetailView';
 
 /**
@@ -24,6 +26,8 @@ export function ExerciseHistoryView({ exerciseId }: { exerciseId: string }) {
   const { data: exercise } = useQuery(exerciseByIdQuery(db, exerciseId), [exerciseId]);
   const { data: rows, loaded } = useQuery(exerciseHistoryQuery(db, owner, exerciseId), [owner, exerciseId]);
   const [machine, setMachine] = useState<string | null>(null);
+  const { profile } = useProfile();
+  const defaultUnit = profile?.weightUnit ?? 'lb';
 
   const machines = useMemo(() => historyMachines(rows), [rows]);
   const days = useMemo(
@@ -35,6 +39,18 @@ export function ExerciseHistoryView({ exerciseId }: { exerciseId: string }) {
     [rows, machine],
   );
   const name = exercise[0]?.name ?? t.routines.unknownExercise;
+  // Gráfica del mejor peso por sesión (HIS-05), con el mismo filtro de máquina que la lista.
+  const weighted = exercise[0]?.trackingType === 'weight_reps';
+  const progress = useMemo(
+    () =>
+      weighted
+        ? bestWeightProgress(
+            days.flatMap((d) => d.sets.map((s) => ({ workoutId: d.workoutId, startedAt: d.startedAt, ...s }))),
+            defaultUnit,
+          )
+        : [],
+    [days, weighted, defaultUnit],
+  );
 
   return (
     <Screen title={name}>
@@ -55,6 +71,8 @@ export function ExerciseHistoryView({ exerciseId }: { exerciseId: string }) {
         </View>
       ) : null}
       {machine !== null && days.length === 0 ? <Text style={styles.meta}>{t.exerciseHistory.emptyFilter}</Text> : null}
+
+      <ProgressChart points={progress} unit={defaultUnit} />
 
       {days.map((day) => {
         const date = formatRunDate(day.startedAt);

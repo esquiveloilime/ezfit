@@ -1,5 +1,6 @@
 import {
   bestMarks,
+  bestWeightProgress,
   groupExerciseHistory,
   historyMachines,
   type MarkRun,
@@ -132,5 +133,35 @@ describe('historial por ejercicio (HIS-02)', () => {
         { startedAt: 4, machine: null },
       ]),
     ).toEqual(['Hammer', 'Smith']);
+  });
+});
+
+describe('gráfica de progreso (HIS-05)', () => {
+  const row = (workoutId: string, startedAt: number, weight: number | null, unit: 'kg' | 'lb' | null, kind: 'working' | 'warmup' = 'working') => ({
+    workoutId,
+    startedAt,
+    kind,
+    weight,
+    unit,
+  });
+
+  it('toma el mejor peso de cada sesión, de la más antigua a la más reciente', () => {
+    const points = bestWeightProgress(
+      [row('b', 2, 140, 'lb'), row('b', 2, 135, 'lb'), row('a', 1, 130, 'lb'), row('a', 1, 125, 'lb')],
+      'lb',
+    );
+    expect(points).toEqual([
+      { workoutId: 'a', startedAt: 1, weight: 130 },
+      { workoutId: 'b', startedAt: 2, weight: 140 },
+    ]);
+  });
+
+  it('convierte a la unidad por defecto para comparar', () => {
+    const points = bestWeightProgress([row('a', 1, 60, 'kg'), row('a', 1, 130, 'lb')], 'lb');
+    expect(points).toEqual([{ workoutId: 'a', startedAt: 1, weight: 132.3 }]);
+  });
+
+  it('ignora calentamientos y series sin peso', () => {
+    expect(bestWeightProgress([row('a', 1, 200, 'lb', 'warmup'), row('b', 2, null, null)], 'lb')).toEqual([]);
   });
 });

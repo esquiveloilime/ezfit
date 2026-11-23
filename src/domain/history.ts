@@ -2,6 +2,7 @@
 // Sin dependencias de React Native ni de la base de datos.
 
 import type { RunKind } from './run';
+import { convertWeight, type SetKind, type WeightUnit } from './workout';
 
 // --- Filtro por mes (HIS-01) ---
 
@@ -138,4 +139,33 @@ export function historyMachines(rows: readonly { startedAt: number; machine: str
     if (!seen.has(key)) seen.set(key, clean);
   }
   return [...seen.values()];
+}
+
+// --- Gráfica de progreso (HIS-05) ---
+
+export type ProgressPoint = { workoutId: string; startedAt: number; weight: number };
+
+/**
+ * Mejor peso de cada sesión, de la más antigua a la más reciente, para la gráfica. Solo
+ * cuentan las series efectivas con peso; cada una se convierte a la unidad por defecto del
+ * usuario para que los puntos sean comparables (1 kg = 2.20462 lb). El valor guardado no cambia.
+ */
+export function bestWeightProgress(
+  rows: readonly {
+    workoutId: string;
+    startedAt: number;
+    kind: SetKind;
+    weight: number | null;
+    unit: WeightUnit | null;
+  }[],
+  defaultUnit: WeightUnit,
+): ProgressPoint[] {
+  const best = new Map<string, ProgressPoint>();
+  for (const row of rows) {
+    if (row.kind !== 'working' || row.weight === null || row.unit === null) continue;
+    const weight = Math.round(convertWeight(row.weight, row.unit, defaultUnit) * 10) / 10;
+    const current = best.get(row.workoutId);
+    if (!current || weight > current.weight) best.set(row.workoutId, { workoutId: row.workoutId, startedAt: row.startedAt, weight });
+  }
+  return [...best.values()].sort((a, b) => a.startedAt - b.startedAt);
 }

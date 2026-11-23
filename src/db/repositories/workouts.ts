@@ -448,6 +448,48 @@ export function lastSessions(
 }
 
 /**
+ * Series de la última sesión terminada de un ejercicio, para la sugerencia de peso (REC-01).
+ * Si hoy se anotó una máquina, solo cuenta la última sesión en esa misma máquina (sin
+ * importar mayúsculas). Se saltan las sesiones en que el ejercicio no tuvo series efectivas.
+ */
+export function lastSetsForRecommendation(
+  db: Db,
+  owner: string,
+  exerciseId: string,
+  machine: string | null,
+): LoggedSet[] {
+  const wanted = machine?.trim().toLocaleLowerCase() || null;
+  const items = db
+    .select({ id: workoutExercises.id, machine: workoutExercises.machine })
+    .from(workoutExercises)
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .where(
+      and(
+        eq(workoutExercises.exerciseId, exerciseId),
+        isNull(workoutExercises.deletedAt),
+        eq(workouts.userId, owner),
+        eq(workouts.status, 'finished'),
+        isNull(workouts.deletedAt),
+      ),
+    )
+    .orderBy(desc(workouts.startedAt))
+    .all();
+  // La sesión en curso no cuenta: todavía no está terminada.
+  for (const item of items) {
+    if (wanted !== null && (item.machine ?? '').trim().toLocaleLowerCase() !== wanted) continue;
+    const own = db
+      .select()
+      .from(sets)
+      .where(and(eq(sets.workoutExerciseId, item.id), isNull(sets.deletedAt)))
+      .orderBy(asc(sets.position), asc(sets.performedAt))
+      .all()
+      .map(toLoggedSet);
+    if (own.some((s) => s.kind === 'working')) return own;
+  }
+  return [];
+}
+
+/**
  * Series de referencia de los ejercicios que se repitieron o se trajeron de una sesión
  * pasada (HIS-03, HIS-04), por ejercicio de referencia. Las series no se copian: se leen
  * de la sesión de origen.

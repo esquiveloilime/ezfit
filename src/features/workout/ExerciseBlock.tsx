@@ -8,6 +8,7 @@ import {
   addSet,
   deleteSet,
   type LastSession,
+  lastSetsForRecommendation,
   machineHistory,
   removeWorkoutExercise,
   setMachine,
@@ -16,11 +17,13 @@ import {
   type WorkoutSet,
 } from '@/db/repositories/workouts';
 import type { TrackingType } from '@/domain/exercise';
+import { type Recommendation, recommend } from '@/domain/recommendation';
 import { formatTarget } from '@/domain/routine';
 import {
   cleanMachine,
   type ExerciseProgress,
   fieldsFor,
+  formatNumber,
   formatSet,
   inputFromSet,
   machineSuggestions,
@@ -84,10 +87,28 @@ export function ExerciseBlock({
   progress,
   onToggle,
 }: Props) {
-  const { db } = useDatabase();
+  const { db, owner } = useDatabase();
   const [editingId, setEditingId] = useState<string | null>(null);
+  // Valores de la sugerencia tocada (REC-01), solo para la serie que sigue en ese momento.
+  const [applied, setApplied] = useState<{ at: number; input: SetInput } | null>(null);
   const name = item.name ?? t.routines.unknownExercise;
   const tracking: TrackingType = item.trackingType ?? 'weight_reps';
+  // Sugerencia de peso (REC-01): solo en peso y repeticiones, con la última sesión en la misma máquina.
+  const recommendation = useMemo(
+    () =>
+      tracking === 'weight_reps'
+        ? recommend({
+            lastSets: lastSetsForRecommendation(db, owner, item.exerciseId, item.machine),
+            repsMin: target?.repsMin,
+            repsMax: target?.repsMax,
+            increments,
+          })
+        : null,
+    // `increments` se arma en cada dibujo; sus valores son los que importan.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [db, owner, item.exerciseId, item.machine, tracking, target?.repsMin, target?.repsMax, increments.kg, increments.lb],
+  );
+  const startedExercise = sets.some((s) => s.kind === 'working');
   const numbers = setNumbers(sets);
   const targetText = target ? formatTarget(target.targetSets, target.repsMin, target.repsMax) : '';
   // El RIR solo tiene sentido cuando se cuentan repeticiones (EJE-03).
@@ -185,6 +206,19 @@ export function ExerciseBlock({
 
       <MachineField workoutExerciseId={item.id} exerciseId={item.exerciseId} saved={item.machine} />
 
+      {recommendation && !startedExercise && editingId === null ? (
+        <Suggestion
+          recommendation={recommendation}
+          onApply={(rec) => {
+            const base = prefillSet({ index: sets.length, lastSession: last?.sets ?? [], today: sets.map(toLoggedSet), defaultUnit });
+            setApplied({
+              at: sets.length,
+              input: { ...base, kind: 'working', weight: formatNumber(rec.weight), unit: rec.unit, reps: String(rec.reps) },
+            });
+          }}
+        />
+      ) : null}
+
       {sets.map((s, i) => {
         const label = numbers[i] ?? null;
         const warmup = s.kind === 'warmup';
@@ -225,22 +259,64 @@ export function ExerciseBlock({
 
       {editingId === null ? (
         <NextSet
-          // Al registrar una serie cambia la clave y los campos se vuelven a precargar.
-          key={`${item.id}-${sets.length}`}
+          // Al registrar una serie o tocar la sugerencia cambia la clave y los campos se vuelven a llenar.
+          key={`${item.id}-${sets.length}-${applied?.at === sets.length ? 'suggested' : 'prefill'}-${applied?.input.weight ?? ''}`}
           workoutExerciseId={item.id}
           tracking={tracking}
-          initial={prefillSet({
-            index: sets.length,
-            lastSession: last?.sets ?? [],
-            today: sets.map(toLoggedSet),
-            defaultUnit,
-          })}
+          initial={
+            applied?.at === sets.length
+              ? applied.input
+              : prefillSet({
+                  index: sets.length,
+                  lastSession: last?.sets ?? [],
+                  today: sets.map(toLoggedSet),
+                  defaultUnit,
+                })
+          }
           increments={increments}
           onLogged={onSetLogged}
           {...options}
         />
       ) : null}
     </Card>
+  );
+}
+
+/**
+ * Sugerencia de peso para hoy con su motivo en una línea (REC-01). Nunca cambia los campos
+ * por su cuenta: solo al tocarla.
+ */
+function Suggestion({
+  recommendation: rec,
+  onApply,
+}: {
+  recommendation: Recommendation;
+  onApply: (rec: Recommendation) => void;
+}) {
+  const values = {
+    weight: formatNumber(rec.weight),
+    unit: t.units[rec.unit],
+    reps: rec.reps,
+    min: rec.range.min,
+    max: rec.range.max,
+    technique: rec.techniqueAverage === null ? '' : formatNumber(Math.round(rec.techniqueAverage * 10) / 10),
+  };
+  const title = format(t.workout.suggestion[rec.action], values);
+  const reason = format(t.workout.suggestion.reasons[rec.reason], values);
+  const icon = rec.action === 'increase' ? 'trending-up' : rec.action === 'decrease' ? 'trending-down' : 'repeat';
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={format(t.workout.suggestion.applyA11y, { ...values, reason })}
+      onPress={() => onApply(rec)}
+      style={({ pressed }) => [styles.suggestion, pressed && styles.pressed]}>
+      <Ionicons name={icon} size={22} color={colors.primary} />
+      <View style={styles.flex}>
+        <Text style={styles.suggestionTitle}>{title}</Text>
+        <Text style={styles.meta}>{reason}</Text>
+        <Text style={styles.suggestionHint}>{t.workout.suggestion.apply}</Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -502,5 +578,16 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   editActions: { flexDirection: 'row', gap: spacing.sm },
+  suggestion: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: minTouch,
+    padding: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.primarySoft,
+  },
+  suggestionTitle: { fontSize: font.body, fontWeight: '700', color: colors.text },
+  suggestionHint: { fontSize: font.small, color: colors.primary, fontWeight: '600' },
   flex: { flex: 1 },
 });

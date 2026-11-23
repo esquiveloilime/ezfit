@@ -251,43 +251,43 @@ Cómo probarlo:
 
 ## Bloque 5 · Sincronización
 
-### I-13 · Subida de cambios
+### I-13 · Subida de cambios ✅
 
 Motor de sincronización: marcado de pendientes, subida por tablas en orden, reintentos y disparadores automáticos. Pruebas automáticas del motor.
 
 Cubre: SIN-01, SIN-02, SIN-05 (subida), CUE-07 (subida al crear cuenta).
 
 Cómo probarlo:
-- [ ] Registrar una sesión con conexión: los datos aparecen en el panel de Supabase.
-- [ ] Registrar otra en modo avión, quitar el modo avión: sube sola en menos de un minuto.
-- [ ] En el panel de Supabase no hay registros duplicados.
-- [ ] Usar la app sin cuenta, registrar una sesión y una actividad, y luego crear una cuenta: las dos aparecen en el panel de Supabase.
-- [ ] En modo sin cuenta no se intenta sincronizar (Perfil muestra el aviso, no un error).
+- [x] Registrar una sesión con conexión: los datos aparecen en el panel de Supabase.
+- [x] Registrar otra en modo avión, quitar el modo avión: sube sola en menos de un minuto.
+- [x] En el panel de Supabase no hay registros duplicados.
+- [x] Usar la app sin cuenta, registrar una sesión y una actividad, y luego crear una cuenta: las dos aparecen en el panel de Supabase.
+- [x] En modo sin cuenta no se intenta sincronizar (Perfil muestra el aviso, no un error).
 
-### I-14 · Bajada, restauración e indicador de estado
+### I-14 · Bajada, restauración e indicador de estado ✅
 
 Bajada de cambios, restauración completa al iniciar sesión en un teléfono sin datos, estado de sincronización y botón manual en Perfil. Las actividades de running se sincronizan con su ruta.
 
 Cubre: SIN-03, SIN-04, SIN-05 (bajada), SIN-06, CUE-07 (unión con una cuenta que ya tiene datos).
 
 Cómo probarlo:
-- [ ] Borrar los datos de Expo Go (o usar otro teléfono) e iniciar sesión: aparecen rutinas, sesiones, ejercicios propios, ajustes y actividades con su mapa.
-- [ ] Perfil muestra "sincronizado"; en modo avión tras un cambio muestra "pendiente".
-- [ ] El botón de sincronizar funciona y no interrumpe una sesión en curso.
-- [ ] Borrar los datos de Expo Go, empezar sin cuenta, registrar una sesión y luego iniciar sesión en la cuenta que ya tiene datos: se ven las sesiones de los dos lados, sin duplicados, y los ajustes son los de la cuenta.
+- [x] Borrar los datos de Expo Go (o usar otro teléfono) e iniciar sesión: aparecen rutinas, sesiones, ejercicios propios, ajustes y actividades con su mapa.
+- [x] Perfil muestra "sincronizado"; en modo avión tras un cambio muestra "pendiente".
+- [x] El botón de sincronizar funciona y no interrumpe una sesión en curso.
+- [x] Borrar los datos de Expo Go, empezar sin cuenta, registrar una sesión y luego iniciar sesión en la cuenta que ya tiene datos: se ven las sesiones de los dos lados, sin duplicados, y los ajustes son los de la cuenta.
 
-### I-15 · Robustez sin conexión y recuperación de contraseña
+### I-15 · Robustez sin conexión y recuperación de contraseña ✅
 
 Aviso al cerrar sesión con cambios pendientes, manejo de errores de red en toda la app, borrados sincronizados, prueba de aislamiento entre cuentas y recuperación de contraseña por correo.
 
 Cubre: CUE-03 (completo), CUE-04, RNF-03, RNF-04.
 
 Cómo probarlo:
-- [ ] Entrenar una sesión completa en modo avión, de principio a fin, sin ningún error.
-- [ ] Cerrar sesión con cambios pendientes: la app avisa.
-- [ ] Eliminar una rutina, sincronizar, restaurar en limpio: la rutina no reaparece.
-- [ ] Con dos cuentas, ninguna ve datos de la otra.
-- [ ] Pedir el correo de recuperación y cambiar la contraseña.
+- [x] Entrenar una sesión completa en modo avión, de principio a fin, sin ningún error.
+- [x] Cerrar sesión con cambios pendientes: la app avisa.
+- [x] Eliminar una rutina, sincronizar, restaurar en limpio: la rutina no reaparece.
+- [x] Con dos cuentas, ninguna ve datos de la otra.
+- [x] Pedir el correo de recuperación y cambiar la contraseña.
 
 ---
 

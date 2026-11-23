@@ -2,7 +2,14 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 
-import type { Fix } from '@/domain/run';
+import type { Db } from '@/db/client';
+import { getMeta, setMeta } from '@/db/repositories/meta';
+import type { BackgroundAccess, Fix } from '@/domain/run';
+import {
+  backgroundSupported,
+  getBackgroundPermission,
+  requestBackgroundPermission,
+} from '@/services/backgroundLocation';
 import {
   getLocationPermission,
   lastKnownLocation,
@@ -42,6 +49,53 @@ export function useLocationPermission() {
   }, []);
 
   return { permission, request };
+}
+
+const BACKGROUND_ASKED_KEY = 'background_location_asked';
+
+/**
+ * Permiso de ubicación "todo el tiempo" para grabar con la pantalla apagada (RUN-10). Como el
+ * de la app abierta, se vuelve a revisar al regresar a la app.
+ */
+export function useBackgroundAccess(db: Db) {
+  const [access, setAccess] = useState<BackgroundAccess | null>(null);
+
+  const refresh = useCallback(
+    (): Promise<BackgroundAccess> =>
+      getBackgroundPermission().then((permission) => {
+        const next: BackgroundAccess = {
+          supported: backgroundSupported(),
+          ...permission,
+          asked: getMeta(db, BACKGROUND_ASKED_KEY) !== null,
+        };
+        setAccess(next);
+        return next;
+      }),
+    [db],
+  );
+
+  useEffect(() => {
+    void refresh();
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void refresh();
+    });
+    return () => sub.remove();
+  }, [refresh]);
+
+  /** Pide el permiso (después de la explicación) y recuerda que ya se pidió. */
+  const request = useCallback(async (): Promise<BackgroundAccess> => {
+    setMeta(db, BACKGROUND_ASKED_KEY, '1');
+    await requestBackgroundPermission();
+    return refresh();
+  }, [db, refresh]);
+
+  /** Al elegir «Ahora no»: no se vuelve a preguntar al iniciar. */
+  const decline = useCallback(() => {
+    setMeta(db, BACKGROUND_ASKED_KEY, '1');
+    void refresh();
+  }, [db, refresh]);
+
+  return { access, request, decline };
 }
 
 /**

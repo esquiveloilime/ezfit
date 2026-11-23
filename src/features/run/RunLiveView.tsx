@@ -101,7 +101,7 @@ export function RunLiveView() {
           <Button variant="secondary" label={t.run.finish} onPress={confirmFinish} />
         </View>
       </View>
-      <Text style={styles.hint}>{t.run.keepScreenOn}</Text>
+      {active.mode === 'foreground' ? <Text style={styles.hint}>{t.run.keepScreenOn}</Text> : null}
     </Screen>
   );
 }

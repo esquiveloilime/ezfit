@@ -31,6 +31,47 @@ export function canStartRun(quality: SignalQuality): boolean {
   return quality !== 'none';
 }
 
+// --- Seguimiento con la pantalla apagada (RUN-10) ---
+
+/** Cómo se graba una actividad: también con la pantalla apagada, o solo con ezfit a la vista. */
+export type TrackingMode = 'background' | 'foreground';
+
+/**
+ * Estado del permiso de ubicación "todo el tiempo". `supported` es falso en Expo Go, donde
+ * Android no permite seguir en segundo plano; `asked` indica si ezfit ya lo pidió alguna vez.
+ */
+export type BackgroundAccess = { supported: boolean; granted: boolean; canAskAgain: boolean; asked: boolean };
+
+/**
+ * Qué hacer al tocar Iniciar. El permiso se pide solo la primera vez, con una explicación
+ * antes (plan técnico, sección 6, fase B). Si no se concede, se graba con la pantalla
+ * encendida, como antes.
+ */
+export function startStep(access: BackgroundAccess): TrackingMode | 'explain' {
+  if (!access.supported) return 'foreground';
+  if (access.granted) return 'background';
+  if (!access.asked && access.canAskAgain) return 'explain';
+  return 'foreground';
+}
+
+/**
+ * Si se ofrece activar la pantalla apagada desde la pantalla previa: `ask` vuelve a pedir el
+ * permiso; `settings` lleva a los ajustes porque Android ya no deja preguntar.
+ */
+export function backgroundOffer(access: BackgroundAccess): 'none' | 'ask' | 'settings' {
+  if (!access.supported || access.granted) return 'none';
+  return access.canAskAgain ? 'ask' : 'settings';
+}
+
+/**
+ * En segundo plano Android puede entregar varias lecturas juntas y no siempre en orden. Se
+ * ordenan por hora y se quitan las repetidas antes de filtrarlas.
+ */
+export function orderFixes(fixes: readonly Fix[]): Fix[] {
+  const sorted = [...fixes].sort((a, b) => a.timestamp - b.timestamp);
+  return sorted.filter((fix, i) => fix.timestamp !== sorted[i - 1]?.timestamp);
+}
+
 // --- Seguimiento: filtrado de puntos y cálculos (RUN-03, RUN-04, RUN-07) ---
 
 /** Punto aceptado de la ruta. `segment` es el tramo: cada reanudación abre uno nuevo (RUN-04). */

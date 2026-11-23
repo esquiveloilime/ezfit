@@ -35,7 +35,10 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "ezfit usa tu ubicación para medir la distancia y dibujar la ruta de tus carreras y caminatas."
+          "locationWhenInUsePermission": "ezfit usa tu ubicación para medir la distancia y dibujar la ruta de tus carreras y caminatas.",
+          "locationAlwaysAndWhenInUsePermission": "ezfit usa tu ubicación mientras grabas una actividad, también con la pantalla apagada, para medir la distancia y dibujar la ruta.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ]
     ],

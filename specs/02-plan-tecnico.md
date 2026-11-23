@@ -17,7 +17,7 @@ Este documento describe **cómo** se construye lo que pide `01-especificacion.md
 | Backend | **Supabase**: autenticación y base de datos Postgres con seguridad por fila | Mismo modelo relacional que SQLite, lo que simplifica la sincronización; plan gratuito suficiente; no hay que programar un servidor | Firebase: su base de datos no relacional obligaría a mantener dos modelos de datos distintos |
 | Sincronización | **Motor propio y simple**: escribir primero en local, subir pendientes, bajar cambios, gana la última modificación | Los datos son de un solo usuario, así que casi no hay conflictos; evita depender de un servicio extra | PowerSync o similares: más potentes, pero agregan un servicio y complejidad que el proyecto no necesita |
 | Mapas | **react-native-maps** (Google Maps en Android, Apple Maps en iOS) | Es la librería de mapas que se carga dentro de Expo Go. En Android, Expo Go la carga pero el mapa sale negro (sección 2), así que el mapa se ve con la build de desarrollo y la clave propia | MapLibre y `expo-maps` no funcionan en Expo Go; MapLibre queda como plan B (riesgo R-03) |
-| Ubicación | **expo-location** | Incluida en Expo Go para seguimiento con la app abierta; soporta segundo plano en una build de desarrollo | Librerías de terceros de pago |
+| Ubicación | **expo-location**, y **expo-task-manager** para la tarea de segundo plano (RUN-10) | Incluida en Expo Go para seguimiento con la app abierta; con expo-task-manager sigue en segundo plano en una build de desarrollo | Librerías de terceros de pago |
 | Avisos de descanso | **expo-notifications**, solo notificaciones locales | Las notificaciones locales funcionan en Expo Go | Notificaciones push: no se necesitan y no funcionan en Expo Go para Android |
 | Estado en pantalla | **Zustand** para la sesión y la actividad en curso; consultas en vivo de Drizzle para lo demás | Mínimo y fácil de probar | Redux: demasiada estructura para este tamaño |
 | Validación | **Zod** | Valida formularios y los datos que llegan del servidor con el mismo esquema | Validación manual |
@@ -32,7 +32,7 @@ Este documento describe **cómo** se construye lo que pide `01-especificacion.md
 | Estado de la conexión | **expo-network** | Funciona en Expo Go; lo usan la sincronización (para subir al recuperar la conexión) y el botón de tutorial | `@react-native-community/netinfo`: equivalente, pero no es parte de Expo |
 | Compartir una actividad como imagen | **react-native-view-shot** para convertir la tarjeta del resumen en imagen y **expo-sharing** para abrir el menú de compartir del teléfono (RUN-14) | Las dos vienen en Expo Go; el menú de compartir ya permite guardar en la galería, así que no se pide permiso de fotos | `expo-media-library`: pide permiso de la galería solo para guardar, y el menú de compartir ya lo hace |
 
-Las dependencias `@react-native-google-signin/google-signin` y `expo-network` se agregaron en la versión 0.3 y el autor las aprobó el 2 de noviembre de 2026.
+Las dependencias `@react-native-google-signin/google-signin` y `expo-network` se agregaron en la versión 0.3 y el autor las aprobó el 2 de noviembre de 2026. La dependencia `expo-task-manager` se agregó con I-20 y el autor la aprobó el 22 de noviembre de 2026.
 
 ## 2. Qué funciona en Expo Go y qué no
 
@@ -228,6 +228,8 @@ Todos estos cálculos viven en la capa de dominio y se prueban con recorridos gr
 - Permiso de ubicación "todo el tiempo", pedido solo cuando el usuario inicia su primera actividad y con explicación previa.
 - La tarea de segundo plano escribe directamente en SQLite; la pantalla solo lee.
 - En teléfonos Samsung hay que indicar al usuario que quite la restricción de batería para la app; se agrega una pantalla de ayuda.
+- Si el permiso no se concede, o en Expo Go, la actividad se graba como en la fase A, con la pantalla encendida y el aviso de RUN-10. Desde la pantalla previa se puede volver a pedir el permiso.
+- El servicio se detiene si el usuario cierra la app; al volver a abrirla se ofrece guardar lo registrado (RUN-08).
 
 ## 7. Temporizador de descanso
 

@@ -1,5 +1,9 @@
 import {
   avgSpeedKmh,
+  backgroundOffer,
+  type BackgroundAccess,
+  orderFixes,
+  startStep,
   canStartRun,
   dayPart,
   decodeRoute,
@@ -226,5 +230,44 @@ describe('resumen y ruta guardada (RUN-05)', () => {
     const points: RoutePoint[] = [];
     for (let s = 0; s < 3600; s++) points.push(at(s * 2.8 * Math.cos(s / 300), 300 * Math.sin(s / 200), s * 1000));
     expect(encodeRoute(points).length).toBeLessThan(10_000);
+  });
+});
+
+describe('seguimiento con la pantalla apagada (RUN-10)', () => {
+  const access = (over: Partial<BackgroundAccess> = {}): BackgroundAccess => ({
+    supported: true,
+    granted: false,
+    canAskAgain: true,
+    asked: false,
+    ...over,
+  });
+
+  it('en Expo Go graba con la pantalla encendida y no ofrece nada', () => {
+    expect(startStep(access({ supported: false }))).toBe('foreground');
+    expect(backgroundOffer(access({ supported: false }))).toBe('none');
+  });
+
+  it('con el permiso concedido graba en segundo plano', () => {
+    expect(startStep(access({ granted: true }))).toBe('background');
+    expect(backgroundOffer(access({ granted: true }))).toBe('none');
+  });
+
+  it('la primera vez explica antes de pedir el permiso', () => {
+    expect(startStep(access())).toBe('explain');
+  });
+
+  it('si ya se pidió y no se concedió, no vuelve a preguntar al iniciar', () => {
+    expect(startStep(access({ asked: true }))).toBe('foreground');
+    expect(backgroundOffer(access({ asked: true }))).toBe('ask');
+  });
+
+  it('si Android ya no deja preguntar, ofrece abrir los ajustes', () => {
+    expect(startStep(access({ canAskAgain: false }))).toBe('foreground');
+    expect(backgroundOffer(access({ asked: true, canAskAgain: false }))).toBe('settings');
+  });
+
+  it('ordena por hora las lecturas que llegan juntas y quita las repetidas', () => {
+    const ordered = orderFixes([fix(5, 3_000), fix(5, 1_000), fix(5, 2_000), fix(5, 1_000)]);
+    expect(ordered.map((f) => f.timestamp)).toEqual([1_000, 2_000, 3_000]);
   });
 });

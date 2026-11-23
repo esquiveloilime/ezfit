@@ -7,6 +7,7 @@ import { addRunPoint, endRun, getRunPoints, type RunRow, setRunStatus, startRun 
 import {
   filterPoint,
   type Fix,
+  orderFixes,
   type MovingClock,
   movingMs,
   parseClock,
@@ -17,12 +18,19 @@ import {
   type RunKind,
   startClock,
   stepDistance,
+  type TrackingMode,
 } from '@/domain/run';
+import { t } from '@/i18n';
+import { defineRunLocationTask, startBackgroundLocation, stopBackgroundLocation } from '@/services/backgroundLocation';
 import { watchLocation } from '@/services/location';
 
 // Actividad de running en curso (RUN-03, RUN-04, RUN-08). Vive en memoria para la pantalla;
 // cada punto aceptado se guarda de inmediato en `run_points`, y el reloj en `app_meta`, para
 // poder recuperar lo registrado si la app se cierra.
+//
+// Con la pantalla apagada (RUN-10), las lecturas llegan por la tarea de segundo plano, que
+// escribe en SQLite con la misma función que las lecturas con la app abierta; la pantalla
+// solo lee el resultado.
 
 const CLOCK_KEY = 'active_run';
 const KEEP_AWAKE_TAG = 'ezfit-run';
@@ -30,6 +38,8 @@ const KEEP_AWAKE_TAG = 'ezfit-run';
 type Active = {
   runId: string;
   kind: RunKind;
+  /** `background`: sigue grabando con la pantalla apagada; `foreground`: solo con ezfit a la vista. */
+  mode: TrackingMode;
   clock: MovingClock;
   points: RoutePoint[];
   distance: number;
@@ -40,6 +50,8 @@ type State = { active: Active | null; lastFix: Fix | null };
 export const useRunStore = create<State>(() => ({ active: null, lastFix: null }));
 
 let stopWatching: (() => void) | null = null;
+/** Base de datos de la actividad en curso, para la tarea de segundo plano. */
+let trackingDb: Db | null = null;
 
 function saveClock(db: Db, runId: string, clock: MovingClock) {
   setMeta(db, CLOCK_KEY, JSON.stringify({ runId, ...clock }));
@@ -69,18 +81,24 @@ function onFix(db: Db, fix: Fix) {
   });
 }
 
-/**
- * Empieza a grabar: crea la actividad, lee el GPS y mantiene la pantalla encendida (RUN-03).
- * `seed` es la última lectura de la pantalla previa, para que el mapa de la actividad empiece
- * centrado en el usuario sin esperar la primera lectura nueva.
- */
-export async function beginRun(db: Db, owner: string, kind: RunKind, seed: Fix | null = null): Promise<void> {
-  if (useRunStore.getState().active) return;
-  const now = Date.now();
-  const runId = startRun(db, owner, kind, now);
-  const clock = startClock(now);
-  saveClock(db, runId, clock);
-  useRunStore.setState({ active: { runId, kind, clock, points: [], distance: 0 }, lastFix: seed });
+/** Lecturas que entrega la tarea de segundo plano. Si no hay actividad en curso, se ignoran. */
+export function handleBackgroundFixes(fixes: Fix[]): void {
+  const db = trackingDb;
+  if (!db || useRunStore.getState().active?.mode !== 'background') return;
+  for (const fix of orderFixes(fixes)) onFix(db, fix);
+}
+
+/** Se registra al cargar la app (app/_layout.tsx), como exige expo-task-manager. */
+export function registerRunLocationTask(): void {
+  try {
+    defineRunLocationTask(handleBackgroundFixes);
+  } catch (error) {
+    console.warn('No se pudo registrar la tarea de ubicación', error);
+  }
+}
+
+/** Con la app abierta: lectura directa del GPS y la pantalla encendida (fase A). */
+async function startForeground(db: Db): Promise<void> {
   void activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => undefined);
   try {
     stopWatching?.();
@@ -88,6 +106,39 @@ export async function beginRun(db: Db, owner: string, kind: RunKind, seed: Fix |
   } catch (error) {
     console.warn('No se pudo leer la ubicación', error);
   }
+}
+
+/**
+ * Empieza a grabar: crea la actividad y lee el GPS (RUN-03). En modo `background` lo hace un
+ * servicio de Android con su notificación permanente (RUN-10); si no se puede iniciar, se
+ * graba con la pantalla encendida. `seed` es la última lectura de la pantalla previa, para que
+ * el mapa de la actividad empiece centrado en el usuario sin esperar la primera lectura nueva.
+ */
+export async function beginRun(
+  db: Db,
+  owner: string,
+  kind: RunKind,
+  seed: Fix | null = null,
+  mode: TrackingMode = 'foreground',
+): Promise<void> {
+  if (useRunStore.getState().active) return;
+  const now = Date.now();
+  const runId = startRun(db, owner, kind, now);
+  const clock = startClock(now);
+  saveClock(db, runId, clock);
+  trackingDb = db;
+  useRunStore.setState({ active: { runId, kind, mode, clock, points: [], distance: 0 }, lastFix: seed });
+  if (mode === 'background') {
+    try {
+      await startBackgroundLocation({ title: t.run.serviceTitle[kind], body: t.run.serviceBody });
+      return;
+    } catch (error) {
+      console.warn('No se pudo iniciar la ubicación en segundo plano', error);
+      const { active } = useRunStore.getState();
+      if (active) useRunStore.setState({ active: { ...active, mode: 'foreground' } });
+    }
+  }
+  await startForeground(db);
 }
 
 export function pauseRun(db: Db): void {
@@ -112,7 +163,9 @@ export function resumeRun(db: Db): void {
 function stopTracking() {
   stopWatching?.();
   stopWatching = null;
+  trackingDb = null;
   deactivateKeepAwake(KEEP_AWAKE_TAG);
+  void stopBackgroundLocation();
 }
 
 /** Termina la actividad en curso y devuelve su id, para abrir el resumen (RUN-05). */
@@ -133,6 +186,8 @@ export function finishRun(db: Db): string | null {
  */
 export function recoverRun(db: Db, run: RunRow): void {
   if (run.endedAt !== null) return;
+  // Por si el servicio de segundo plano siguió vivo tras cerrarse la app.
+  void stopBackgroundLocation();
   const saved = parseClock(getMeta(db, CLOCK_KEY));
   const points = getRunPoints(db, run.id);
   const lastAt = points[points.length - 1]?.timestamp ?? null;

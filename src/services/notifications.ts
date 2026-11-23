@@ -98,6 +98,18 @@ async function hasPermission(): Promise<boolean> {
 }
 
 /**
+ * Pide el permiso de notificaciones si hace falta, sin programar nada. Lo usa la actividad con
+ * la pantalla apagada: sin él, Android sigue grabando pero oculta la notificación permanente.
+ */
+export async function ensureNotificationPermission(): Promise<boolean> {
+  try {
+    return await hasPermission();
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Programa el aviso del final del descanso. Devuelve su identificador, o `null` si no se
  * pudo (sin permiso, o el sistema lo rechazó); el temporizador sigue funcionando igual.
  */

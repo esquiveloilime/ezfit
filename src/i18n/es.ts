@@ -636,7 +636,29 @@ export const es = {
     offlineMap: 'Sin conexión: el mapa aparecerá al recuperarla. Tu ruta se sigue registrando.',
     start: 'Iniciar',
     startFailed: 'No se pudo iniciar la actividad. Inténtalo de nuevo.',
-    keepScreenOn: 'Mantén la pantalla encendida y ezfit abierta mientras grabas: con la pantalla apagada todavía no se registra el recorrido.',
+    keepScreenOn: 'Mantén la pantalla encendida y ezfit abierta mientras grabas: con la pantalla apagada no se registra el recorrido.',
+    backgroundOn: 'La actividad se sigue grabando con la pantalla apagada o con otra app abierta. Mientras grabas verás una notificación de ezfit.',
+    backgroundEnable: 'Grabar también con la pantalla apagada',
+    backgroundExplainTitle: 'Grabar con la pantalla apagada',
+    backgroundExplainBody:
+      'Para que la actividad siga grabándose con el teléfono bloqueado o en el bolsillo, ezfit necesita tu ubicación «todo el tiempo».\n\nAl tocar «Continuar», Android abrirá los permisos de ubicación de ezfit: elige «Permitir todo el tiempo» y regresa a la app.\n\nezfit solo lee tu ubicación mientras grabas una actividad, y verás una notificación todo ese tiempo.',
+    backgroundContinue: 'Continuar',
+    backgroundNotNow: 'Ahora no',
+    backgroundSettingsBody:
+      'Toca «Abrir ajustes», entra a Permisos › Ubicación y elige «Permitir todo el tiempo». Luego regresa a ezfit.',
+    serviceTitle: { run: 'ezfit está grabando tu carrera', walk: 'ezfit está grabando tu caminata' },
+    serviceBody: 'Toca para volver a la actividad.',
+    batteryLink: '¿La ruta se corta con la pantalla apagada?',
+    battery: {
+      title: 'Pantalla apagada en Samsung',
+      intro:
+        'Para ahorrar batería, los teléfonos Samsung pueden detener las apps que trabajan con la pantalla apagada. Si tu ruta queda cortada o la distancia sale incompleta, quita esa restricción para ezfit:',
+      steps: '1. Toca «Abrir ajustes de ezfit».\n2. Entra a Batería.\n3. Elige «Sin restricciones».',
+      sleeping:
+        'Revisa también en Ajustes › Batería › Límites de uso en segundo plano que ezfit no esté en «Aplicaciones en suspensión» ni en «Aplicaciones en suspensión profunda». Si está, quítala de la lista.',
+      permission: 'En Permisos › Ubicación debe estar elegida la opción «Permitir todo el tiempo».',
+      open: 'Abrir ajustes de ezfit',
+    },
     time: 'Tiempo',
     distance: 'Distancia',
     currentPace: 'Ritmo actual',
@@ -653,6 +675,7 @@ export const es = {
     noActiveBody: 'Inicia una desde la sección Correr.',
     inProgressTitle: 'Tienes una actividad en curso',
     inProgressBody: 'Llevas {km} km. Se sigue grabando mientras la app esté abierta.',
+    inProgressBodyBackground: 'Llevas {km} km. Se sigue grabando aunque apagues la pantalla.',
     backToRun: 'Volver a la actividad',
     pendingTitle: 'Tienes una actividad sin guardar',
     pendingBody: '{kind}: {km} km en {time}. Puedes guardarla o descartarla.',

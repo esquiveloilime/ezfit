@@ -5,15 +5,26 @@ import { Alert, StyleSheet, Text } from 'react-native';
 import { useDatabase } from '@/db/DatabaseProvider';
 import { activeRunQuery, discardRun, type RunRow } from '@/db/repositories/runs';
 import { useQuery } from '@/db/useQuery';
-import { canStartRun, formatElapsed, formatKm, RUN_KINDS, type RunKind, signalQuality } from '@/domain/run';
+import {
+  backgroundOffer,
+  canStartRun,
+  formatElapsed,
+  formatKm,
+  RUN_KINDS,
+  type RunKind,
+  signalQuality,
+  startStep,
+  type TrackingMode,
+} from '@/domain/run';
 import { format, t } from '@/i18n';
 import { openAppSettings } from '@/services/location';
+import { ensureNotificationPermission } from '@/services/notifications';
 import { Button, Card, ChipGroup, Screen, colors, font } from '@/ui';
 
 import { RunMap } from './RunMap';
 import { beginRun, recoverRun, useRunStore } from './runStore';
 import { SignalBadge } from './SignalBadge';
-import { useLiveFix, useLocationPermission, useNow } from './useLocation';
+import { useBackgroundAccess, useLiveFix, useLocationPermission, useNow } from './useLocation';
 
 /**
  * Sección Correr. Si hay una actividad en curso, lleva a ella; si quedó una sin guardar,
@@ -31,7 +42,11 @@ export function RunView() {
       <Screen title={t.tabs.run}>
         <Card>
           <Text style={styles.title}>{t.run.inProgressTitle}</Text>
-          <Text style={styles.body}>{format(t.run.inProgressBody, { km: formatKm(active.distance) })}</Text>
+          <Text style={styles.body}>
+            {format(active.mode === 'background' ? t.run.inProgressBodyBackground : t.run.inProgressBody, {
+              km: formatKm(active.distance),
+            })}
+          </Text>
           <Button label={t.run.backToRun} onPress={() => router.push('/run/live')} />
         </Card>
       </Screen>
@@ -123,16 +138,20 @@ function PermissionGate() {
 function RunPreview() {
   const { db, owner } = useDatabase();
   const { fix, servicesOn, center } = useLiveFix(true);
+  const { access, request, decline } = useBackgroundAccess(db);
   const now = useNow();
   const [kind, setKind] = useState<RunKind>('run');
   const [starting, setStarting] = useState(false);
   const quality = signalQuality(fix, now);
+  const background = access !== null && startStep(access) === 'background';
+  const offer = access ? backgroundOffer(access) : 'none';
 
-  async function start() {
-    if (starting) return;
+  async function launch(mode: TrackingMode) {
     setStarting(true);
     try {
-      await beginRun(db, owner, kind, fix);
+      // Sin este permiso, Android 13 o más nuevo oculta la notificación permanente (RUN-10).
+      if (mode === 'background') await ensureNotificationPermission();
+      await beginRun(db, owner, kind, fix, mode);
       router.push('/run/live');
     } catch (error) {
       console.error('No se pudo iniciar la actividad', error);
@@ -140,6 +159,51 @@ function RunPreview() {
     } finally {
       setStarting(false);
     }
+  }
+
+  /** Explica para qué es la ubicación "todo el tiempo" antes de pedirla (plan técnico, sección 6). */
+  function explainBackground(thenStart: boolean) {
+    Alert.alert(
+      t.run.backgroundExplainTitle,
+      t.run.backgroundExplainBody,
+      [
+        {
+          text: t.run.backgroundNotNow,
+          style: 'cancel',
+          onPress: () => {
+            decline();
+            if (thenStart) void launch('foreground');
+          },
+        },
+        {
+          text: t.run.backgroundContinue,
+          onPress: () => {
+            void request().then((next) => {
+              if (thenStart) void launch(next.granted ? 'background' : 'foreground');
+            });
+          },
+        },
+      ],
+      { cancelable: false },
+    );
+  }
+
+  function start() {
+    if (starting || !access) return;
+    const step = startStep(access);
+    if (step === 'explain') explainBackground(true);
+    else void launch(step);
+  }
+
+  function enableBackground() {
+    if (offer === 'ask') {
+      explainBackground(false);
+      return;
+    }
+    Alert.alert(t.run.backgroundExplainTitle, t.run.backgroundSettingsBody, [
+      { text: t.common.cancel, style: 'cancel' },
+      { text: t.run.openSettings, onPress: openAppSettings },
+    ]);
   }
 
   return (
@@ -155,9 +219,13 @@ function RunPreview() {
         labelFor={(k) => t.run.kinds[k]}
         onChange={setKind}
       />
-      <Button label={t.run.start} disabled={!canStartRun(quality) || starting} onPress={() => void start()} />
-      {/* Mientras no exista el seguimiento con la pantalla apagada (RUN-10), se avisa al iniciar. */}
-      <Text style={styles.hint}>{t.run.keepScreenOn}</Text>
+      <Button label={t.run.start} disabled={!canStartRun(quality) || starting || !access} onPress={start} />
+      {/* Sin el seguimiento con la pantalla apagada (Expo Go o sin permiso), se avisa al iniciar (RUN-10). */}
+      {access ? <Text style={styles.hint}>{background ? t.run.backgroundOn : t.run.keepScreenOn}</Text> : null}
+      {offer !== 'none' ? <Button variant="ghost" label={t.run.backgroundEnable} onPress={enableBackground} /> : null}
+      {background ? (
+        <Button variant="ghost" label={t.run.batteryLink} onPress={() => router.push('/run/battery')} />
+      ) : null}
     </Screen>
   );
 }

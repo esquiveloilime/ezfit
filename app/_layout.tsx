@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseProvider } from '@/db/DatabaseProvider';
 import { ownerFor, useAccount } from '@/features/account/accountStore';
+import { registerRunLocationTask } from '@/features/run/runStore';
 import { t } from '@/i18n';
 import { configureNotifications } from '@/services/notifications';
 import { AutoSync } from '@/sync';
@@ -13,6 +14,8 @@ import { colors } from '@/ui';
 
 void SplashScreen.preventAutoHideAsync();
 configureNotifications();
+// La tarea de ubicación con la pantalla apagada se registra al cargar, fuera de las pantallas (RUN-10).
+registerRunLocationTask();
 
 /** Abre la base de datos del dueño actual; en la bienvenida no hace falta ninguna. */
 function WithDatabase({ owner, synced, children }: { owner: string | null; synced: boolean; children: ReactNode }) {

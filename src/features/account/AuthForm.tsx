@@ -8,10 +8,11 @@ import { isSupabaseConfigured } from '@/services/supabase';
 import { Button, Card, Screen, TextField, colors, font, spacing } from '@/ui';
 
 import { type AccountResult, useAccount } from './accountStore';
+import { GoogleButton } from './GoogleButton';
 
 type Kind = 'sign-up' | 'sign-in';
 
-/** Formulario de registro o inicio de sesión con correo y contraseña (CUE-01, CUE-02). */
+/** Formulario de registro o inicio de sesión con correo y contraseña (CUE-01, CUE-02); el de inicio de sesión también ofrece Google (CUE-08). */
 export function AuthForm({ kind }: { kind: Kind }) {
   const mode = useAccount((s) => s.mode);
   const signUp = useAccount((s) => s.signUp);
@@ -23,6 +24,7 @@ export function AuthForm({ kind }: { kind: Kind }) {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   const isSignUp = kind === 'sign-up';
   const fromGuest = mode === 'guest';
@@ -99,7 +101,9 @@ export function AuthForm({ kind }: { kind: Kind }) {
         label={isSignUp ? t.auth.signUpButton : t.auth.signInButton}
         onPress={() => void submit()}
         loading={busy}
+        disabled={googleBusy}
       />
+      {!isSignUp ? <GoogleButton disabled={busy} onBusyChange={setGoogleBusy} /> : null}
       {!isSignUp ? (
         <Button
           variant="ghost"

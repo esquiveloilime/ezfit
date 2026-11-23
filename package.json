@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-google-signin/google-signin": "^17.0.0",
     "@supabase/supabase-js": "^2.118.0",
     "babel-preset-expo": "~57.0.0",
     "drizzle-orm": "^0.45.4",

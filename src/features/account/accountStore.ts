@@ -14,6 +14,7 @@ import {
   signOutLocal,
   signUpWithEmail,
 } from '@/services/auth';
+import { type GoogleResult, signInWithGoogle, signOutGoogle } from '@/services/googleAuth';
 
 export type AccountMode = 'welcome' | 'guest' | 'user';
 
@@ -27,10 +28,14 @@ type AccountState = {
   startGuest: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<AccountResult>;
   signIn: (email: string, password: string) => Promise<AccountResult>;
+  signInWithGoogle: () => Promise<GoogleAccountResult>;
   signOut: () => Promise<void>;
 };
 
 export type AccountResult = AuthResult | { ok: false; error: 'claim_failed' };
+
+/** Como `AccountResult`, pero el usuario puede cerrar el selector de Google sin elegir cuenta. */
+export type GoogleAccountResult = AccountResult | { ok: false; error: 'cancelled' };
 
 const STORAGE_KEY = 'ezfit.account';
 
@@ -49,6 +54,10 @@ function parse(raw: string | null): Persisted | null {
     // Valor dañado: se trata como si no hubiera cuenta.
   }
   return null;
+}
+
+function isCancelled(result: GoogleResult): result is { ok: false; error: 'cancelled' } {
+  return !result.ok && result.error === 'cancelled';
 }
 
 /** Dueño de la base de datos que deben ver las pantallas, o `null` en la bienvenida. */
@@ -99,8 +108,18 @@ export const useAccount = create<AccountState>((set, get) => {
 
     signIn: async (email, password) => enter(await signInWithEmail(email, password)),
 
+    signInWithGoogle: async () => {
+      const result = await signInWithGoogle();
+      if (isCancelled(result)) return result;
+      const entered = await enter(result);
+      // Si no se pudo entrar, se olvida la cuenta de Google para poder elegir otra.
+      if (!entered.ok) await signOutGoogle();
+      return entered;
+    },
+
     signOut: async () => {
       await signOutLocal();
+      await signOutGoogle();
       await persist(null);
       set({ mode: 'welcome', user: null });
     },

@@ -125,6 +125,7 @@ export const es = {
     signUpIntro: 'Con una cuenta tus datos se respaldan en la nube y puedes usarlos en otro teléfono.',
     signUpFromGuest: 'Todo lo que registraste sin cuenta pasará a tu cuenta nueva.',
     signInTitle: 'Iniciar sesión',
+    continueWithGoogle: 'Continuar con Google',
     signInFromGuest: 'Lo que registraste sin cuenta se agregará a tu cuenta.',
     emailLabel: 'Correo electrónico',
     emailPlaceholder: 'tu@correo.com',

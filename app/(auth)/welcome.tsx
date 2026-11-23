@@ -3,13 +3,15 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useAccount } from '@/features/account/accountStore';
+import { GoogleButton } from '@/features/account/GoogleButton';
 import { t } from '@/i18n';
 import { Button, Screen, colors, font, spacing } from '@/ui';
 
-/** Pantalla de bienvenida (CUE-00), con el aviso de privacidad (CUE-09). "Continuar con Google" llega en I-25 (CUE-08). */
+/** Pantalla de bienvenida (CUE-00), con el aviso de privacidad (CUE-09) y "Continuar con Google" (CUE-08). */
 export default function WelcomeScreen() {
   const startGuest = useAccount((s) => s.startGuest);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   async function onStartGuest() {
     setBusy(true);
@@ -31,20 +33,22 @@ export default function WelcomeScreen() {
           accessibilityHint={t.welcome.startGuestHint}
           onPress={() => void onStartGuest()}
           loading={busy}
+          disabled={googleBusy}
         />
         <Text style={styles.note}>{t.welcome.guestNote}</Text>
         <Button
           variant="secondary"
           label={t.welcome.createAccount}
           onPress={() => router.push('/sign-up')}
-          disabled={busy}
+          disabled={busy || googleBusy}
         />
         <Button
           variant="secondary"
           label={t.welcome.signIn}
           onPress={() => router.push('/sign-in')}
-          disabled={busy}
+          disabled={busy || googleBusy}
         />
+        <GoogleButton disabled={busy} onBusyChange={setGoogleBusy} />
         <Text style={styles.legal}>{t.privacy.accept}</Text>
         <Button variant="ghost" label={t.privacy.read} onPress={() => router.push('/privacy')} />
       </View>

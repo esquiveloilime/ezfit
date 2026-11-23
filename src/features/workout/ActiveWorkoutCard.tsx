@@ -55,7 +55,10 @@ export function DoneTodayCard({ workout, profile }: { workout: WorkoutRow; profi
   };
 
   return (
-    <Card>
+    // Al tocarla se abre su detalle (RUT-02, HIS-01).
+    <Card
+      accessibilityLabel={name}
+      onPress={() => router.push({ pathname: '/sessions/[id]', params: { id: workout.id } })}>
       <Text style={styles.title}>{name}</Text>
       <Text style={styles.body}>
         {format(summary.volume > 0 ? t.today.doneBodyVolume : t.today.doneBody, values)}

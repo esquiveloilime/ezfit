@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNull, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, isNull, lt, ne } from 'drizzle-orm';
 
 import { newId } from '@/domain/id';
 import { encodeRoute, paceSecondsPerKm, type RoutePoint, type RunKind, routeDistance } from '@/domain/run';
@@ -103,6 +103,23 @@ export function finishedRunsQuery(db: Db, owner: string) {
     .select()
     .from(runs)
     .where(and(eq(runs.userId, owner), eq(runs.status, 'finished'), isNull(runs.deletedAt)))
+    .orderBy(desc(runs.startedAt));
+}
+
+/** Actividades guardadas que empezaron entre `from` (incluido) y `to` (excluido), para el historial (HIS-01). */
+export function finishedRunsBetweenQuery(db: Db, owner: string, from: number, to: number) {
+  return db
+    .select()
+    .from(runs)
+    .where(
+      and(
+        eq(runs.userId, owner),
+        eq(runs.status, 'finished'),
+        isNull(runs.deletedAt),
+        gte(runs.startedAt, from),
+        lt(runs.startedAt, to),
+      ),
+    )
     .orderBy(desc(runs.startedAt));
 }
 

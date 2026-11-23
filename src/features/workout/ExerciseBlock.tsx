@@ -152,6 +152,11 @@ export function ExerciseBlock({
           onPress={() => router.push({ pathname: '/exercises/[id]', params: { id: item.exerciseId } })}
         />
         <IconButton
+          icon="time-outline"
+          label={format(t.sessionDetail.seeHistory, { name })}
+          onPress={() => router.push({ pathname: '/exercises/history/[id]', params: { id: item.exerciseId } })}
+        />
+        <IconButton
           icon="arrow-up"
           label={format(t.workout.moveUp, { name })}
           disabled={index === 0}

@@ -1,11 +1,11 @@
-import { and, asc, desc, eq, gte, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt } from 'drizzle-orm';
 
 import { moveItem } from '@/domain/routine';
 import type { LoggedSet, SetValues } from '@/domain/workout';
 
 import type { Db } from '../client';
 import { newRecord, softDeleted, touched } from '../records';
-import { cardioEntries, exercises, routineExercises, sets, workoutExercises, workouts } from '../schema';
+import { cardioEntries, exercises, routineExercises, routines, sets, workoutExercises, workouts } from '../schema';
 
 export type WorkoutRow = typeof workouts.$inferSelect;
 export type SetRow = typeof sets.$inferSelect;
@@ -34,6 +34,82 @@ export function finishedSinceQuery(db: Db, owner: string, since: number) {
       ),
     )
     .orderBy(asc(workouts.startedAt));
+}
+
+/** Campos de una sesión con el nombre de su rutina (vacío en una sesión libre). */
+const workoutWithRoutine = {
+  id: workouts.id,
+  routineId: workouts.routineId,
+  startedAt: workouts.startedAt,
+  endedAt: workouts.endedAt,
+  status: workouts.status,
+  mood: workouts.mood,
+  notes: workouts.notes,
+  routineName: routines.name,
+};
+
+/** Sesiones terminadas que empezaron entre `from` (incluido) y `to` (excluido), para el historial (HIS-01). */
+export function finishedWorkoutsBetweenQuery(db: Db, owner: string, from: number, to: number) {
+  return db
+    .select(workoutWithRoutine)
+    .from(workouts)
+    .leftJoin(routines, eq(routines.id, workouts.routineId))
+    .where(
+      and(
+        eq(workouts.userId, owner),
+        eq(workouts.status, 'finished'),
+        isNull(workouts.deletedAt),
+        gte(workouts.startedAt, from),
+        lt(workouts.startedAt, to),
+      ),
+    )
+    .orderBy(desc(workouts.startedAt));
+}
+
+export type HistoryWorkout = Awaited<ReturnType<ReturnType<typeof finishedWorkoutsBetweenQuery>['all']>>[number];
+
+/** Una sesión con el nombre de su rutina, para su detalle (HIS-01). */
+export function workoutByIdQuery(db: Db, workoutId: string) {
+  return db
+    .select(workoutWithRoutine)
+    .from(workouts)
+    .leftJoin(routines, eq(routines.id, workouts.routineId))
+    .where(and(eq(workouts.id, workoutId), isNull(workouts.deletedAt)))
+    .limit(1);
+}
+
+/** Todas las series de un ejercicio en sesiones terminadas, con su fecha y máquina (HIS-02). */
+export function exerciseHistoryQuery(db: Db, owner: string, exerciseId: string) {
+  return db
+    .select({
+      workoutId: workouts.id,
+      startedAt: workouts.startedAt,
+      machine: workoutExercises.machine,
+      id: sets.id,
+      position: sets.position,
+      kind: sets.kind,
+      weight: sets.weight,
+      unit: sets.unit,
+      reps: sets.reps,
+      durationSeconds: sets.durationSeconds,
+      distanceMeters: sets.distanceMeters,
+      rir: sets.rir,
+      technique: sets.technique,
+    })
+    .from(sets)
+    .innerJoin(workoutExercises, eq(workoutExercises.id, sets.workoutExerciseId))
+    .innerJoin(workouts, eq(workouts.id, workoutExercises.workoutId))
+    .where(
+      and(
+        eq(workoutExercises.exerciseId, exerciseId),
+        eq(workouts.userId, owner),
+        eq(workouts.status, 'finished'),
+        isNull(workouts.deletedAt),
+        isNull(workoutExercises.deletedAt),
+        isNull(sets.deletedAt),
+      ),
+    )
+    .orderBy(desc(workouts.startedAt), asc(workoutExercises.position), asc(sets.position), asc(sets.performedAt));
 }
 
 export function getActiveWorkout(db: Db, owner: string): WorkoutRow | undefined {

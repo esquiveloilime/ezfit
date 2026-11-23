@@ -75,6 +75,11 @@ export function ExerciseDetailView({ id }: { id: string }) {
         accessibilityHint={t.exercises.watchTutorialHint}
         onPress={() => void openTutorial(e)}
       />
+      <Button
+        variant="secondary"
+        label={t.exerciseHistory.open}
+        onPress={() => router.push({ pathname: '/exercises/history/[id]', params: { id: e.id } })}
+      />
       <Card>
         <Field label={t.exercises.mainMuscle} value={t.exercises.muscleGroups[e.muscleGroup]} />
         <Field label={t.exercises.secondaryMuscles} value={secondary || t.exercises.none} />

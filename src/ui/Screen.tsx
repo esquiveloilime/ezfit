@@ -1,4 +1,5 @@
-import { type ReactNode, type Ref, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
+import { HeaderShownContext } from 'expo-router/react-navigation';
+import { type ReactNode, type Ref, use, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import { Keyboard, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,6 +27,9 @@ const FIELD_MARGIN = 48;
 const SETTLE_MS = 100;
 
 export function Screen({ title, children, scroll = true, ref }: Props) {
+  // Con encabezado arriba (flecha y título), él ya deja el espacio de la hora y la batería;
+  // si la pantalla lo dejara otra vez, quedaría una franja vacía debajo del encabezado.
+  const headerShown = use(HeaderShownContext);
   const scrollRef = useRef<ScrollView>(null);
   const contentRef = useRef<View>(null);
 
@@ -72,7 +76,7 @@ export function Screen({ title, children, scroll = true, ref }: Props) {
   ) : null;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.safe} edges={headerShown ? ['left', 'right'] : ['top', 'left', 'right']}>
       {/* La pantalla se encoge al aparecer el teclado, para que nada quede debajo de él. */}
       <KeyboardAvoidingView style={styles.fill} behavior="padding">
         {scroll ? (

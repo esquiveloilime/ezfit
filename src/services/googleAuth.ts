@@ -63,12 +63,17 @@ export async function signInWithGoogle(): Promise<GoogleResult> {
     if (!idToken) return { ok: false, error: 'unknown' };
 
     const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
-    if (error) return { ok: false, error: classifyAuthError(error) };
+    if (error) {
+      // Suele ser configuración: el proveedor de Google no está activo en Supabase o el ID de cliente no coincide.
+      console.error('Supabase rechazó la cuenta de Google', error.message);
+      return { ok: false, error: classifyAuthError(error) };
+    }
     return {
       ok: true,
       user: { id: data.user.id, email: normalizeEmail(data.user.email ?? '') },
     };
   } catch (error) {
+    console.error('Falló el inicio de sesión con Google', error);
     return { ok: false, error: classifyAuthError(error) };
   }
 }

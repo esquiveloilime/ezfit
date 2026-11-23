@@ -47,6 +47,8 @@ async function load(environment = 'bare') {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Los fallos simulados se registran en la consola; aquí no hace falta verlos.
+  jest.spyOn(console, 'error').mockImplementation(() => undefined);
 });
 
 describe('Continuar con Google', () => {

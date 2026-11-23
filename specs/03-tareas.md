@@ -426,6 +426,8 @@ En este orden, hasta donde alcance el tiempo: parciales por kilómetro, récords
 
 Cubre: RUN-11, HIS-07, HIS-06, AJU-04, RUN-14, SES-13.
 
+**Estado (22 de noviembre de 2026):** recortado por decisión del autor para entregar el APK el mismo día. Ninguno de los seis requisitos se implementó; quedan pendientes para una versión posterior. I-22 (pulido) se limita a corregir lo que falle en las pruebas del bloque 7.
+
 Cómo probarlo:
 - [ ] Cada función terminada cumple sus criterios de la especificación.
 - [ ] Lo que no se alcanzó queda anotado como pendiente en la especificación.

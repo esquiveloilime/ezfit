@@ -111,7 +111,7 @@ export function ExerciseCatalog({ mode = 'browse' }: Props) {
           accessibilityLabel={item.name}
           onPress={() => onPressExercise(item.id)}>
           <View style={styles.row}>
-            <ExerciseThumb imageKey={item.imageKey} size={48} />
+            <ExerciseThumb imageKey={item.imageKey} muscleGroup={item.muscleGroup} size={48} />
             <View style={styles.rowText}>
               <Text style={styles.name}>{item.name}</Text>
               <Text style={styles.meta}>

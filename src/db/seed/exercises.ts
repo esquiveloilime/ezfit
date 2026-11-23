@@ -5,7 +5,8 @@
 
 import type { Equipment, MuscleGroup, TrackingType } from '@/domain/exercise';
 
-export const CATALOG_VERSION = 1;
+/** 2: se agregaron las fotos (EJE-05). */
+export const CATALOG_VERSION = 2;
 
 export type CatalogExercise = {
   n: number;

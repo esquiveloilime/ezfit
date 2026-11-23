@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 import { appMeta, exercises } from '../schema';
+import { CATALOG_IMAGE_KEYS } from './exerciseImageKeys';
 import { CATALOG_EXERCISES, CATALOG_VERSION, catalogExerciseId } from './exercises';
 
 const META_KEY = 'catalog_version';
@@ -29,6 +30,7 @@ export function seedCatalog(db: SyncDb, now: number = Date.now()): void {
         trackingType: e.tracking,
         usesRir: e.tracking === 'weight_reps' || e.tracking === 'reps',
         usesTechnique: true,
+        imageKey: CATALOG_IMAGE_KEYS[e.n] ?? null,
         updatedAt: now,
       };
       tx.insert(exercises)

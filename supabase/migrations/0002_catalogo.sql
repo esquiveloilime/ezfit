@@ -1,4 +1,4 @@
--- ezfit · Catálogo de ejercicios, versión 1.
+-- ezfit · Catálogo de ejercicios, versión 2.
 -- ARCHIVO GENERADO con `npm run supabase:catalog` a partir de src/db/seed/exercises.ts. No editar a mano.
 -- Cómo aplicarlo: panel de Supabase → SQL Editor → New query → pegar todo → Run.
 -- Se puede volver a ejecutar: actualiza los ejercicios existentes sin duplicarlos.

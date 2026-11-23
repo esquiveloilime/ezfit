@@ -1,5 +1,5 @@
 import { router, Stack } from 'expo-router';
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useDatabase } from '@/db/DatabaseProvider';
@@ -23,7 +23,7 @@ import { type ExerciseProgress, exerciseProgress, firstPendingExercise, formatTi
 import { useExercisePicker } from '@/features/exercises/pickerStore';
 import { useProfile } from '@/features/onboarding/useProfile';
 import { format, t } from '@/i18n';
-import { Button, EmptyState, Screen, colors, font } from '@/ui';
+import { Button, EmptyState, Screen, type ScreenHandle, colors, font } from '@/ui';
 
 import { ExerciseBlock, type WorkoutItem } from './ExerciseBlock';
 import { RestTimerBar } from './RestTimerBar';
@@ -82,6 +82,7 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
 
   const title = routineRows[0]?.name ?? t.workout.emptyWorkoutName;
   const increments = { kg: profile.weightIncrementKg, lb: profile.weightIncrementLb };
+  const screenRef = useRef<ScreenHandle>(null);
 
   function confirmDiscard() {
     Alert.alert(t.workout.discardConfirmTitle, t.workout.discardConfirmBody, [
@@ -108,7 +109,7 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
 
   return (
     <View style={styles.fill}>
-      <Screen>
+      <Screen ref={screenRef}>
         <Stack.Screen options={{ title }} />
         <Text style={styles.started}>
           {format(t.workout.startedAt, { time: formatTimeOfDay(new Date(workout.startedAt)) })}
@@ -118,9 +119,9 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
           <ExerciseList
             items={items}
             progress={progress}
+            screen={screenRef}
             render={(item, index, open, onToggle) => (
               <ExerciseBlock
-                key={item.id}
                 item={item}
                 index={index}
                 total={items.length}
@@ -153,17 +154,20 @@ function ActiveWorkout({ workout, profile }: { workout: WorkoutRow; profile: Pro
 
 /**
  * Lista de ejercicios plegados: solo uno abierto a la vez (SES-02). Al entrar se abre el
- * primero sin completar; después solo cambia cuando el usuario toca otro o agrega uno.
+ * primero sin completar; después solo cambia cuando el usuario toca otro o agrega uno. El
+ * ejercicio que el usuario abre sube hasta arriba de la pantalla, para anotar sin desplazarse.
  */
 function ExerciseList({
   items,
   progress,
+  screen,
   render,
   onAdd,
   onPick,
 }: {
   items: WorkoutItem[];
   progress: Map<string, ExerciseProgress>;
+  screen: RefObject<ScreenHandle | null>;
   render: (item: WorkoutItem, index: number, open: boolean, onToggle: () => void) => ReactNode;
   onAdd: (exerciseId: string) => string;
   onPick: (onPicked: (exerciseId: string) => void) => void;
@@ -171,23 +175,72 @@ function ExerciseList({
   const [openId, setOpenId] = useState<string | null>(() =>
     firstPendingExercise(items.map((i) => ({ id: i.id, ...(progress.get(i.id) ?? exerciseProgress([], null)) }))),
   );
+  const views = useRef(new Map<string, View>());
+  // Ejercicio que el usuario acaba de abrir; el que se abre solo al entrar no mueve la pantalla.
+  const [scrollTarget, setScrollTarget] = useState<string | null>(null);
+
+  const register = useCallback((id: string, view: View | null) => {
+    if (view) views.current.set(id, view);
+    else views.current.delete(id);
+  }, []);
+
+  function openByUser(id: string | null) {
+    setScrollTarget(id);
+    setOpenId(id);
+  }
+
+  useEffect(() => {
+    const id = scrollTarget;
+    if (!id || id !== openId) return undefined;
+    // Se espera a que el ejercicio anterior termine de plegarse para medir la posición final.
+    const timer = setTimeout(() => {
+      const view = views.current.get(id);
+      if (!view) return;
+      screen.current?.scrollToView(view);
+      setScrollTarget(null);
+    }, SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, [scrollTarget, openId, items.length, screen]);
 
   return (
     <>
       {items.length === 0 ? (
         <EmptyState title={t.workout.noExercisesTitle} body={t.workout.noExercisesBody} />
       ) : null}
-      {items.map((item, index) =>
-        render(item, index, openId === item.id, () => setOpenId(openId === item.id ? null : item.id)),
-      )}
+      {items.map((item, index) => (
+        <Slot key={item.id} id={item.id} register={register}>
+          {render(item, index, openId === item.id, () => openByUser(openId === item.id ? null : item.id))}
+        </Slot>
+      ))}
       <Button
         variant="secondary"
         label={t.workout.addExercise}
-        onPress={() => onPick((exerciseId) => setOpenId(onAdd(exerciseId)))}
+        onPress={() => onPick((exerciseId) => openByUser(onAdd(exerciseId)))}
       />
     </>
   );
 }
+
+/** Envoltura de un ejercicio que avisa a la lista dónde está, para poder desplazarse hasta él. */
+function Slot({
+  id,
+  register,
+  children,
+}: {
+  id: string;
+  register: (id: string, view: View | null) => void;
+  children: ReactNode;
+}) {
+  const ref = useRef<View>(null);
+  useEffect(() => {
+    register(id, ref.current);
+    return () => register(id, null);
+  }, [id, register]);
+  return <View ref={ref}>{children}</View>;
+}
+
+// Tiempo para que la lista termine de acomodarse antes de desplazarse.
+const SETTLE_MS = 80;
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },

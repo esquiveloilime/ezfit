@@ -300,7 +300,7 @@ En la sección **Rutinas**, Mis rutinas, Planes semanales, Por tiempo, Pierna Pu
 **SES-02 · P1 · Gestionar ejercicios durante la sesión**
 - Agregar, quitar y reordenar ejercicios en cualquier momento.
 - Quitar un ejercicio siempre pide confirmación; si tiene series registradas, avisa que también se borrarán.
-- Los ejercicios se muestran plegados: solo el nombre y el avance (por ejemplo, "2 de 4 series", con una marca cuando se completan las series objetivo). Al tocar uno se abre con sus series y los campos para registrar; solo hay uno abierto a la vez. El botón para cerrarlo está en el mismo lugar que el de abrirlo, lejos del botón para quitar el ejercicio. Al entrar a la sesión se abre el primer ejercicio sin completar, y al agregar un ejercicio se abre ese.
+- Los ejercicios se muestran plegados: solo el nombre y el avance (por ejemplo, "2 de 4 series", con una marca cuando se completan las series objetivo). Al tocar uno se abre con sus series y los campos para registrar; solo hay uno abierto a la vez. El botón para cerrarlo está en el mismo lugar que el de abrirlo, lejos del botón para quitar el ejercicio. Al entrar a la sesión se abre el primer ejercicio sin completar, y al agregar un ejercicio se abre ese. El ejercicio que el usuario abre o agrega se desplaza hasta arriba de la pantalla.
 
 **SES-03 · P1 · Registrar una serie**
 - Los campos dependen del tipo de registro del ejercicio (peso y repeticiones, solo tiempo, etc.).
